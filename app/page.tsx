@@ -1,8 +1,11 @@
 import BannerSection from "@/components/BannerSection/BannerSection";
-import Image from "next/image";
+import InformativeSlider from "@/components/InformativeSlider/InformativeSlider";
 
 export default function Home() {
   return (
+    <>
       <BannerSection/>
+      <InformativeSlider/>
+    </>
   );
 }
