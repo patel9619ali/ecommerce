@@ -1,4 +1,7 @@
+'use client';
+
 import BannerSection from "@/components/BannerSection/BannerSection";
+import DummyButton from "@/components/DummyButton";
 import InformativeSlider from "@/components/InformativeSlider/InformativeSlider";
 
 export default function Home() {
@@ -6,6 +9,7 @@ export default function Home() {
     <>
       <BannerSection/>
       <InformativeSlider/>
+      <DummyButton/>
     </>
   );
 }
