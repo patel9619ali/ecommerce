@@ -6,7 +6,14 @@ const config: Config = {
     "./components/**/*.{ts,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ["var(--font-sans)", "sans-serif"],
+      },
+      screens: {
+        xs: '500px',
+      },
+    }
   },
   plugins: [
     require("tailwindcss-animate"),

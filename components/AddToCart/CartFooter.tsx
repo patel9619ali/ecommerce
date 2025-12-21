@@ -1,13 +1,6 @@
 "use client"
-import { useState } from 'react';
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
-import { Button } from "@/components/ui/button";
+import { useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 let NoteSVG = (
     <svg width={15} height={15} xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" fill="none" viewBox="0 0 512 512">
@@ -31,80 +24,80 @@ const [sheetDiscountOpen, setSheetDiscountOpen] = useState(false);
   return (
         <>
             <div>
-                <div className='flex gap-3 items-center mt-5 cursor-pointer'>
-                    <button onClick={() => setSheetNoteOpen(true)} className="cursor-pointer flex items-center gap-2 text-white" >
-                        {NoteSVG}
-                        <span className="text-[14px] uppercase">Note</span>
-                    </button>
-                    <button onClick={() => setSheetShippingOpen(true)} className="cursor-pointer flex items-center gap-2 text-white" >
-                        {Shipping}
-                        <span className="text-[14px] uppercase">Shipping</span>
-                    </button>
-                    <button onClick={() => setSheetDiscountOpen(true)} className="cursor-pointer flex items-center gap-2 text-white" >
-                        {Discount}
-                        <span className="text-[14px] uppercase">Discount</span>
-                    </button>
+                <div className='flex flex-col gap-3 items-center mt-5 justify-between'>
+                    <div className="flex items-center mt-5 justify-center border-y border-[#ffffff5c] py-2 px-4 divide-x divide-[#ffffff5c] w-full">
+                        <button onClick={() => setSheetNoteOpen(true)} className="cursor-pointer flex items-center gap-2 text-white px-6" >
+                            {NoteSVG}
+                            <span className="text-[14px] uppercase">Note</span>
+                        </button>
+                        <button onClick={() => setSheetShippingOpen(true)} className="cursor-pointer flex items-center gap-2 text-white px-6" >
+                            {Shipping}
+                            <span className="text-[14px] uppercase">Shipping</span>
+                        </button>
+                        <button onClick={() => setSheetDiscountOpen(true)} className="cursor-pointer flex items-center gap-2 text-white px-6" >
+                            {Discount}
+                            <span className="text-[14px] uppercase">Discount</span>
+                        </button>
+                    </div>
+
 
                     {/* Overlay */}
                     {sheetNoteOpen && (
-                        <div onClick={() => setSheetNoteOpen(false)} className=" fixed inset-0 z-40 bg-[#9c9c9cd9] backdrop-blur-sm transition-opacity " />
+                        <div onClick={() => setSheetNoteOpen(false)} className="fixed z-40 inset-0 z-50 bg-black/30 [backdrop-filter:blur(4px)] transition-opacity" />
                     )}
                     {sheetShippingOpen && (
-                        <div onClick={() => setSheetShippingOpen(false)} className=" fixed inset-0 z-40 bg-[#9c9c9cd9] backdrop-blur-sm transition-opacity " />
+                        <div onClick={() => setSheetShippingOpen(false)} className="fixed z-40 inset-0 z-50 bg-black/30 [backdrop-filter:blur(4px)] transition-opacity" />
                     )}
                     {sheetDiscountOpen && (
-                        <div onClick={() => setSheetDiscountOpen(false)} className=" fixed inset-0 z-40 bg-[#9c9c9cd9] backdrop-blur-sm transition-opacity " />
+                        <div onClick={() => setSheetDiscountOpen(false)} className="fixed z-40 inset-0 z-50 bg-black/30 [backdrop-filter:blur(4px)] transition-opacity" />
                     )}
 
                     {/* Bottom Sheet */}
-                    <div className={` fixed right-0 bottom-0 z-50 lg:max-w-[450px] md:max-w-[350px] w-full bg-black text-white transition-transform duration-500 ease-out ${sheetNoteOpen ? 'translate-y-0' : 'translate-y-full'} `} >
+                    <div className={`fixed right-0 bottom-0 z-50 lg:max-w-[450px] md:max-w-[350px] w-full bg-[#000000] text-white transition-transform duration-500 ease-out border border-white/10 ${sheetNoteOpen ? 'translate-y-0' : 'translate-y-full'} `} >
                         {/* Header */}
-                        <div className="flex justify-end p-3 border-b border-white/10">
-                        <button
-                            onClick={() => setSheetNoteOpen(false)}
-                            className="opacity-70 hover:opacity-100"
-                        >
-                            <X size={28} className="bg-white/10 rounded-full p-1" />
-                        </button>
+                        <div className="flex justify-end p-3 mb-4">
+                            <button className="absolute opacity-70 hover:opacity-100 cursor-pointer " onClick={() => setSheetNoteOpen(false)}>
+                                <X size={28} className="bg-white/10 rounded-full p-1" />
+                            </button>
+                            {/* Content */}
+                        </div>
+                        <div className="pb-5 px-5 text-center">
+                            <p className='text-[14px] mb-3 text-left font-[500] text-[#fff]'>Order instructions, gift messages, or special notes for the seller.</p>
+                            <textarea placeholder="Put your message here" className="w-full border border-[#ffffff5c] rounded-[0] px-4 py-3 mt-2 outline-none text-[#fff] placeholder:text-[#ffffff5c] font-medium focus-visible:border-[#ffffff5c] focus-visible:border-[1.5px]" />
+                            <Button className='mt-4 uppercase bg-[#fff] px-4 font-[700] w-[250px] text-[#000000f0] text-[14px]'>SUBMIT</Button>
+                        </div>
+                    
+
+                    </div>
+                    <div className={`fixed right-0 bottom-0 z-50 lg:max-w-[450px] md:max-w-[350px] w-full bg-[#000000] text-white transition-transform duration-500 ease-out border border-white/10 ${sheetShippingOpen ? 'translate-y-0' : 'translate-y-full'} `} >
+                        {/* Header */}
+                        <div className="flex justify-end p-3">
+                            <button onClick={() => setSheetShippingOpen(false)} className="absolute opacity-70 hover:opacity-100" >
+                                <X size={28} className="bg-white/10 rounded-full p-1" />
+                            </button>
+                            {/* Content */}
+                        </div>
+                        <div className="pb-5 px-5">
+                            Order instructions, gift messages, or special notes for the seller.
                         </div>
 
-                        {/* Content */}
-                        <div className="p-5">
-                        Hello (Note content)
-                        </div>
                     </div>
-                    <div className={` fixed right-0 bottom-0 z-50 lg:max-w-[450px] md:max-w-[350px] w-full bg-black text-white transition-transform duration-500 ease-out ${sheetShippingOpen ? 'translate-y-0' : 'translate-y-full'} `} >
+                    <div className={`fixed right-0 bottom-0 z-50 lg:max-w-[450px] md:max-w-[350px] w-full bg-[#000000] text-white transition-transform duration-500 ease-out border border-white/10 ${sheetDiscountOpen ? 'translate-y-0' : 'translate-y-full'} `} >
                         {/* Header */}
-                        <div className="flex justify-end p-3 border-b border-white/10">
-                        <button
-                            onClick={() => setSheetShippingOpen(false)}
-                            className="opacity-70 hover:opacity-100"
-                        >
-                            <X size={28} className="bg-white/10 rounded-full p-1" />
-                        </button>
+                        <div className="flex justify-end p-3">
+                            <button onClick={() => setSheetDiscountOpen(false)} className="absolute opacity-70 hover:opacity-100" >
+                                <X size={28} className="bg-white/10 rounded-full p-1" />
+                            </button>
+                            {/* Content */}
+                        </div>
+                        <div className="pb-5 px-5">
+                            Order instructions, gift messages, or special notes for the seller.
                         </div>
 
-                        {/* Content */}
-                        <div className="p-5">
-                        Hello (Shipping content)
-                        </div>
                     </div>
-                    <div className={` fixed right-0 bottom-0 z-50 lg:max-w-[450px] md:max-w-[350px] w-full bg-black text-white transition-transform duration-500 ease-out ${sheetDiscountOpen ? 'translate-y-0' : 'translate-y-full'} `} >
-                        {/* Header */}
-                        <div className="flex justify-end p-3 border-b border-white/10">
-                        <button
-                            onClick={() => setSheetDiscountOpen(false)}
-                            className="opacity-70 hover:opacity-100"
-                        >
-                            <X size={28} className="bg-white/10 rounded-full p-1" />
-                        </button>
-                        </div>
 
-                        {/* Content */}
-                        <div className="p-5">
-                        Hello (Discount content)
-                        </div>
-                    </div>
+                    <p className='text-[13px] text-left font-[500] text-[#fff]'>Taxes, discounts and shipping calculated at checkout.</p>
+                    <Button className='uppercase bg-[#fff] px-4 font-[700] w-[250px] text-[#000000f0] text-[14px]'>Check out - ¥ 188,200 JPY</Button>
                 </div>
             </div>
         </>

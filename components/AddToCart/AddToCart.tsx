@@ -46,9 +46,9 @@ export function AddToCart({ sheetOpenCart,hasCartData, quantity, setQuantity }: 
  {hasCartData && 
     <>
         <SheetTitle className="hidden">Menu</SheetTitle>
-        <SheetContent side="right" className="menu-sheet-hide-close lg:!max-w-[450px] md:!max-w-[350px] lg:w-[450px] md:w-[350px] w-full bg-black text-white border-white/10 duration-500 ease-out ">
+        <SheetContent side="right" className="menu-sheet-hide-close lg:!max-w-[450px] md:!max-w-[350px] lg:w-[450px] md:w-[350px] justify-between w-full bg-black text-white border-white/10 duration-500 ease-out px-0">
         <div>
-            <div className={`flex justify-between items-start relative pb-3 after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-full after:bg-[linear-gradient(325deg,#049cff_0%,#35ee7a_100%)]`}>
+            <div className={`flex justify-between items-start relative pb-3 after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-full after:bg-[linear-gradient(325deg,#049cff_0%,#35ee7a_100%)] px-4`}>
                 <div>
                     <p className='text-[16px] font-[700] uppercase mb-3'>Cart</p>
                     <p className='text-[12px] font-[600]'>You are eligible for free shipping.</p>
@@ -61,11 +61,11 @@ export function AddToCart({ sheetOpenCart,hasCartData, quantity, setQuantity }: 
             </div>
             {quantity > 0 &&
                 <div className='mt-6'>
-                    <div className='grid lg:grid-cols-[1fr_3fr] gap-2'>
+                    <div className='grid lg:grid-cols-[1fr_3fr] gap-2 px-4'>
 
                     <Image alt='' width={80} height={80} src={`/assets/images/dynasty-headphone-black-01.jpg`}/>
                     <div className='flex flex-col gap-3 items-start'>
-                        <div className='flex gap-3'>
+                        <div className='flex gap-3 justify-between w-full'>
                             <div>
                                 <h3 className='text-[14px] font-[700]'>DYNASTY HEADPHONE</h3>
                                 <p className='text-[#fafafa8c] text-[12px]'>Color: Black</p>
