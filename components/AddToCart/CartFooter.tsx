@@ -2,6 +2,11 @@
 import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
+import { ShippingForm } from '@/components/ShippingAddress/ShippingAddress';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Checkbox } from '../ui/checkbox';
 let NoteSVG = (
     <svg width={15} height={15} xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" fill="none" viewBox="0 0 512 512">
       <path fillRule="evenodd" clipRule="evenodd" d="M493.25 56.26l-37.51-37.51C443.25 6.25 426.87 0 410.49 0s-32.76 6.25-45.26 18.74L12.85 371.12.15 485.34C-1.45 499.72 9.88 512 23.95 512c.89 0 1.78-.05 2.69-.15l114.14-12.61 352.48-352.48c24.99-24.99 24.99-65.51-.01-90.5zM126.09 468.68l-93.03 10.31 10.36-93.17 263.89-263.89 82.77 82.77-263.99 263.98zm344.54-344.54l-57.93 57.93-82.77-82.77 57.93-57.93c6.04-6.04 14.08-9.37 22.63-9.37 8.55 0 16.58 3.33 22.63 9.37l37.51 37.51c12.47 12.48 12.47 32.78 0 45.26z" fill="currentColor"></path>
@@ -18,9 +23,24 @@ let Discount = (
     </svg>
 )
 export function CartFooter() {
-const [sheetNoteOpen, setSheetNoteOpen] = useState(false);
-const [sheetShippingOpen, setSheetShippingOpen] = useState(false);
-const [sheetDiscountOpen, setSheetDiscountOpen] = useState(false);
+    const STATES_WITH_CITIES: Record<string, string[]> = {
+        Maharashtra: ["Mumbai", "Pune", "Nagpur", "Nashik", "Aurangabad"],
+        Karnataka: ["Bengaluru", "Mysuru", "Mangaluru", "Hubli", "Belagavi"],
+        "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Trichy", "Salem"],
+        Delhi: ["New Delhi"],
+        Gujarat: ["Ahmedabad", "Surat", "Vadodara", "Rajkot"],
+    };
+    const [sheetNoteOpen, setSheetNoteOpen] = useState(false);
+    const [sheetShippingOpen, setSheetShippingOpen] = useState(false);
+    const [sheetDiscountOpen, setSheetDiscountOpen] = useState(false);
+    const [selectedState, setSelectedState] = useState<string | null>(null);
+    const [selectedCity, setSelectedCity] = useState<string | null>(null);
+    const findStateByCity = (city: string) => {
+        return Object.keys(STATES_WITH_CITIES).find((state) =>
+            STATES_WITH_CITIES[state].includes(city)
+        );
+    };
+
   return (
         <>
             <div>
@@ -63,7 +83,7 @@ const [sheetDiscountOpen, setSheetDiscountOpen] = useState(false);
                         </div>
                         <div className="pb-5 px-5 text-center">
                             <p className='text-[14px] mb-3 text-left font-[500] text-[#fff]'>Order instructions, gift messages, or special notes for the seller.</p>
-                            <textarea placeholder="Put your message here" className="w-full border border-[#ffffff5c] rounded-[0] px-4 py-3 mt-2 outline-none text-[#fff] placeholder:text-[#ffffff5c] font-medium focus-visible:border-[#ffffff5c] focus-visible:border-[1.5px]" />
+                            <textarea placeholder="Put your message here" className="w-full border border-[#ffffff5c] rounded-[0] px-4 py-3 outline-none text-[#fff] placeholder:text-[#ffffff5c] font-medium focus-visible:border-[#ffffff5c] focus-visible:border-[1.5px]" />
                             <Button className='mt-4 uppercase bg-[#fff] px-4 font-[700] w-[250px] text-[#000000f0] text-[14px]'>SUBMIT</Button>
                         </div>
                     
@@ -71,14 +91,77 @@ const [sheetDiscountOpen, setSheetDiscountOpen] = useState(false);
                     </div>
                     <div className={`fixed right-0 bottom-0 z-50 lg:max-w-[450px] md:max-w-[350px] w-full bg-[#000000] text-white transition-transform duration-500 ease-out border border-white/10 ${sheetShippingOpen ? 'translate-y-0' : 'translate-y-full'} `} >
                         {/* Header */}
-                        <div className="flex justify-end p-3">
-                            <button onClick={() => setSheetShippingOpen(false)} className="absolute opacity-70 hover:opacity-100" >
+                        <div className="flex justify-end p-3 mb-5">
+                            <button onClick={() => setSheetShippingOpen(false)} className="absolute opacity-70 hover:opacity-100 cursor-pointer" >
                                 <X size={28} className="bg-white/10 rounded-full p-1" />
                             </button>
                             {/* Content */}
                         </div>
-                        <div className="pb-5 px-5">
-                            Order instructions, gift messages, or special notes for the seller.
+                        <div className="grid grid-cols-1 gap-2 pb-5 px-5 text-center">
+                            <div className="grid gap-2 mb-3">
+                                <Input id="flat" placeholder="Flat, House no., Building, Company, Apartment" className="bg-transparent w-full border border-[#ffffff5c] rounded-[0] px-4 py-3 mt-2 outline-none text-[#fff] placeholder:text-[#ffffff5c] font-medium focus-visible:!border-[#ffffff5c] focus-visible:!ring-[0px] focus-visible:!border-[1.5px]" />
+                            </div>
+                            <div className="grid gap-2 mb-3">
+                                <Input id="area" placeholder="Area, Street, Sector, Village" className="bg-transparent w-full border border-[#ffffff5c] rounded-[0] px-4 py-3 outline-none text-[#fff] placeholder:text-[#ffffff5c] font-medium focus-visible:!border-[#ffffff5c] focus-visible:!ring-[0px] focus-visible:!border-[1.5px]"/>
+                            </div>
+                            <div className="grid gap-2 mb-3">
+                                <Input type='number' id="pincode" placeholder="6 digits [0-9] PIN code" maxLength={6} className="bg-transparent w-full border border-[#ffffff5c] rounded-[0] px-4 py-3 outline-none text-[#fff] placeholder:text-[#ffffff5c] font-medium focus-visible:!border-[#ffffff5c] focus-visible:!ring-[0px] focus-visible:!border-[1.5px]"/>
+                            </div>
+                            <div className="grid gap-2 w-full mb-3">
+                                <Select value={selectedState ?? undefined} onValueChange={(state) => { setSelectedState(state); setSelectedCity(null);  }} >
+                                    <SelectTrigger className="w-full bg-transparent border-white/20 text-white">
+                                        <SelectValue placeholder="Choose a state" />
+                                    </SelectTrigger>
+
+                                    <SelectContent className="bg-white">
+                                        {Object.keys(STATES_WITH_CITIES).map((state) => (
+                                        <SelectItem key={state} value={state}>
+                                            {state}
+                                        </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="grid gap-2 w-full mb-3">
+                                <Select key={selectedState ?? "no-state"}
+                                    value={selectedCity ?? undefined}
+                                    onValueChange={(city) => {
+                                        setSelectedCity(city);
+
+                                        if (!selectedState) {
+                                        const detectedState = findStateByCity(city);
+                                        if (detectedState) setSelectedState(detectedState);
+                                        }
+                                    }}
+                                    >
+                                    <SelectTrigger className="w-full bg-transparent border-white/20 text-white">
+                                        <SelectValue placeholder="Choose a city" />
+                                    </SelectTrigger>
+
+                                        <SelectContent className="bg-white">
+                                            {(selectedState
+                                            ? STATES_WITH_CITIES[selectedState]
+                                            : Object.values(STATES_WITH_CITIES).flat()
+                                            ).map((city) => (
+                                            <SelectItem key={city} value={city}>
+                                                {city}
+                                            </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+
+                            </div>
+                            <div className="flex items-start gap-2 mt-2">
+                                <Checkbox id="default-address" className="mt-0.5 border-white/20" />
+                                <Label 
+                                    htmlFor="default-address" 
+                                    className="text-white text-sm font-normal leading-tight cursor-pointer" >
+                                    Make this my default address
+                                </Label>
+                            </div>
+                            <Button className='mt-4 uppercase bg-[#fff] hover:bg-[#f0f0f0] px-4 font-[700] w-full text-[#000000f0] text-[14px]'>
+                                SAVE ADDRESS
+                            </Button>
                         </div>
 
                     </div>
@@ -91,7 +174,11 @@ const [sheetDiscountOpen, setSheetDiscountOpen] = useState(false);
                             {/* Content */}
                         </div>
                         <div className="pb-5 px-5">
-                            Order instructions, gift messages, or special notes for the seller.
+                            Apply Coupen Code
+                            <div className="flex gap-2 mt-3 mb-5">
+                                <Input placeholder="Enter your code" className="bg-transparent w-full border border-[#ffffff5c] rounded-[0] px-4 py-3 outline-none text-[#fff] placeholder:text-[#ffffff5c] font-medium focus-visible:!border-[#ffffff5c] focus-visible:!ring-[0px] focus-visible:!border-[1.5px]" />
+                                <Button className='uppercase bg-[#fff] px-4 font-[700] w-[100px] text-[#000000f0] text-[14px]'>APPLY</Button>
+                                </div>
                         </div>
 
                     </div>
