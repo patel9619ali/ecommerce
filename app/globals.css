@@ -8,7 +8,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-figtree);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -27,4 +27,45 @@ body {
 /* Menu close button hide */
 .menu-sheet-hide-close button[data-slot="sheet-close"]:has(.sr-only) {
   display: none;
+}
+
+
+/** Custom Container **/
+@layer utilities {
+  .container {
+    margin-inline: auto;
+    padding-inline: 0.6rem;
+    width: 100%;
+  }
+
+  @media (min-width: 500px) {
+    .container {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      padding-inline: 2rem;
+      max-width: 100%;
+    }
+  }
+
+  @media (min-width: 1240px) {
+    .container {
+      max-width: 1240px;
+    }
+  }
+
+  @media (min-width: 1540px) {
+    .container {
+      max-width: 1440px;
+    }
+  }
 }
