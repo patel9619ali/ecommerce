@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronsDown, ChevronsUp, ChevronUp, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,12 +12,13 @@ import {
   DialogClose,
 } from "@/components/ui/dialog"
 
-import img1 from "../../public/assets/cartImages/dynasty-headphone-1.jpg";
+import img1 from "../../public/assets/cartImages/dynasty-headphone-blackgold-01.jpg";
 import img2 from "../../public/assets/cartImages/dynasty-headphone-black-02.jpg";
 import img3 from "../../public/assets/cartImages/dynasty-headphone-black-03.jpg";
 import img4 from "../../public/assets/cartImages/dynasty-headphone-black-04.jpg";
+import img5 from "../../public/assets/cartImages/dynasty-headphone-1.jpg";
 
-const cartImages = [img1, img2, img3, img4];
+const cartImages = [img1, img2, img3, img4, img5];
 
 export const ProductGallery = () => {
   const [mainRef, mainApi] = useEmblaCarousel({ loop: true });
@@ -63,7 +64,7 @@ export const ProductGallery = () => {
   }, [mainApi]);
 
   return (
-    <section className="w-full">
+    <section className="w-full grid lg:grid-cols-[3fr_1fr] gap-4">
       {/* Main Carousel */}
       <div className="relative mb-3 group">
         <div className="overflow-hidden rounded-xl" ref={mainRef}>
@@ -103,61 +104,41 @@ export const ProductGallery = () => {
         </div>
 
         {/* Navigation Buttons */}
-        <div
-        onClick={scrollPrev}
-          className="absolute left-2 top-1/2 -translate-y-1/2 bottom-0 w-12 h-12 flex items-center justify-center rounded-full cursor-pointer bg-gradient-to-r from-white/60 to-white/60"
-        >
-          <ChevronLeft className="h-8 w-8 text-[#053E54] rounded-md"/>
+        <div onClick={scrollPrev} className="absolute left-2 top-1/2 -translate-y-1/2 bottom-0 w-12 h-12 flex items-center justify-center group w-8 rounded-full cursor-pointer bg-gradient-to-r from-white/60 to-white/60 ml-2 hover:bg-[#fff] transition-colors" >
+          <ChevronLeft className="p-2 h-8 w-8 text-[#0005c] group-hover:text-[#fff5c] transition-colors" />
         </div>
-        <div
-        onClick={scrollNext}
-        className="absolute rounded-full right-2 top-1/2 -translate-y-1/2  bottom-0 w-12 h-12 flex items-center justify-center cursor-pointer bg-gradient-to-l from-white/60 to-white/60"
-        >
-        <ChevronRight className="h-8 w-8 text-[#053E54] rounded-md" />
+        <div onClick={scrollNext} className="absolute rounded-full right-2 top-1/2 -translate-y-1/2 bottom-0 w-12 h-12 flex items-center justify-center group w-8 rounded-full cursor-pointer bg-gradient-to-r from-white/60 to-white/60 ml-2 hover:bg-[#fff] transition-colors" >
+          <ChevronRight className="p-2 h-8 w-8 text-[#0005c] group-hover:text-[#fff5c] transition-colors" />
         </div>
       </div>
 
       {/* Thumbnail Carousel */}
       <div className="relative group bg-transparent rounded-md overflow-hidden" >
         <div className="overflow-hidden" ref={thumbRef}>
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-3 w-max-content">
             {cartImages.map((image, index) => (
-              <button
-                key={index}
-                onClick={() => onThumbClick(index)}
-                className={`flex-[0_0_22.4%] overflow-hidden ${
-                  index === selectedIndex
-                    ? "border-[2px] border-[#053E54] rounded-md"
-                    : "border-[2px] border-[#C9C9C9] rounded-md hover:opacity-100"
-                }`}
-              >
-                <img
-                  src={image.src}
-                  alt='Cart thumbnail'
-                  className="w-full h-auto object-cover aspect-3/2"
-                />
+              <button key={index} onClick={() => onThumbClick(index)} className={` w-[75px] h-[75px] rounded-[25%] border-[2px] overflow-hidden transition-colors duration-200 ${ index === selectedIndex ? "border-[#fff]" : "border-[#ffffff5c] hover:border-[#fff]" } `} >
+                {/* INNER WRAPPER CONTROLS HOVER */}
+                <div className="w-full h-full overflow-hidden rounded-[25%] hover:[&>img]:scale-110">
+                  <img src={image.src} alt="Cart thumbnail" className={`cursor-pointer w-full h-full object-cover transition-transform duration-500 ease-out ${index === selectedIndex ? "scale-110" : "scale-100"} `} />
+                </div>
               </button>
             ))}
+          {/* Thumbnail Navigation Buttons */}
+          <div className="flex gap-3 flex-col justify-between items-center">
+            <div onClick={scrollPrev} className="group relative w-8 rounded-full cursor-pointer bg-gradient-to-r from-white/60 to-white/60 hover:bg-[#fff] transition-colors" >
+                <ChevronsUp className="p-2 h-8 w-8 text-[#0005c] group-hover:text-[#fff5c] transition-colors" />
+            </div>
+
+            <div onClick={scrollNext} className="group relative w-8 rounded-full cursor-pointer bg-gradient-to-r from-white/60 to-white/60 hover:bg-[#fff] transition-colors" >
+              <ChevronsDown className="p-2 h-8 w-8 text-[#0005c] group-hover:text-[#fff5c] transition-colors" />
+            </div>
           </div>
-        </div>
-
-        {/* Thumbnail Navigation Buttons */}
-        <div onClick={scrollPrev} className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white/100 to-transparent flex items-center justify-start cursor-pointer rounded-md" >
-            <ChevronLeft className="h-6 w-6 text-[#053E54]" />
-        </div>
-
-        <div onClick={scrollNext} className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white/100 to-transparent flex items-center justify-end cursor-pointer rounded-md" >
-            <ChevronRight className="h-6 w-6 text-[#053E54]" />
+          </div>
         </div>
 
       </div>
 
-      {/* Image Counter */}
-      {/* <div className="text-center mt-6">
-        <p className="text-sm text-muted-foreground">
-          Click on Image to enlarge • {selectedIndex + 1} / {carImages.length}
-        </p>
-      </div> */}
     </section>
   );
 };
