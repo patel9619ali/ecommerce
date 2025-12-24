@@ -11,18 +11,15 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog"
+type Props = {
+  variant: any;
+};
 
-import img1 from "../../public/assets/cartImages/dynasty-headphone-blackgold-01.jpg";
-import img2 from "../../public/assets/cartImages/dynasty-headphone-black-02.jpg";
-import img3 from "../../public/assets/cartImages/dynasty-headphone-black-03.jpg";
-import img4 from "../../public/assets/cartImages/dynasty-headphone-black-04.jpg";
-import img5 from "../../public/assets/cartImages/dynasty-headphone-1.jpg";
 
-const cartImages = [img1, img2, img3, img4, img5];
-
-export const ProductGallery = () => {
+export const ProductGallery = ({ variant }: Props) => {
   const [mainRef, mainApi] = useEmblaCarousel({ loop: true });
   const [thumbRef, thumbApi] = useEmblaCarousel({
+    axis: "y",
     containScroll: "keepSnaps",
     dragFree: true,
   });
@@ -38,10 +35,10 @@ export const ProductGallery = () => {
 
   const onSelect = useCallback(() => {
     if (!mainApi || !thumbApi) return;
-    const selected = mainApi.selectedScrollSnap();
-    setSelectedIndex(selected);
-    thumbApi.scrollTo(selected);
-  }, [mainApi, thumbApi, setSelectedIndex]);
+    const index = mainApi.selectedScrollSnap();
+    setSelectedIndex(index);
+    thumbApi.scrollTo(index);
+  }, [mainApi, thumbApi]);
 
   useEffect(() => {
     if (!mainApi) return;
@@ -64,18 +61,18 @@ export const ProductGallery = () => {
   }, [mainApi]);
 
   return (
-    <section className="w-full grid lg:grid-cols-[3fr_1fr] gap-4">
+    <section className="w-full grid lg:grid-cols-[4fr_1fr] gap-4">
       {/* Main Carousel */}
-      <div className="relative mb-3 group">
-        <div className="overflow-hidden rounded-xl" ref={mainRef}>
+      <div className="relative">
+        <div className="overflow-hidden rounded-[0]" ref={mainRef}>
           <div className="flex">
-            {cartImages.map((image, index) => (
-                <div key={index} className="flex-[0_0_100%] min-w-0">
+            {variant.images.map((image:any, index:any) => (
+                <div key={index} className="flex-[0_0_100%] min-w-0 cursor-zoom-in">
                 <Dialog>
                     <DialogTrigger asChild>
                     <img
                         src={image.src}
-                        alt="cart image"
+                        alt={variant.name}
                         className="w-full h-auto object-cover aspect-3/2 cursor-pointer"
                     />
                     </DialogTrigger>
@@ -88,10 +85,10 @@ export const ProductGallery = () => {
                             </DialogClose>
                     </DialogHeader>
                     <div className="overflow-y-scroll p-3 space-y-3 custom-scroll h-full xs:h-[70vh]">
-                        {cartImages.map((image, index) => (
+                        {variant.images.map((image:any, index:any) => (
                         <img key={index}
                             src={image.src}
-                            alt="Cart Large"
+                            alt={variant.name}
                             className="w-full h-auto object-cover aspect-video rounded-lg"
                         />
                         ))}
@@ -104,40 +101,90 @@ export const ProductGallery = () => {
         </div>
 
         {/* Navigation Buttons */}
-        <div onClick={scrollPrev} className="absolute left-2 top-1/2 -translate-y-1/2 bottom-0 w-12 h-12 flex items-center justify-center group w-8 rounded-full cursor-pointer bg-gradient-to-r from-white/60 to-white/60 ml-2 hover:bg-[#fff] transition-colors" >
-          <ChevronLeft className="p-2 h-8 w-8 text-[#0005c] group-hover:text-[#fff5c] transition-colors" />
+        <div
+          onClick={scrollPrev}
+          className="
+            group absolute right-10 bottom-1
+            w-12 h-12
+            flex items-center justify-center
+            cursor-pointer
+            bg-black hover:bg-white
+            transition-colors
+          "
+        >
+          <ChevronLeft
+            className="h-6 w-6 text-white group-hover:text-black transition-colors"
+            stroke="currentColor"
+          />
         </div>
-        <div onClick={scrollNext} className="absolute rounded-full right-2 top-1/2 -translate-y-1/2 bottom-0 w-12 h-12 flex items-center justify-center group w-8 rounded-full cursor-pointer bg-gradient-to-r from-white/60 to-white/60 ml-2 hover:bg-[#fff] transition-colors" >
-          <ChevronRight className="p-2 h-8 w-8 text-[#0005c] group-hover:text-[#fff5c] transition-colors" />
+
+        <div onClick={scrollNext} className=" group absolute right-0 bottom-1 w-12 h-12 flex items-center justify-center cursor-pointer bg-black hover:bg-white transition-colors " >
+          <ChevronRight
+            className="h-6 w-6 text-white group-hover:text-black transition-colors"
+            stroke="currentColor"
+          />
         </div>
+
       </div>
 
       {/* Thumbnail Carousel */}
-      <div className="relative group bg-transparent rounded-md overflow-hidden" >
-        <div className="overflow-hidden" ref={thumbRef}>
-          <div className="flex flex-col gap-3 w-max-content">
-            {cartImages.map((image, index) => (
-              <button key={index} onClick={() => onThumbClick(index)} className={` w-[75px] h-[75px] rounded-[25%] border-[2px] overflow-hidden transition-colors duration-200 ${ index === selectedIndex ? "border-[#fff]" : "border-[#ffffff5c] hover:border-[#fff]" } `} >
-                {/* INNER WRAPPER CONTROLS HOVER */}
+    <div className="relative bg-transparent rounded-[0]">
+      <div ref={thumbRef}>
+        <div className="flex flex-col gap-3 w-max ">
+          
+          {/* ✅ SCROLL CONTAINER */}
+          <div className="flex flex-col gap-3 h-[300px] overflow-y-auto custom-scroll  cursor-pointer">
+            {variant.images.map((image:any, index:any) => (
+              <button
+                key={index}
+                onClick={() => onThumbClick(index)}
+                className={`cursor-pointer
+                  w-[75px] h-[75px] rounded-[25%]
+                  border-[2px] overflow-hidden
+                  transition-colors duration-200
+                  ${
+                    index === selectedIndex
+                      ? "border-[#fff]"
+                      : "border-[#ffffff5c] hover:border-[#fff]"
+                  }
+                `}
+              >
                 <div className="w-full h-full overflow-hidden rounded-[25%] hover:[&>img]:scale-110">
-                  <img src={image.src} alt="Cart thumbnail" className={`cursor-pointer w-full h-full object-cover transition-transform duration-500 ease-out ${index === selectedIndex ? "scale-110" : "scale-100"} `} />
+                  <img
+                    src={image.src}
+                    alt="Cart thumbnail"
+                    className={`
+                      w-full h-full object-cover
+                      transition-transform duration-500 ease-out
+                      ${index === selectedIndex ? "scale-110" : "scale-100"}
+                    `}
+                  />
                 </div>
               </button>
             ))}
-          {/* Thumbnail Navigation Buttons */}
-          <div className="flex gap-3 flex-col justify-between items-center">
-            <div onClick={scrollPrev} className="group relative w-8 rounded-full cursor-pointer bg-gradient-to-r from-white/60 to-white/60 hover:bg-[#fff] transition-colors" >
-                <ChevronsUp className="p-2 h-8 w-8 text-[#0005c] group-hover:text-[#fff5c] transition-colors" />
+          </div>
+
+          {/* Navigation */}
+          <div className="flex gap-3 justify-center items-center cursor-pointer">
+            <div
+              onClick={scrollPrev}
+              className="group w-8 h-8 bg-black/60 hover:bg-white flex items-center justify-center transition-colors"
+            >
+              <ChevronsUp className="text-white group-hover:text-black" />
             </div>
 
-            <div onClick={scrollNext} className="group relative w-8 rounded-full cursor-pointer bg-gradient-to-r from-white/60 to-white/60 hover:bg-[#fff] transition-colors" >
-              <ChevronsDown className="p-2 h-8 w-8 text-[#0005c] group-hover:text-[#fff5c] transition-colors" />
+            <div
+              onClick={scrollNext}
+              className="group w-8 h-8 bg-black/60 hover:bg-white flex items-center justify-center transition-colors"
+            >
+              <ChevronsDown className="text-white group-hover:text-black" />
             </div>
           </div>
-          </div>
+
         </div>
-
       </div>
+    </div>
+
 
     </section>
   );
