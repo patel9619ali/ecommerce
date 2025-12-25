@@ -82,6 +82,6 @@ body {
 }
 
 .custom-scroll::-webkit-scrollbar-thumb {
-  background: #053E54;
+  background: #000;
   border-radius: 20px;
 }
