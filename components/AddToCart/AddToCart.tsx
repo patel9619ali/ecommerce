@@ -13,7 +13,6 @@ import { Minus,Plus } from 'lucide-react';
 import { CartFooter } from './CartFooter';
 type props = {
     sheetOpenCart: boolean;
-    hasCartData: boolean;
     quantity: number;
     setQuantity: React.Dispatch<React.SetStateAction<number>>;
 }
@@ -23,7 +22,7 @@ let TrashSVG = (
       <path d="M6.55 5.25a.5.5 0 00-.5.5v6a.5.5 0 001 0v-6a.5.5 0 00-.5-.5zM9.45 5.25a.5.5 0 00-.5.5v6a.5.5 0 001 0v-6a.5.5 0 00-.5-.5z" fill="currentColor"></path>
     </svg>
 )
-export function AddToCart({ sheetOpenCart,hasCartData, quantity, setQuantity }: props) {
+export function AddToCart({ sheetOpenCart, quantity, setQuantity }: props) {
 
    
      const incrementQuantity = () => {
@@ -43,7 +42,7 @@ export function AddToCart({ sheetOpenCart,hasCartData, quantity, setQuantity }: 
     };
   return (
  <>
- {hasCartData && 
+
     <>
         <SheetTitle className="hidden">Menu</SheetTitle>
         <SheetContent side="right" className="menu-sheet-hide-close lg:!max-w-[450px] md:!max-w-[350px] lg:w-[450px] md:w-[350px] justify-between w-full bg-black text-white border-white/10 duration-500 ease-out px-0">
@@ -104,7 +103,7 @@ export function AddToCart({ sheetOpenCart,hasCartData, quantity, setQuantity }: 
         }
         </SheetContent>
     </>
-}   
+
 </>
   )
 }

@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { Search, ShoppingCart, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/components/CartContext"
 import {
   Sheet,
   SheetClose,
@@ -30,32 +29,12 @@ const user = (
 
 
 export function DesktopHeader() {
-   const { cartItems, clearCart } = useCart() 
-  const hasCartData = cartItems.length > 0
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetOpenCart, setSheetOpenCart] = useState(false);
   const handleSheetClose = () => setSheetOpen(false);
   const [quantity, setQuantity] = useState(1);
-  console.log("cartItems.length:", cartItems.length);
-  console.log("cartItems:", cartItems);
-    // Sync quantity with cartItems.length using useEffect
-  useEffect(() => {
-    // Only update if there are cart items, otherwise keep it at 1 (for initial state)
-    if (cartItems.length > 0) {
-      setQuantity(cartItems.length);
-    } else {
-      setQuantity(1); // Reset to 1 when cart is empty
-    }
-  }, [cartItems.length]);
-    // Clear cart when quantity reaches 0
-  useEffect(() => {
-    if (quantity === 0 && cartItems.length > 0) {
-      clearCart(); // This will clear all items from cart
-      setQuantity(1); // Reset quantity to 1 immediately
-    }
-  }, [quantity, cartItems.length, clearCart]);
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
@@ -117,11 +96,11 @@ export function DesktopHeader() {
           </Button>
           <Sheet open={sheetOpenCart} onOpenChange={setSheetOpenCart}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={!hasCartData} className={!hasCartData ? "opacity-40 cursor-not-allowed" : ""} >
+              <Button variant="ghost" size="icon" className=" cursor-pointer transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:bg-transparent ">
                   <ShoppingCart className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <AddToCart hasCartData={hasCartData} sheetOpenCart={sheetOpenCart} setQuantity={setQuantity} quantity={quantity}/>
+            <AddToCart sheetOpenCart={sheetOpenCart} setQuantity={setQuantity} quantity={quantity}/>
           </Sheet>
         </div>
       </div>

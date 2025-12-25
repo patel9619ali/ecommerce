@@ -4,7 +4,6 @@ import "./globals.css";
 import { DesktopHeader } from "@/components/Header/DesktopHeader";
 import { LoadingProvider } from "@/context/LoadingContext";
 import LoaderWrapper from "@/components/Loader/LoaderWrapper";
-import { CartProvider } from "@/components/CartContext";
 
 
 export const metadata: Metadata = {
@@ -22,10 +21,8 @@ export default function RootLayout({
       <body className={`${fontSans.variable} font-sans antialiased`}>
         <LoadingProvider>
           <LoaderWrapper>
-            <CartProvider>
               <DesktopHeader />
               {children}
-            </CartProvider>
           </LoaderWrapper>
         </LoadingProvider>
       </body>

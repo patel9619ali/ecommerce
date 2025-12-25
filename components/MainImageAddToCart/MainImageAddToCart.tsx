@@ -6,7 +6,7 @@ import { ProductGallery } from "./ProductGallery";
 import { BuyCartSection } from "./BuyCartSection";
 import { PRODUCT_VARIANTS } from "./productVariants";
 export const MainImageAddToCart = () => {
-  const [variantKey, setVariantKey] = useState<keyof typeof PRODUCT_VARIANTS>("blue");
+  const [variantKey, setVariantKey] = useState<keyof typeof PRODUCT_VARIANTS>("black");
   const variant = PRODUCT_VARIANTS[variantKey];
   return (
     <section className="w-full bg-[#000000e6] py-5">
