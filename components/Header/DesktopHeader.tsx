@@ -1,5 +1,6 @@
-"use client"
+"use client";
 
+import { useCartStore } from "@/store/useCartStore";
 import { useState, useEffect } from "react"
 import { Search, ShoppingCart, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,9 @@ const user = (
 
 
 export function DesktopHeader() {
+  const items = useCartStore((state) => state.items);
+  console.log("Cart items in Header:", items);
+  const hasCartData = items.length > 0;
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -96,7 +100,7 @@ export function DesktopHeader() {
           </Button>
           <Sheet open={sheetOpenCart} onOpenChange={setSheetOpenCart}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className=" cursor-pointer transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:bg-transparent ">
+               <Button variant="ghost" size="icon" disabled={!hasCartData} className={!hasCartData ? "opacity-40 cursor-not-allowed" : ""} >
                   <ShoppingCart className="h-5 w-5" />
               </Button>
             </SheetTrigger>
