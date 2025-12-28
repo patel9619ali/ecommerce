@@ -1,5 +1,7 @@
 "use client"
-import { useState } from 'react';
+import { useRouter } from "next/navigation";
+import { useCartStore } from "@/store/useCartStore";
+import { PRODUCT_VARIANTS } from "../MainImageAddToCart/productVariants";
 import {
   Sheet,
   SheetClose,
@@ -25,21 +27,12 @@ let TrashSVG = (
 export function AddToCart({ sheetOpenCart, quantity, setQuantity }: props) {
 
    
-     const incrementQuantity = () => {
-       setQuantity(prev => prev + 1);
-     };
-   
-     const decrementQuantity = () => {
-       if (quantity > 0) {
-         setQuantity(prev => prev - 1);
-       }
-     };
-    const handleRemoveItem = () => {
-        // Reset to 1 when removing item (or you could set to 0 and clear cart)
-        setQuantity(0);
-        // If you have a removeFromCart function in your CartContext, call it here
-        // removeFromCart(itemId);
-    };
+  const router = useRouter();
+  const { items, updateQuantity, removeItem } = useCartStore();
+
+  const item = items[0]; // single-product store
+  console.log(item,"item")
+  if (!item) return null;
   return (
  <>
 
@@ -58,49 +51,48 @@ export function AddToCart({ sheetOpenCart, quantity, setQuantity }: props) {
                     </button>
                 </SheetClose>
             </div>
-            {quantity > 0 &&
-                <div className='mt-6'>
-                    <div className='grid lg:grid-cols-[1fr_3fr] gap-2 px-4'>
+            <div className='mt-6'>
+                <div className='grid lg:grid-cols-[1fr_3fr] gap-2 px-4'>
 
-                    <Image alt='' width={80} height={80} src={`/assets/images/dynasty-headphone-black-01.jpg`}/>
-                    <div className='flex flex-col gap-3 items-start'>
-                        <div className='flex gap-3 justify-between w-full'>
-                            <div>
-                                <h3 className='text-[14px] font-[700]'>DYNASTY HEADPHONE</h3>
-                                <p className='text-[#fafafa8c] text-[12px]'>Color: Black</p>
-                            </div>
-                            <span className='text-[15px] font-[700]'>¥169,500</span>
+                <img src={item.image} alt={item.title} width={80} height={80} />
+                <div className='flex flex-col gap-3 items-start'>
+                    <div className='flex gap-3 justify-between w-full'>
+                        <div>
+                            <h3 className='text-[14px] font-[700]'>{item.title}</h3>
+                            <p className='text-[#fafafa8c] text-[12px]'>Variant: {item.variantKey}</p>
+                        </div>
+                        <span className='text-[15px] font-[700]'>₹ {item.price}</span>
 
-                        </div>
-                        <div className='flex w-full justify-between'>
-                            {/* Increment counter */}
-                            <div className='flex items-center border border-[#ffffff5c] rounded-md overflow-hidden'>
-                                <button onClick={decrementQuantity} disabled={quantity <= 0} className='px-2 cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed h-[30px]' aria-label="Decrease quantity" >
-                                    <Minus size={10} />
-                                </button>
-                            
-                                <span className='px-2  text-center font-semibold border-x border-[#ffffff5c]'>
-                                    {quantity}
-                                </span>
-                            
-                                <button onClick={incrementQuantity} className='px-2 transition-colors cursor-pointer h-[30px]' aria-label="Increase quantity" >
-                                    <Plus size={10} />
-                                </button>
-                            </div>
-                        
-                            {/* Trash Icon */}
-                            <button onClick={handleRemoveItem} className='cursor-pointer opacity-70 hover:opacity-100 transition-opacity'aria-label="Remove item">
-                            {TrashSVG}
-                            </button>
-                        </div>
                     </div>
+                    <div className='flex w-full justify-between'>
+                        {/* Increment counter */}
+                        <div className='flex items-center border border-[#ffffff5c] rounded-md overflow-hidden'>
+                            <button onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1)) } disabled={quantity <= 0} className='px-2 cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed h-[30px]' aria-label="Decrease quantity" >
+                                <Minus size={10} />
+                            </button>
+                        
+                            <span className='px-2  text-center font-semibold border-x border-[#ffffff5c]'>
+                                {item.quantity}
+                            </span>
+                        
+                        <button onClick={() => updateQuantity(item.id, item.quantity + 1) } className='px-2 transition-colors cursor-pointer h-[30px]' aria-label="Increase quantity" >
+                                <Plus size={10} />
+                        </button>
+                        </div>
+                    
+                        {/* Trash Icon */}
+                        <button onClick={() => removeItem(item.id)} className='cursor-pointer opacity-70 hover:opacity-100 transition-opacity'aria-label="Remove item">
+                        {TrashSVG}
+                        </button>
                     </div>
                 </div>
-            }
+                </div>
+            </div>
+          
         </div>
-        {quantity > 0 &&
-            <CartFooter />
-        }
+        <CartFooter
+          
+        />
         </SheetContent>
     </>
 

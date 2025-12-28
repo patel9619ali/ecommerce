@@ -2,10 +2,13 @@ import { Share } from "lucide-react";
 import { AddToCartButton } from "../Loader/AddToCartButton";
 import { BuyNow } from "../Loader/BuyNow";
 import { PRODUCT_VARIANTS } from "./productVariants";
+
+type VariantKey = keyof typeof PRODUCT_VARIANTS;
+
 type Props = {
-  variantKey: string;
-  setVariantKey: (key: any) => void;
-  variant: any;
+  variantKey: VariantKey;
+  setVariantKey: (key: VariantKey) => void;
+  variant: (typeof PRODUCT_VARIANTS)[VariantKey];
 };
 
 export const BuyCartSection = ({ variantKey, setVariantKey, variant }: Props) => {
@@ -27,7 +30,7 @@ export const BuyCartSection = ({ variantKey, setVariantKey, variant }: Props) =>
         {Object.entries(PRODUCT_VARIANTS).map(([key, value]) => (
           <button
             key={key}
-            onClick={() => setVariantKey(key)}
+            onClick={() => setVariantKey(key as VariantKey)}
             className={`cursor-pointer w-12 h-12  hover:scale-110 transition-transform duration-500 ease-out rounded-full border-2 overflow-hidden
               ${variantKey === key ? "border-white scale-120" : "border-white/40"}
             `}
@@ -52,7 +55,7 @@ export const BuyCartSection = ({ variantKey, setVariantKey, variant }: Props) =>
       </div>
       <p className="mt-6 text-[14px] text-white/80">Hurry, only 7 items left in stock!</p>
       <div className="mt-6">
-        <AddToCartButton />
+        <AddToCartButton productId="dynasty-headphone" title="DYNASTY HEADPHONE" variantKey={variantKey} />
       </div>
       <div className="mt-6">
         <BuyNow/>
