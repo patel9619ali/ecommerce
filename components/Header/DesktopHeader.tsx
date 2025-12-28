@@ -98,14 +98,15 @@ export function DesktopHeader() {
             {user}
             <span className="sr-only">Account</span>
           </Button>
-          <Sheet open={sheetOpenCart} onOpenChange={setSheetOpenCart}>
-            <SheetTrigger asChild>
-               <Button variant="ghost" size="icon" disabled={!hasCartData} className={!hasCartData ? "opacity-40 cursor-not-allowed" : ""} >
-                  <ShoppingCart className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <AddToCart sheetOpenCart={sheetOpenCart} setQuantity={setQuantity} quantity={quantity}/>
-          </Sheet>
+          <Button
+              variant="ghost"
+              size="icon"
+              disabled={items.length === 0}
+            >
+              <ShoppingCart className="h-5 w-5" />
+            </Button>
+
+            <AddToCart />
         </div>
       </div>
     </header>

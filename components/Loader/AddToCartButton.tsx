@@ -27,7 +27,7 @@ export const AddToCartButton = ({
 
   const handleClick = () => {
     addItem({
-      id: productId,
+      id: `${productId}-${variantKey}`,
       title,
       variantKey,
       price: variant.price,

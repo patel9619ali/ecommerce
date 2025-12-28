@@ -13,23 +13,18 @@ import { X } from 'lucide-react';
 import Image from 'next/image';
 import { Minus,Plus } from 'lucide-react';
 import { CartFooter } from './CartFooter';
-type props = {
-    sheetOpenCart: boolean;
-    quantity: number;
-    setQuantity: React.Dispatch<React.SetStateAction<number>>;
-}
+
 let TrashSVG = (
     <svg width={20} height={20} xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" fill="none" viewBox="0 0 16 16">
       <path d="M14 3h-3.53a3.07 3.07 0 00-.6-1.65C9.44.82 8.8.5 8 .5s-1.44.32-1.87.85A3.06 3.06 0 005.53 3H2a.5.5 0 000 1h1.25v10c0 .28.22.5.5.5h8.5a.5.5 0 00.5-.5V4H14a.5.5 0 000-1zM6.91 1.98c.23-.29.58-.48 1.09-.48s.85.19 1.09.48c.2.24.3.6.36 1.02h-2.9c.05-.42.17-.78.36-1.02zm4.84 11.52h-7.5V4h7.5v9.5z" fill="currentColor"></path>
       <path d="M6.55 5.25a.5.5 0 00-.5.5v6a.5.5 0 001 0v-6a.5.5 0 00-.5-.5zM9.45 5.25a.5.5 0 00-.5.5v6a.5.5 0 001 0v-6a.5.5 0 00-.5-.5z" fill="currentColor"></path>
     </svg>
 )
-export function AddToCart({ sheetOpenCart, quantity, setQuantity }: props) {
-
+export function AddToCart() {
+const { items, isCartOpen, closeCart,updateQuantity, removeItem } = useCartStore();
    
   const router = useRouter();
-  const { items, updateQuantity, removeItem } = useCartStore();
-
+  const isOpen = items.length > 0;
   const item = items[0]; // single-product store
   console.log(item,"item")
   if (!item) return null;
@@ -37,6 +32,7 @@ export function AddToCart({ sheetOpenCart, quantity, setQuantity }: props) {
  <>
 
     <>
+    <Sheet open={isCartOpen} onOpenChange={(open) => { if (!open) closeCart(); }} >
         <SheetTitle className="hidden">Menu</SheetTitle>
         <SheetContent side="right" className="menu-sheet-hide-close lg:!max-w-[450px] md:!max-w-[350px] lg:w-[450px] md:w-[350px] justify-between w-full bg-black text-white border-white/10 duration-500 ease-out px-0">
         <div>
@@ -54,38 +50,39 @@ export function AddToCart({ sheetOpenCart, quantity, setQuantity }: props) {
             <div className='mt-6'>
                 <div className='grid lg:grid-cols-[1fr_3fr] gap-2 px-4'>
 
-                <img src={item.image} alt={item.title} width={80} height={80} />
-                <div className='flex flex-col gap-3 items-start'>
-                    <div className='flex gap-3 justify-between w-full'>
-                        <div>
-                            <h3 className='text-[14px] font-[700]'>{item.title}</h3>
-                            <p className='text-[#fafafa8c] text-[12px]'>Variant: {item.variantKey}</p>
-                        </div>
-                        <span className='text-[15px] font-[700]'>₹ {item.price}</span>
+                    {items.map((item) => (
+                        <>
+                        <img src={item.image} alt={item.title} width={80} height={80} />
+                        <div className='flex flex-col gap-3 items-start mb-5'>
+                            <div className="flex gap-3 justify-between w-full">
+                                <div>
+                                    <h3 className='text-[14px] font-[700]'>{item.title}</h3>
+                                    <p className='text-[#fafafa8c] text-[12px]'>Variant: {item.variantKey}</p>
+                                </div>
+                                <span className='text-[15px] font-[700]'>₹ {item.price}</span>
+                            </div>
+                            <div className='flex w-full justify-between'>
+                                {/* Increment counter */}
+                                <div className='flex items-center border border-[#ffffff5c] rounded-md overflow-hidden'>
+                                    <button onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1)) } className='px-2 cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed h-[30px]'>
+                                        <Minus size={10} />
+                                    </button>
 
-                    </div>
-                    <div className='flex w-full justify-between'>
-                        {/* Increment counter */}
-                        <div className='flex items-center border border-[#ffffff5c] rounded-md overflow-hidden'>
-                            <button onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1)) } disabled={quantity <= 0} className='px-2 cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed h-[30px]' aria-label="Decrease quantity" >
-                                <Minus size={10} />
-                            </button>
-                        
-                            <span className='px-2  text-center font-semibold border-x border-[#ffffff5c]'>
-                                {item.quantity}
-                            </span>
-                        
-                        <button onClick={() => updateQuantity(item.id, item.quantity + 1) } className='px-2 transition-colors cursor-pointer h-[30px]' aria-label="Increase quantity" >
-                                <Plus size={10} />
-                        </button>
+                                    <span className='px-2  text-center font-semibold border-x border-[#ffffff5c]'>{item.quantity}</span>
+
+                                    <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className='px-2 transition-colors cursor-pointer h-[30px]' aria-label="Increase quantity">
+                                        <Plus size={10} />
+                                    </button>
+                                </div>
+
+                                <button onClick={() => removeItem(item.id)} className='cursor-pointer opacity-70 hover:opacity-100 transition-opacity' aria-label="Remove item">
+                                {TrashSVG}
+                                </button>
+                            </div>
                         </div>
-                    
-                        {/* Trash Icon */}
-                        <button onClick={() => removeItem(item.id)} className='cursor-pointer opacity-70 hover:opacity-100 transition-opacity'aria-label="Remove item">
-                        {TrashSVG}
-                        </button>
-                    </div>
-                </div>
+                        </>
+                    ))}
+
                 </div>
             </div>
           
@@ -94,6 +91,7 @@ export function AddToCart({ sheetOpenCart, quantity, setQuantity }: props) {
           
         />
         </SheetContent>
+    </Sheet>
     </>
 
 </>
