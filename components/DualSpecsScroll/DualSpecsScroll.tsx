@@ -122,33 +122,36 @@ export default function DualSpecsScroll() {
   const rightY = useTransform(scrollYProgress, [0, 1], ["-300%", "0%"]);
 
   return (
-    <div
-      ref={containerRef}
-      className="relative bg-black"
-      style={{ height: `${products.length * 100}vh` }}
-    >
-      <div className="sticky top-0 h-screen w-full overflow-hidden">
-        <div className="flex h-full bg-black container">
+    <>
+    <section className='bg-[#000] py-10'>
+      <div className='container mx-auto'>
+        <h2 className='text-[40px] text-[#fff] text-center font-[600] mb-5'>TECH SPECS</h2>
+        <div ref={containerRef} className="relative" style={{ height: `${products.length * 100}vh` }} >
+          <div className="sticky top-0 h-screen w-full overflow-hidden">
+            <div className="flex h-full">
+                  <motion.div
+                style={{ y: rightY }}
+                className="w-1/2 flex flex-col"
+              >
+                {products.map((product) => (
+                  <ProductDescription key={product.id} product={product} />
+                ))}
+              </motion.div>
               <motion.div
-            style={{ y: rightY }}
-            className="w-1/2 flex flex-col"
-          >
-            {products.map((product) => (
-              <ProductDescription key={product.id} product={product} />
-            ))}
-          </motion.div>
-          <motion.div
-            style={{ y: leftY }}
-            className="w-1/2 flex flex-col bg-black"
-          >
-            {products.map((product, index) => (
-              <ProductImage key={product.id} product={product} index={index} />
-            ))}
-          </motion.div>
+                style={{ y: leftY }}
+                className="w-1/2 flex flex-col bg-black"
+              >
+                {products.map((product, index) => (
+                  <ProductImage key={product.id} product={product} index={index} />
+                ))}
+              </motion.div>
 
-        
+            
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
+    </>
   );
 }
