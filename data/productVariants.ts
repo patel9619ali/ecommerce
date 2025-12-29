@@ -24,6 +24,7 @@ export type ProductBenefit = {
 export const PRODUCT_VARIANTS = {
   black: {
     name: "Black",
+    slug: "dynasty-headphone",
     price: 169400,
     images: [img1, img2, img3, img4],
     benefits: [
@@ -46,6 +47,7 @@ export const PRODUCT_VARIANTS = {
 },
   blue: {
     name: "Blue",
+    slug: "dynasty-headphone",
     price: 169400,
     images: [blue1, blue2, blue3, blue4],
   benefits: [

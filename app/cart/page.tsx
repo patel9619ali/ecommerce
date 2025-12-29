@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/useCartStore";
-
+import Link from "next/link";
 export default function CartPage() {
   const router = useRouter();
   const { items, updateQuantity, removeItem } = useCartStore();
@@ -21,6 +21,16 @@ export default function CartPage() {
   }
 
   return (
-<></>
+<>
+{items.map(item => (
+  <Link
+    key={item.id}
+    href={`/products/${item.slug}?variant=${item.variantKey}&editCart=true`}
+  >
+    <h3>{item.title}</h3>
+    <p>{item.variantKey}</p>
+  </Link>
+))}
+</>
   );
 }

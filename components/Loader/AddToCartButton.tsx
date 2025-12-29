@@ -1,35 +1,31 @@
 "use client";
 
-
-import { Loader2, Check } from "lucide-react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/useCartStore";
-import { PRODUCT_VARIANTS } from "../MainImageAddToCart/productVariants";
-
-type VariantKey = keyof typeof PRODUCT_VARIANTS;
+import type { Variant } from "@/data/types";
 
 type Props = {
   productId: string;
+  slug: string;
   title: string;
-  variantKey: VariantKey;
+  variant: Variant;
 };
 
 export const AddToCartButton = ({
   productId,
+  slug,
   title,
-  variantKey,
+  variant,
 }: Props) => {
-  const router = useRouter();
   const addItem = useCartStore((s) => s.addItem);
-
-  const variant = PRODUCT_VARIANTS[variantKey]; // ✅ always defined now
 
   const handleClick = () => {
     addItem({
-      id: `${productId}-${variantKey}`,
+      id: `${productId}-${variant.key}`,
+      productId,
+      slug,
       title,
-      variantKey,
+      variantKey: variant.key,
       price: variant.price,
       image: variant.images[0].src,
       quantity: 1,

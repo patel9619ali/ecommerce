@@ -1,43 +1,49 @@
 import { Share } from "lucide-react";
 import { AddToCartButton } from "../Loader/AddToCartButton";
+import type { Product, Variant } from "@/data/types";
 import { BuyNow } from "../Loader/BuyNow";
-import { PRODUCT_VARIANTS } from "./productVariants";
-
-type VariantKey = keyof typeof PRODUCT_VARIANTS;
 
 type Props = {
-  variantKey: VariantKey;
-  setVariantKey: (key: VariantKey) => void;
-  variant: (typeof PRODUCT_VARIANTS)[VariantKey];
+  product: Product;
+  selectedVariant: Variant;
+  onVariantChange: (key: string) => void;
 };
 
-export const BuyCartSection = ({ variantKey, setVariantKey, variant }: Props) => {
+export const BuyCartSection = ({
+  product,
+  selectedVariant,
+  onVariantChange,
+}: Props) => {
   return (
     <section className="w-full text-white">
       <h3 className="text-[38px] font-bold">DYNASTY HEADPHONE</h3>
       <p className="text-white/80 text-lg">Ultimate over-ear headphones</p>
 
       <span className="text-[28px] font-semibold">
-        ¥ {variant.price.toLocaleString()}
+        ₹ {selectedVariant.price.toLocaleString()}
       </span>
 
       <p className="mt-3">
-        Color: <span className="font-semibold">{variant.name}</span>
+        Color: <span className="font-semibold">{selectedVariant.name}</span>
       </p>
 
       {/* COLOR SELECTOR */}
       <div className="flex gap-3 mt-4">
-        {Object.entries(PRODUCT_VARIANTS).map(([key, value]) => (
+        {product.variants.map((variant) => (
           <button
-            key={key}
-            onClick={() => setVariantKey(key as VariantKey)}
+            key={variant.key}
+            onClick={() => onVariantChange(variant.key)}
             className={`cursor-pointer w-12 h-12  hover:scale-110 transition-transform duration-500 ease-out rounded-full border-2 overflow-hidden
-              ${variantKey === key ? "border-white scale-120" : "border-white/40"}
+              ${
+              variant.key === selectedVariant.key
+                ? "border-white"
+                : "border-white/40"
+            }
             `}
           >
             <img
-              src={value.images[0].src}
-              alt={value.name}
+              src={variant.images[0].src}
+              alt={variant.name}
               className="w-full h-full object-cover"
             />
           </button>
@@ -46,16 +52,16 @@ export const BuyCartSection = ({ variantKey, setVariantKey, variant }: Props) =>
 
       {/* Benefits */}
       <div className="mt-6">
-        {variant.benefits.map((benefit:any) => (
-          <div key={benefit.id} className="flex items-center gap-2 mb-2">
-            <benefit.icon className="w-5 h-5" />
-            <span>{benefit.label}</span>
+        {selectedVariant.benefits.map((b) => (
+          <div key={b.id} className="flex items-center gap-2">
+            <b.icon className="w-5 h-5" />
+            <span>{b.label}</span>
           </div>
         ))}
       </div>
       <p className="mt-6 text-[14px] text-white/80">Hurry, only 7 items left in stock!</p>
       <div className="mt-6">
-        <AddToCartButton productId="dynasty-headphone" title="DYNASTY HEADPHONE" variantKey={variantKey} />
+        <AddToCartButton productId={product.id} slug={product.slug} title={product.title} variant={selectedVariant}/>
       </div>
       <div className="mt-6">
         <BuyNow/>

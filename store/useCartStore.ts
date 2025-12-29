@@ -3,9 +3,11 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { PRODUCT_VARIANTS } from "@/components/MainImageAddToCart/productVariants";
 
 export type CartProduct = {
-  id: string;
+  id: string;            // productId-variantKey
+  productId: string;
+  slug: string;
   title: string;
-  variantKey: keyof typeof PRODUCT_VARIANTS;
+  variantKey: string;
   price: number;
   image: string;
   quantity: number;
