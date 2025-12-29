@@ -4,6 +4,7 @@ import { useCartStore } from "@/store/useCartStore";
 import { useState, useEffect } from "react"
 import { Search, ShoppingCart, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   Sheet,
@@ -36,9 +37,25 @@ export function DesktopHeader() {
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
-  useEffect(() => {
+    const [isScrolled, setIsScrolled] = useState(false);
+ const pathName = usePathname();
+  const isHomePage = pathName === '/';
+  
+  // page lists path name
+  const headerNotFixedpages = [
+    '',
+  ];
+  
+ useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
+
+      // Track if user has scrolled past threshold for non-home pages
+      if (!isHomePage && currentScrollY > 80) {
+        setIsScrolled(true);
+      } else if (!isHomePage && currentScrollY <= 80) {
+        setIsScrolled(false);
+      }
 
       if (currentScrollY < lastScrollY || currentScrollY < 10) {
         // Scrolling up or at top
@@ -53,10 +70,17 @@ export function DesktopHeader() {
 
     window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [lastScrollY])
+  }, [lastScrollY, isHomePage])
+
+  // Determine if header should be fixed
+  const shouldBeFixed = isHomePage || isScrolled;
 
   return (
-    <header className={cn( "fixed top-0 left-0 right-0 z-50 bg-[#000] text-white transition-transform duration-300", isVisible ? "translate-y-0" : "-translate-y-full", )} >
+    <header className={cn(
+        "top-0 left-0 right-0 z-50 bg-[#000] text-white transition-transform duration-300", 
+        shouldBeFixed ? "fixed" : "relative",
+        isVisible ? "translate-y-0" : "-translate-y-full", 
+      )}  >
     
       <div className="flex items-center justify-between px-4 py-4">
         {/* Left: Hamburger Menu */}
