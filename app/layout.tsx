@@ -4,7 +4,8 @@ import "./globals.css";
 import { DesktopHeader } from "@/components/Header/DesktopHeader";
 import { LoadingProvider } from "@/context/LoadingContext";
 import LoaderWrapper from "@/components/Loader/LoaderWrapper";
-
+import RightStickyBar from "@/components/RightStickyBar/RightStickyBar";
+import MobileStickyBar from "@/components/RightStickyBar/MobileStickyBar";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -23,6 +24,8 @@ export default function RootLayout({
           <LoaderWrapper>
               <DesktopHeader />
               {children}
+              <RightStickyBar/>
+              <MobileStickyBar/>
           </LoaderWrapper>
         </LoadingProvider>
       </body>

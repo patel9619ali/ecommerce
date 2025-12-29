@@ -118,7 +118,7 @@ const InformativeSlider: React.FC = () => {
   return (
     <section className="relative w-full">
       {/* Navigation Arrows - Positioned at top left */}
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} className="absolute top-0 left-[calc(15%)] z-20 flex gap-0 bg-white rounded-none shadow-lg overflow-hidden">
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} className="absolute top-[2px] left-[calc(15%)] z-20 flex gap-0 bg-white rounded-none shadow-lg overflow-hidden">
         <button onClick={scrollPrev} disabled={!canPrev} aria-label="Previous slide" className=" group relative cursor-pointer h-12 w-12 flex items-center justify-center overflow-hidden border-r border-gray-200 disabled:opacity-40 " >
             {/* Hover background */}
             <span className=" absolute inset-0 bg-black translate-y-full transition-transform duration-300 ease-out group-hover:translate-y-0 " />

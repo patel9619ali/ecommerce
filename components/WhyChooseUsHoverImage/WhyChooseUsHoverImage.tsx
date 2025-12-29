@@ -78,7 +78,7 @@ const WhyChooseUsHoverImage = () => {
                     </h3>
                     <p
                       className={`text-sm transition-colors duration-300 ${
-                        selectedIndex === index ? 'text-amber-400' : 'text-gray-500'
+                        selectedIndex === index ? 'text-gray-300' : 'text-gray-500'
                       }`}
                     >
                       {slide.subtitle}

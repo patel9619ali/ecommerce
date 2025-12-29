@@ -5,7 +5,6 @@ import { ProductGallery } from "./ProductGallery";
 import { BuyCartSection } from "./BuyCartSection";
 import { PRODUCT_VARIANTS } from "./productVariants";
 export const MainImageAddToCart = () => {
-  console.log(useCartStore,"useCartStore")
   const [selectedVariant, setSelectedVariant] = useState<keyof typeof PRODUCT_VARIANTS>("black");
   const variant = PRODUCT_VARIANTS[selectedVariant];
   return (

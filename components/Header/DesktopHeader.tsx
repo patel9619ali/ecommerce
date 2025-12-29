@@ -4,6 +4,7 @@ import { useCartStore } from "@/store/useCartStore";
 import { useState, useEffect } from "react"
 import { Search, ShoppingCart, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import {
   Sheet,
   SheetClose,
@@ -31,14 +32,10 @@ const user = (
 
 export function DesktopHeader() {
   const items = useCartStore((state) => state.items);
-  console.log("Cart items in Header:", items);
-  const hasCartData = items.length > 0;
+  const {  openCart } = useCartStore();
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [sheetOpenCart, setSheetOpenCart] = useState(false);
-  const handleSheetClose = () => setSheetOpen(false);
-  const [quantity, setQuantity] = useState(1);
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
@@ -79,7 +76,19 @@ export function DesktopHeader() {
                       <X fill="#fff40" size={30} className="bg-[#fafafa20] rounded-full p-1"/>
                     </button>
                 </SheetClose>
-                Hello
+                <div className="h-full flex flex-col justify-between border-t-[1px] border-b-[1px] border-[#C9C9C950] py-0">
+                  <div className="flex flex-col shrink-0 gap-0">
+                    <Link className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/">Home</Link>
+                    <Link className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/more-products">Headphones</Link>
+                    <Link className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/our-story">Our story</Link>
+                    <Link className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/about-us">About Us</Link>
+                    <Link className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/contact-us">Contact Us</Link>
+                  </div>
+                  <div>
+                    
+                  </div>
+                </div>
+
               </SheetContent>
           </Sheet>
           <CurrencySelector/>
@@ -98,11 +107,7 @@ export function DesktopHeader() {
             {user}
             <span className="sr-only">Account</span>
           </Button>
-          <Button
-              variant="ghost"
-              size="icon"
-              disabled={items.length === 0}
-            >
+          <Button onClick={openCart} variant="ghost" size="icon" disabled={items.length === 0} >
               <ShoppingCart className="h-5 w-5" />
             </Button>
 
