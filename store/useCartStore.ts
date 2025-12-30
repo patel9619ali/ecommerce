@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { PRODUCT_VARIANTS } from "@/components/MainImageAddToCart/productVariants";
 
 export type CartProduct = {
   id: string;            // productId-variantKey
