@@ -56,7 +56,6 @@ export default function RootLayout({
           <LoaderWrapper>
               <DesktopHeader />
               {children}
-              <RightStickyBar/>
               <MobileStickyBar/>
           </LoaderWrapper>
         </LoadingProvider>
