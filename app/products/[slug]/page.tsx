@@ -5,6 +5,7 @@ import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useCartStore } from "@/store/useCartStore";
 import { useEffect, useState } from "react";
 import ProductImage from "@/components/Product/ProductImage";
+import ProductEmiCartDescription from "@/components/Product/ProductEmiCartDescription";
 
 export default function ProductPage() {
   const { slug } = useParams();
@@ -34,10 +35,17 @@ export default function ProductPage() {
   }, [editCart, items, slug, variantFromUrl]);
 
   const variant = product.variants.find(v => v.key === variantKey)!;
-  console.log(product,"productproduct")
+  useEffect(() => {
+  router.replace(`?variant=${variantKey}`, { scroll: false });
+}, [variantKey, router]);
   return (
-    <section className="bg-[#000] container-fluid px-2">
-      <ProductImage />
+    <section className="bg-[#000]">
+      <div className="px-2 container">
+        <div className="grid grid-cols-[2fr_2fr]">
+          <ProductImage variant={variant} product={product}/>
+          <ProductEmiCartDescription  variant={variant} product={product}/>
+        </div>
+      </div>
     </section>
   );
-}
+};

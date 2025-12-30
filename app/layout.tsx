@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { fontSans } from "@/lib/font"
+import "react-medium-image-zoom/dist/styles.css";
 import "./globals.css";
 import { DesktopHeader } from "@/components/Header/DesktopHeader";
 import { LoadingProvider } from "@/context/LoadingContext";
