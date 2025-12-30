@@ -4,6 +4,7 @@ import { PRODUCTS } from "@/data/products";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useCartStore } from "@/store/useCartStore";
 import { useEffect, useState } from "react";
+import ProductImage from "@/components/Product/ProductImage";
 
 export default function ProductPage() {
   const { slug } = useParams();
@@ -33,22 +34,10 @@ export default function ProductPage() {
   }, [editCart, items, slug, variantFromUrl]);
 
   const variant = product.variants.find(v => v.key === variantKey)!;
-
+  console.log(product,"productproduct")
   return (
-    <div>
-      <h1>{product.title}</h1>
-
-      {product.variants.map(v => (
-        <button key={v.key} onClick={() => setVariantKey(v.key)}>
-          {v.name}
-        </button>
-      ))}
-
-      <button
-        onClick={() => router.push("/cart")}
-      >
-        Add to Cart
-      </button>
-    </div>
+    <section className="bg-[#000] container-fluid px-2">
+      <ProductImage />
+    </section>
   );
 }

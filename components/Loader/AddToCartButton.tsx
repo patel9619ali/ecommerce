@@ -30,8 +30,17 @@ export const AddToCartButton = ({
       image: variant.images[0].src,
       quantity: 1,
     });
+ // 2️⃣ Facebook Pixel tracking (safe)
+    if (typeof window !== "undefined" && typeof window.fbq === "function") {
+      window.fbq("track", "AddToCart", {
+        content_ids: [`${productId}-${variant.key}`],
+        content_name: title,
+        content_type: "product",
+        value: variant.price,
+        currency: "INR",
+      });
+    }
   };
-
   return (
     <>
       <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} >
