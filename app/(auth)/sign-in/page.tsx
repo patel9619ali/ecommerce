@@ -19,7 +19,6 @@ export default function LoginPassword() {
   const [userInput, setUserInput] = useState("");
   const [identifier, setIdentifier] = useState("");
   const [foundUser, setFoundUser] = useState<any>(null);
-  console.log(userInput,"userInputuserInput")
   const identifierForm = useForm();
   const passwordForm = useForm();
   const {
