@@ -6,6 +6,7 @@ import { Search, ShoppingCart, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Sheet,
   SheetClose,
@@ -37,7 +38,8 @@ export function DesktopHeader() {
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
-    const [isScrolled, setIsScrolled] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const router = useRouter();
  const pathName = usePathname();
   const isHomePage = pathName === '/';
   
@@ -127,7 +129,7 @@ export function DesktopHeader() {
             <Search className="h-5 w-5" />
             <span className="sr-only">Search</span>
           </Button>
-          <Button variant="ghost" size="icon" className=" cursor-pointer transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:bg-transparent ">
+          <Button onClick={() => router.push('/sign-in')} variant="ghost" size="icon" className=" cursor-pointer transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:bg-transparent ">
             {user}
             <span className="sr-only">Account</span>
           </Button>
