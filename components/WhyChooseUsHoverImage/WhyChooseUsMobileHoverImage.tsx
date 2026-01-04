@@ -59,13 +59,7 @@ const slides = [
 const WhyChooseUsMobileHoverImage = ({
   className,
 }: WhyChooseUsMobileHoverImageProps) => {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const activeItem = slides[activeIndex];
-
-  const handleNavigate = (id: string) => {
-    const section = document.getElementById(id);
-    section?.scrollIntoView({ behavior: "smooth" });
-  };
+  const [activeIndex, setActiveIndex] = useState(0); // first visible by default
 
   return (
     <section className={clsx("w-full bg-black/90 py-16", className)}>
@@ -74,44 +68,54 @@ const WhyChooseUsMobileHoverImage = ({
           WHY DYNASTY HEADPHONE
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center bg-[#3a4149]">
-          {/* LEFT – TITLES */}
-          <div className="space-y-4">
-            {slides.map((item, index) => (
-              <button
-                key={item.id}
-                onMouseEnter={() => setActiveIndex(index)}
-                onClick={() => handleNavigate(item.id)}
-                className={clsx(
-                  "w-full text-left px-4 py-3 border-l-4 transition-all duration-300",
-                  activeIndex === index
-                    ? "border-white/5 bg-white/5"
-                    : "border-transparent text-white/70 hover:text-white"
+        <div className="bg-[#3a4149] rounded-lg">
+          {slides.map((item, index) => {
+            const isActive = activeIndex === index;
+
+            return (
+              <div key={item.id} className="border-b border-white/10">
+                {/* TITLE */}
+                <button
+                  onClick={() => setActiveIndex(index)}
+                  className="w-full text-left px-4 py-4 transition-all duration-300"
+                >
+                  <h3
+                    className={clsx(
+                      isActive
+                        ? "text-white text-[18px] font-[700]"
+                        : "text-white/70 text-[14px] font-[500]"
+                    )}
+                  >
+                    {item.title}
+                  </h3>
+                </button>
+
+                {/* EXPANDED CONTENT */}
+                {isActive && (
+                  <div className="px-4 pb-6 animate-fadeIn">
+                    <div className="text-white mb-4">
+                      <h4 className="text-[14px] font-semibold mb-2">
+                        {item.subtitle}
+                      </h4>
+                      <p className="text-white/70 leading-relaxed">
+                        {item.description}
+                      </p>
+                    </div>
+
+                    <div className="relative w-full h-[250px] rounded-xl overflow-hidden">
+                      <Image
+                        src={item.image}
+                        alt={item.title}
+                        fill
+                        className="object-cover p-3"
+                        unoptimized
+                      />
+                    </div>
+                  </div>
                 )}
-              >
-                <h3 className={`${activeIndex === index ? "text-[#fff] text-[18px] font-[700]" : "text-[#fff30] text-[14px] font-[500]"}`}>
-                  {item.title}
-                </h3>
-              </button>
-            ))}
-          </div>
-
-          {/* RIGHT – IMAGE + CONTENT */}
-          <div className="relative px-3">
-             <div className="text-white">
-              <h4 className="text-xl font-semibold mb-2">
-                {activeItem.subtitle}
-              </h4>
-              <p className="text-white/70 leading-relaxed">
-                {activeItem.description}
-              </p>
-            </div>
-            <div className="mt-6 relative w-full h-[250px] rounded-xl overflow-hidden">
-              <Image src={activeItem.image} alt={activeItem.title} fill className="object-cover transition-opacity duration-500 p-4" unoptimized />
-            </div>
-
-           
-          </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
