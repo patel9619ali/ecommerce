@@ -2,6 +2,7 @@
 
 import BannerSection from "@/components/BannerSection/BannerSection";
 import InformativeSlider from "@/components/InformativeSlider/InformativeSlider";
+import MobileInformativeSlider from "@/components/InformativeSlider/MobileInformativeSlider";
 import { MainImageAddToCart } from "@/components/MainImageAddToCart/MainImageAddToCart";
 import DualSpecsScroll from "@/components/DualSpecsScroll/DualSpecsScroll";
 import MobileSpecs from "@/components/DualSpecsScroll/MobileSpecs";
@@ -13,6 +14,7 @@ export default function Home() {
     <>
       <BannerSection/>
       <InformativeSlider className={`hidden md:block`}/>
+      <MobileInformativeSlider className={`block md:hidden`}/>
       <MainImageAddToCart/>
       <DualSpecsScroll className={`hidden md:block`}/>
       <MobileSpecs className={`block md:hidden`}/>
