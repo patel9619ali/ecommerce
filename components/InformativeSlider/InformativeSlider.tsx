@@ -57,8 +57,11 @@ export const sliderContent = [
         href: "/products/studio-quality",
     },
 ];
+type InformativeSliderProps = {
+  className?: string;
+};
 
-const InformativeSlider: React.FC = () => {
+const InformativeSlider = ({ className }: InformativeSliderProps) => {
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: true, ...options },
     // [Autoplay({ delay: 3000, stopOnInteraction: false })]
@@ -116,7 +119,7 @@ const InformativeSlider: React.FC = () => {
   }, [emblaApi])
 
   return (
-    <section className="relative w-full">
+    <section className={`${className} relative w-full`}>
       {/* Navigation Arrows - Positioned at top left */}
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} className="absolute top-[2px] left-[calc(15%)] z-20 flex gap-0 bg-white rounded-none shadow-lg overflow-hidden">
         <button onClick={scrollPrev} disabled={!canPrev} aria-label="Previous slide" className=" group relative cursor-pointer h-12 w-12 flex items-center justify-center overflow-hidden border-r border-gray-200 disabled:opacity-40 " >

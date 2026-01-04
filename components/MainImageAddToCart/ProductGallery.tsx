@@ -173,20 +173,20 @@ useEffect(() => {
 
 
       {/* Thumbnail Carousel */}
-    <div className="relative bg-transparent rounded-[0]">
+    <div className="relative bg-transparent rounded-[0] overflow-x-auto">
       <div ref={thumbRef}>
-        <div className="flex flex-col gap-3 w-max ">
+        <div className="flex lg:flex-col flex-row gap-3 w-max ">
           
           {/* ✅ SCROLL CONTAINER */}
-          <div className="flex flex-col gap-3 h-[300px] overflow-y-auto custom-scroll  cursor-pointer">
+          <div className="flex lg:flex-col flex-row gap-3 lg:h-[300px] h-full overflow-y-auto custom-scroll cursor-pointer">
             {variant.images.map((image:any, index:any) => (
               <button
                 key={index}
                 onClick={() => onThumbClick(index)}
                 className={`cursor-pointer
-                  w-[75px] h-[75px] rounded-[25%]
+                  lg:w-[75px] lg:h-[75px] w-[60px] h-[60px] rounded-[25%]
                   border-[2px] overflow-hidden
-                  transition-colors duration-200
+                  transition-colors duration-200 lg:mb-0 mb-5
                   ${
                     index === selectedIndex
                       ? "border-[#fff]"
@@ -210,7 +210,7 @@ useEffect(() => {
           </div>
 
           {/* Navigation */}
-          <div className="flex gap-3 justify-center items-center">
+          <div className="lg:flex gap-3 justify-center items-center hidden">
             <div
               onClick={scrollPrev}
               className="cursor-pointer group w-8 h-8 bg-black/60 hover:bg-white flex items-center justify-center transition-colors"

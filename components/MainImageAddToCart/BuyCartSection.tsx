@@ -16,14 +16,14 @@ export const BuyCartSection = ({
 }: Props) => {
   return (
     <section className="w-full text-white">
-      <h3 className="text-[38px] font-bold">DYNASTY HEADPHONE</h3>
-      <p className="text-white/80 text-lg">Ultimate over-ear headphones</p>
+      <h3 className="lg:text-[38px] text-[28px] font-bold">DYNASTY HEADPHONE</h3>
+      <p className="text-white/80 lg:text-lg text-md">Ultimate over-ear headphones</p>
 
-      <span className="text-[28px] font-semibold">
+      <span className="lg:text-[28px] text-[22px] font-semibold">
         ₹ {selectedVariant.price.toLocaleString()}
       </span>
 
-      <p className="mt-3">
+      <p className="lg:mt-3 mt-1 lg:text-[20px] text-[16px]">
         Color: <span className="font-semibold">{selectedVariant.name}</span>
       </p>
 

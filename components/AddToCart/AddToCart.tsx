@@ -49,15 +49,15 @@ if (!hydrated) return null;
             <div className='mt-6'>
 
                 {items.map((item,index) => (
-                    <Link href={`/products/${item.slug}?variant=${item.variantKey}&editCart=true`} key={`${item.title}-${index}`} onClick={() => closeCart()} className='grid lg:grid-cols-[1fr_3fr] gap-2 px-4'>
+                    <Link href={`/products/${item.slug}?variant=${item.variantKey}&editCart=true`} key={`${item.title}-${index}`} onClick={() => closeCart()} className='grid grid-cols-[1fr_3fr] gap-2 px-4'>
                         <img src={item.image} alt={item.title} width={80} height={80} />
                         <div className='flex flex-col gap-3 items-start mb-5'>
                             <div className="flex gap-3 justify-between w-full">
                                 <div>
-                                    <h3 className='text-[14px] font-[700]'>{item.title}</h3>
-                                    <p className='text-[#fafafa8c] text-[12px]'>Variant: {item.variantKey}</p>
+                                    <h3 className='lg:text-[14px] text-[12px] font-[700]'>{item.title}</h3>
+                                    <p className='text-[#fafafa8c] lg:text-[12px] text-[10px]'>Variant: {item.variantKey}</p>
                                 </div>
-                                <span className='text-[15px] font-[700]'>₹ {item.price}</span>
+                                <span className='lg:text-[15px] text-[12px] font-[700]'>₹ {item.price}</span>
                             </div>
                             <div className='flex w-full justify-between'>
                                 {/* Increment counter */}
@@ -66,17 +66,17 @@ if (!hydrated) return null;
                                         e.preventDefault();
                                         e.stopPropagation();
                                         updateQuantity(item.id, Math.max(1, item.quantity - 1));
-                                    }}  className='px-2 cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed h-[30px]'>
+                                    }}  className='px-2 cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed lg:h-[30px] h-[25px]'>
                                         <Minus size={10} />
                                     </button>
 
-                                    <span className='px-2  text-center font-semibold border-x border-[#ffffff5c]'>{item.quantity}</span>
+                                    <span className='px-2 text-center lg:text-[17px] text-[14px] font-semibold border-x border-[#ffffff5c]'>{item.quantity}</span>
 
                                     <button onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
                                         updateQuantity(item.id, item.quantity + 1);
-                                    }}  className='px-2 transition-colors cursor-pointer h-[30px]' aria-label="Increase quantity">
+                                    }}  className='px-2 transition-colors cursor-pointer lg:h-[30px] h-[25px]' aria-label="Increase quantity">
                                         <Plus size={10} />
                                     </button>
                                 </div>

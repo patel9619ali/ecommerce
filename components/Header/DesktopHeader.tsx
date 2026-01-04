@@ -42,47 +42,54 @@ export function DesktopHeader() {
   const router = useRouter();
  const pathName = usePathname();
   const isHomePage = pathName === '/';
-  
+  const [isMobile, setIsMobile] = useState(false);
+const [hasScrolled, setHasScrolled] = useState(false);
   // page lists path name
   const headerNotFixedpages = [
     '',
   ];
-  
- useEffect(() => {
+  useEffect(() => {
+  const checkMobile = () => {
+    setIsMobile(window.innerWidth < 768);
+  };
+
+  checkMobile();
+  window.addEventListener("resize", checkMobile);
+
+  return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+  useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY
+      const currentScrollY = window.scrollY;
 
-      // Track if user has scrolled past threshold for non-home pages
-      if (!isHomePage && currentScrollY > 80) {
-        setIsScrolled(true);
-      } else if (!isHomePage && currentScrollY <= 80) {
-        setIsScrolled(false);
-      }
+      // Mobile: switch to fixed after scroll
+      setHasScrolled(currentScrollY > 60);
 
+      // Hide / show on scroll
       if (currentScrollY < lastScrollY || currentScrollY < 10) {
-        // Scrolling up or at top
-        setIsVisible(true)
+        setIsVisible(true);
       } else if (currentScrollY > lastScrollY && currentScrollY > 80) {
-        // Scrolling down
-        setIsVisible(false)
+        setIsVisible(false);
       }
 
-      setLastScrollY(currentScrollY)
-    }
+      setLastScrollY(currentScrollY);
+    };
 
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [lastScrollY, isHomePage])
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
+
 
   // Determine if header should be fixed
-  const shouldBeFixed = isHomePage || isScrolled;
-
+  const shouldBeFixed = isMobile
+  ? hasScrolled          // mobile: fixed AFTER scroll
+  : isHomePage || isScrolled; // desktop behavior
   return (
     <header className={cn(
         "top-0 left-0 right-0 z-50 bg-[#000] text-white transition-transform duration-300", 
         shouldBeFixed ? "fixed" : "relative",
         isVisible ? "translate-y-0" : "-translate-y-full", 
-      )}  >
+      )}>
     
       <div className="flex items-center justify-between px-4 py-4">
         {/* Left: Hamburger Menu */}

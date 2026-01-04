@@ -49,7 +49,7 @@ export default function SignUpPage() {
         {/* ================= SIGN UP FORM ================= */}
         {view === "signup" && (
           <>
-            <form onSubmit={handleSubmit(onSubmit)} className="border-b border-[#000000e6]">
+            <form onSubmit={handleSubmit(onSubmit)} className="border-b border-[#00000052] pb-4">
               <h1 className="text-[28px] font-[600] mb-4">
                 Create Account
               </h1>

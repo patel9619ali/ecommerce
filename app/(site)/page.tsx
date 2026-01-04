@@ -10,10 +10,10 @@ export default function Home() {
   return (
     <>
       <BannerSection/>
-      <InformativeSlider/>
+      <InformativeSlider className={`hidden md:block`}/>
       <MainImageAddToCart/>
       <DualSpecsScroll/>
-      <WhyChooseUsHoverImage/>
+      <WhyChooseUsHoverImage className={`hidden md:block`}/>
     </>
   );
 }

@@ -1,7 +1,10 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
+type WhyChooseUsHoverImageProps = {
+  className?: string;
+};
 
-const WhyChooseUsHoverImage = () => {
+const WhyChooseUsHoverImage = ({ className }: WhyChooseUsHoverImageProps) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ 
     axis: 'y',
     loop: false
@@ -60,7 +63,7 @@ const WhyChooseUsHoverImage = () => {
   }, [emblaApi]);
 
   return (
-    <section className="w-full bg-[#000000e6] py-10">
+    <section className={`w-full bg-[#000000e6] py-10 ${className}`}>
       <div className='container mx-auto'>
           <h2 className='text-[40px] text-[#fff] text-center font-[600] mb-5'>WHY DYNASTY HEADPHONE</h2>
           

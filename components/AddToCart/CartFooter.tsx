@@ -52,15 +52,15 @@ export function CartFooter({ onCheckout }: { onCheckout: () => void }) {
             <div>
                 <div className='flex flex-col gap-3 items-center mt-5 justify-between'>
                     <div className="flex items-center mt-5 justify-center border-y border-[#ffffff5c] py-2 px-4 divide-x divide-[#ffffff5c] w-full">
-                        <button onClick={() => setSheetNoteOpen(true)} className="cursor-pointer flex items-center gap-2 text-white px-6" >
+                        <button onClick={() => setSheetNoteOpen(true)} className="cursor-pointer flex items-center gap-2 text-white lg:px-6 px-4" >
                             {NoteSVG}
                             <span className="text-[14px] uppercase">Note</span>
                         </button>
-                        <button onClick={() => setSheetShippingOpen(true)} className="cursor-pointer flex items-center gap-2 text-white px-6" >
+                        <button onClick={() => setSheetShippingOpen(true)} className="cursor-pointer flex items-center gap-2 text-white lg:px-6 px-4" >
                             {Shipping}
                             <span className="text-[14px] uppercase">Shipping</span>
                         </button>
-                        <button onClick={() => setSheetDiscountOpen(true)} className="cursor-pointer flex items-center gap-2 text-white px-6" >
+                        <button onClick={() => setSheetDiscountOpen(true)} className="cursor-pointer flex items-center gap-2 text-white lg:px-6 px-4" >
                             {Discount}
                             <span className="text-[14px] uppercase">Discount</span>
                         </button>
