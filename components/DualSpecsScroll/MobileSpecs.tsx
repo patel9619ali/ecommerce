@@ -69,8 +69,11 @@ Charging Case (Qi Wireless): 2 ½ h</p>
   },
 ];
 
+type MobileSpecs = {
+  className: string;
+}
 const ProductImage = ({ product, index }: { product: Product; index: number }) => (
-  <div className="h-screen w-full flex items-center justify-center p-12 flex-shrink-0">
+  <div className="w-full flex items-center justify-center p-12 flex-shrink-0">
     <div className="relative w-full max-w-md">
       <img 
         src={product.image} 
@@ -82,62 +85,39 @@ const ProductImage = ({ product, index }: { product: Product; index: number }) =
 );
 
 const ProductDescription = ({ product }: { product: Product }) => (
-  <div className="h-screen w-full px-16 py-12 flex items-center flex-shrink-0 bg-[#3a4149]">
+  <div className="w-full px-8 py-12 flex items-center flex-shrink-0 bg-[#3a4149]">
     <div className="max-w-xl">
       <h3 
-        className="text-[42px] font-bold text-white mb-8 leading-tight" 
+        className="text-[36px] font-bold text-white mb-8 leading-tight" 
         dangerouslySetInnerHTML={{ __html: product.title }} 
       />
-      <div className="text-[#b8bdc4] text-base leading-relaxed space-y-4 [&_p]:mb-5  [&_p:last-child]:mb-0 [&_strong]:text-white  [&_strong]:font-semibold [&_strong]:block [&_strong]:mb-1 [&_ul]:list-none [&_ul]:space-y-2 [&_li]:pl-0 [&_li]:text-[#b8bdc4] [&_li]:leading-relaxed [&_li:before]:content-['•'] [&_li:before]:mr-3 [&_li:before]:text-white" dangerouslySetInnerHTML={{ __html: product.description }}  />
+      <div className="text-[20px] text-[#b8bdc4] text-base leading-relaxed space-y-4 [&_p]:mb-5  [&_p:last-child]:mb-0 [&_strong]:text-white  [&_strong]:font-semibold [&_strong]:block [&_strong]:mb-1 [&_ul]:list-none [&_ul]:space-y-2 [&_li]:pl-0 [&_li]:text-[#b8bdc4] [&_li]:leading-relaxed [&_li:before]:content-['•'] [&_li:before]:mr-3 [&_li:before]:text-white" dangerouslySetInnerHTML={{ __html: product.description }}  />
     </div>
   </div>
 );
-type DualSpecsScrollProps = {
-  className: string;
-}
-const DualSpecsScroll = ({ className }: DualSpecsScrollProps) => {
-  const containerRef = useRef(null);
-  
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
-
-  const leftY = useTransform(scrollYProgress, [0, 1], ["0%", "-300%"]);
-  const rightY = useTransform(scrollYProgress, [0, 1], ["-300%", "0%"]);
-
+const MobileSpecs = ({ className }: MobileSpecs) => {
+ 
   return (
     <>
     <section className={`${className} bg-[#000] py-10`}>
-      <div className='container mx-auto'>
-        <h2 className='text-[40px] text-[#fff] text-center font-[600] mb-5'>TECH SPECS</h2>
-        <div ref={containerRef} className="relative" style={{ height: `${products.length * 100}vh` }} >
-          <div className="sticky top-0 h-screen w-full overflow-hidden">
-            <div className="flex h-full">
-              <motion.div
-                style={{ y: rightY }}
-                className="w-1/2 flex flex-col"
-              >
-                {products.map((product) => (
-                  <ProductDescription key={product.id} product={product} />
-                ))}
-              </motion.div>
-              <motion.div
-                style={{ y: leftY }}
-                className="w-1/2 flex flex-col bg-black"
-              >
-                {products.map((product, index) => (
-                  <ProductImage key={product.id} product={product} index={index} />
-                ))}
-              </motion.div>
-
-            
-            </div>
-          </div>
+      <div className='container mx-auto !px-0'>
+        <h2 className='text-[28px] text-[#fff] text-center font-[600] mb-5'>TECH SPECS</h2>
+        <div>
+          {products.map((product, index) => (
+            <>
+            <motion.div className="w-full flex flex-col bg-black">
+              <ProductImage key={product.id} product={product} index={index} />
+            </motion.div>
+            <motion.div className="w-full flex flex-col" >
+              <ProductDescription key={product.id} product={product} />
+            </motion.div>
+            </>
+          ))}           
+                        
         </div>
       </div>
     </section>
     </>
   );
 }
-export default DualSpecsScroll
+export default MobileSpecs
