@@ -50,29 +50,29 @@ export default function SignUpPage() {
         {view === "signup" && (
           <>
             <form onSubmit={handleSubmit(onSubmit)} className="border-b border-[#00000052] pb-4">
-              <h1 className="text-[28px] font-[600] mb-4">
+              <h1 className="text-[28px] font-[600] mb-4 text-[#000000e6]">
                 Create Account
               </h1>
 
 
               {/* MOBILE NUMBER */}
               <div className="mb-4">
-                <Label>Mobile number</Label>
+                <Label className="text-[#000000e6]">Mobile number</Label>
 
-                <div className="flex gap-2 mt-2">
+                <div className="bg-[#fff] flex gap-2 mt-2">
                   {/* COUNTRY CODE */}
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setView("country")}
-                    className="flex items-center gap-1"
+                    className="bg-[#fff] text-[#000000e6] flex items-center gap-1"
                   >
                     {countryCode}
                     <ChevronDown size={16} />
                   </Button>
 
                   {/* PHONE INPUT */}
-                  <Input className={`focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none  ${errors.phone ? "focus-visible:border-tranparent focus-visible:outline-none border-[2px] border-[#c10015]" : "border-[1px] border-[#0000004a]"
+                  <Input className={`bg-[#fff] placeholder:text-[#000000e6] text-[#000000e6] focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none  ${errors.phone ? "focus-visible:border-tranparent focus-visible:outline-none border-[2px] border-[#c10015]" : "border-[1px] border-[#0000004a]"
                 }`} type="tel" inputMode="numeric" pattern="[0-9]*" placeholder="Mobile number"
                     {...register("phone", {
                       required: "Mobile number is required",
@@ -101,8 +101,8 @@ export default function SignUpPage() {
 
               {/* FIRST NAME */}
               <div className="mb-4">
-                <Label className="mb-2 block">First name</Label>
-                <Input className={`focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none  ${errors.firstName ? "focus-visible:border-tranparent focus-visible:outline-none border-[2px] border-[#c10015]" : "border-[1px] border-[#0000004a]"
+                <Label className="text-[#000000e6] mb-2 block">First name</Label>
+                <Input className={`bg-[#fff] placeholder:text-[#000000e6] text-[#000000e6] focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none  ${errors.firstName ? "focus-visible:border-tranparent focus-visible:outline-none border-[2px] border-[#c10015]" : "border-[1px] border-[#0000004a]"
                 }`} placeholder="Your name" {...register("firstName", { required: "First name is required", minLength: { value: 2, message: "At least 2 characters", }, })} />
                 {errors.firstName && (
                   <p className="text-red-500 text-sm mt-1">
@@ -115,8 +115,8 @@ export default function SignUpPage() {
 
               {/* PASSWORD */}
               <div className="mb-4">
-                <Label>Password</Label>
-                <Input className={`focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none  ${errors.password ? "focus-visible:border-tranparent focus-visible:outline-none border-[2px] border-[#c10015]" : "border-[1px] border-[#0000004a]"
+                <Label className="text-[#000000e6] ">Password</Label>
+                <Input className={`bg-[#fff] placeholder:text-[#000000e6] text-[#000000e6] focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none  ${errors.password ? "focus-visible:border-tranparent focus-visible:outline-none border-[2px] border-[#c10015]" : "border-[1px] border-[#0000004a]"
                 }`} 
                   type="password"
                   placeholder="At least 6 characters"
@@ -134,7 +134,7 @@ export default function SignUpPage() {
                   </p>
                 )}
               </div>
-              <Label className="text-[14px] leading-[18px] mb-3 block">To verify your number, we will send you a text message with a temporary code. Message and data rates may apply.</Label>
+              <Label className="text-[#000000e6] text-[14px] leading-[18px] mb-3 block">To verify your number, we will send you a text message with a temporary code. Message and data rates may apply.</Label>
               {/* SUBMIT */}
               <Button
                 type="submit"

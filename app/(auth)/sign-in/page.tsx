@@ -72,13 +72,13 @@ export default function LoginPassword() {
         {/* STEP 1 */}
         {view === "identifier" && (
           <form onSubmit={handleSubmit(onContinue)}>
-            <h1 className="text-[28px] font-[600] leading-normal mb-4">
+            <h1 className="text-[28px] text-[#000000e6] font-[600] leading-normal mb-4">
               Sign in or create account
             </h1>
 
-            <Label>Enter mobile number or email</Label>
+            <Label className="text-[#000000e6]">Enter mobile number or email</Label>
             <Input
-              className={`mt-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none ${
+              className={`bg-[#fff] mt-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none placeholder:text-[#000000e6] text-[#000000e6] ${
                 errors.identifier ? "focus-visible:border-tranparent focus-visible:outline-none border-[2px] border-[#c10015]" : "border-[1px] border-[#0000004a]"
               }`}
               placeholder="Email or mobile number"
@@ -114,7 +114,7 @@ export default function LoginPassword() {
         {view === "password" && (
           <form onSubmit={passwordForm.handleSubmit(handleLogin)}>
 
-            <h1 className="text-[28px] font-[600] leading-normal mb-4">Sign in</h1>
+            <h1 className="text-[28px] text-[#000000e6] font-[600] leading-normal mb-4">Sign in</h1>
             <div className="flex gap-3 items-center mb-2">
               <p className="text-sm text-gray-600">{userInput}</p>
               <button type="button" onClick={goBackToIdentifier} className="hover:text-underline flex cursor-pointer text-[13px] text-blue-600 items-center gap-1" >
@@ -123,13 +123,13 @@ export default function LoginPassword() {
 
             </div>
             <div className="flex justify-between w-full items-center">
-              <Label>Password</Label>
+              <Label className="text-[#000000e6] ">Password</Label>
               <Link href="/forget-password" className="hover:text-underline flex cursor-pointer text-[13px] text-blue-600 mb-0 items-center gap-1">
                   Forgot password?
               </Link>
             </div>
                 
-            <Input type="password" className="mt-2" {...passwordForm.register("password", { required: true })} />
+            <Input type="password" className="placeholder:text-[#000000e6] text-[#000000e6]  bg-[#fff] mt-2" {...passwordForm.register("password", { required: true })} />
 
             <Button className="w-full mt-4 bg-yellow-400 text-black">
               Sign in
@@ -142,7 +142,7 @@ export default function LoginPassword() {
           <>
             <div className="border-b border-[#0000003b] pb-5">
 
-              <h1 className="text-[28px] font-[600] leading-normal mb-4">
+              <h1 className="text-[28px] text-[#000000e6] font-[600] leading-normal mb-4">
                 Looks like you are new to Store
               </h1>
               <div className="flex gap-3 items-center mb-3">
@@ -151,7 +151,7 @@ export default function LoginPassword() {
                   <ArrowLeft width={12} height={12}/> Change
                 </button>
               </div>
-              <Label className="mb-2 block text-[16px] leading-[20px]">Let's create an account using your mobile number</Label>
+              <Label className="mb-2 text-[#000000e6] block text-[16px] leading-[20px]">Let's create an account using your mobile number</Label>
 
               <Link href="/sign-up">
                 <Button className="w-full bg-yellow-400 text-black">
@@ -159,7 +159,7 @@ export default function LoginPassword() {
                 </Button>
               </Link>
             </div>
-            <Label className="text-[14px] font-[600] block mt-3 mb-2">Already a customer?</Label>
+            <Label className="text-[14px] font-[600] block mt-3 mb-2 text-[#000000e6]">Already a customer?</Label>
             <button type="button" onClick={goBackFromSignup} className="hover:text-underline flex cursor-pointer text-[13px] text-blue-600 items-center gap-1" >
               Sign in with another email or mobile
             </button>

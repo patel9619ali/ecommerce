@@ -61,10 +61,10 @@ export default function ConfirmOtp({
     <div className="h-full">
       {/* HEADER */}
       <div className="flex items-center gap-3 mb-2">
-        <button type="button" onClick={goBack} className="hover:text-underline flex cursor-pointer text-[13px] items-center gap-1" >
+        <button type="button" onClick={goBack} className="text-[#000000e6] hover:text-underline flex cursor-pointer text-[13px] items-center gap-1" >
             <ArrowLeft width={18} height={18}/>
         </button>
-        <h2 className="text-lg font-semibold">
+        <h2 className="text-[#000000e6] text-lg font-semibold">
           Confirm OTP
         </h2>
       </div>
@@ -96,7 +96,7 @@ export default function ConfirmOtp({
           </p>
         )}
 
-        <div className="text-center mt-4 text-sm">
+        <div className="text-[#000000e6] text-center mt-4 text-sm">
           Didn’t receive OTP?{" "}
           <button
             type="button"
