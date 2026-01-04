@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronsDown, ChevronsUp, ChevronUp, X } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronsDown, ChevronsUp, ChevronUp, X, ZoomInIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -90,7 +90,7 @@ useEffect(() => {
     container.removeEventListener("mouseleave", hide);
   };
 }, []);
-
+const [zoomOpen, setZoomOpen] = useState(false);
   return (
     <section className="w-full grid lg:grid-cols-[4fr_1fr] gap-4">
       {/* Main Carousel */}
@@ -100,28 +100,27 @@ useEffect(() => {
           <div className="flex relative group cursor-none">
             {variant.images.map((image:any, index:any) => (
                 <div key={index} className="flex-[0_0_100%] min-w-0 cursor-none">
-                <Dialog>
+                <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
                     <DialogTrigger asChild>
-                    <img
-                        src={image.src}
-                        alt={variant.name}
-                        className="w-full h-auto object-cover cursor-pointer"
-                    />
+                      <img src={image.src} alt={variant.name} className="w-full h-auto object-cover cursor-pointer" />
                     </DialogTrigger>
+                     <div className="lg:hidden absolute bg-black top-[3px] right-[3px] p-2 rounded-full cursor-pointer z-10" onClick={() => setZoomOpen(true)} >
+                      <ZoomInIcon width={25} height={25} />
+                    </div>
 
-                    <DialogContent className="bg-white p-0 overflow-hidden xs:rounded-[20px] rounded-none bottom-[0] border-none [&>button]:hidden z-200 gap-0 w-full xs:w-auto xs:max-h-[90vh] h-full !max-w-[75vw] xs:max-w-[90vw] z-999">
-                    <DialogHeader className="bg-[#000] items-center relative w-full flex flex-row justify-between items-center xs:px-6 px-4 xs:py-5 py-2 gap-0">
+                    <DialogContent className="bg-white p-0 overflow-hidden xs:rounded-[20px] rounded-none bottom-[0] border-none [&>button]:hidden z-200 gap-0 w-full xs:w-auto xs:max-h-[90vh] h-full !max-w-[100vw] xs:max-w-[100vw] z-999">
+                    <DialogHeader className="lg:bg-[#000] bg-transparent items-center lg:relative absolute w-full flex flex-row justify-end items-center xs:px-6 px-4 xs:py-5 py-2 gap-0">
                         <DialogTitle className="text-white hidden text-start xs:text-[23px] text-md font-semibold break-all">Preview</DialogTitle>
-                        <DialogClose className="bg-[#000] text-white hover:bg-transparent opacity-90 hover:opacity-100 cursor-pointer outline-none ring-0 focus:ring-0 focus-visible:ring-0 ring-offset-0 !p-0 cursor-pointer z-3">
+                        <DialogClose className="lg:bg-[#000] bg:transparent text-white hover:bg-transparent opacity-90 hover:opacity-100 cursor-pointer outline-none ring-0 focus:ring-0 focus-visible:ring-0 ring-offset-0 !p-0 cursor-pointer z-3">
                                 <X size={30} fill="#fff" />
                             </DialogClose>
                     </DialogHeader>
-                    <div className="overflow-y-scroll p-3 space-y-3 custom-scroll h-full xs:h-[70vh]">
+                    <div className="lg:bg-transparent bg-[#000] overflow-y-scroll lg:p-3 p-0 lg:space-y-3 space-y-0 custom-scroll h-full xs:h-[70vh]">
                         {variant.images.map((image:any, index:any) => (
                         <img key={index}
                             src={image.src}
                             alt={variant.name}
-                            className="w-full h-auto object-cover aspect-video rounded-lg"
+                            className="w-full h-auto object-cover aspect-video lg:rounded-lg rounded-none"
                         />
                         ))}
                     </div>
