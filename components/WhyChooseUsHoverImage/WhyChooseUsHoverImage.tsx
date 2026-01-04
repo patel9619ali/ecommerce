@@ -126,7 +126,7 @@ const WhyChooseUsHoverImage = ({ className }: WhyChooseUsHoverImageProps) => {
                       onClick={() => scrollTo(index)}
                       className={`w-2 rounded-full transition-all duration-300 ${
                         selectedIndex === index
-                          ? 'h-12 bg-amber-500'
+                          ? 'h-12 bg-[#3a4149]'
                           : 'h-2 bg-white/30 hover:bg-white/50'
                       }`}
                       aria-label={`Go to slide ${index + 1}`}

@@ -94,19 +94,16 @@ const [zoomOpen, setZoomOpen] = useState(false);
   return (
     <section className="w-full grid lg:grid-cols-[4fr_1fr] gap-4">
       {/* Main Carousel */}
-      <div ref={containerRef} className="relative cursor-none">
-        <span ref={cursorRef} className="pointer-events-none cursor-none absolute top-0 left-0 flex items-center justify-center w-18 h-18 rounded-full bg-black/60 text-white text-4xl font-bold z-50 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-150" id="zoom-cursor"><PlusIcon width={45} strokeWidth={1} height={45}/></span>
+      <div ref={containerRef} className="relative">
+        <span ref={cursorRef} className="pointer-events-none absolute hidden lg:flex items-center justify-center w-18 h-18 rounded-full bg-black/60 text-white -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-150 z-50" id="zoom-cursor"><PlusIcon width={45} strokeWidth={1} height={45}/></span>
         <div className="overflow-hidden rounded-[0] relative cursor-none" ref={mainRef}>
           <div className="flex relative group cursor-none">
             {variant.images.map((image:any, index:any) => (
-                <div key={index} className="flex-[0_0_100%] min-w-0 cursor-none">
+                <div key={index} className="flex-[0_0_100%] min-w-0 hidden-cursor">
                 <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
                     <DialogTrigger asChild>
-                      <img src={image.src} alt={variant.name} className="w-full h-auto object-cover cursor-pointer" />
+                      <img src={image.src} alt={variant.name} className="w-full h-auto object-cover select-none cursor-pointer lg:cursor-none" />
                     </DialogTrigger>
-                     <div className="lg:hidden absolute bg-black top-[3px] right-[3px] p-2 rounded-full cursor-pointer z-10" onClick={() => setZoomOpen(true)} >
-                      <ZoomInIcon width={25} height={25} />
-                    </div>
 
                     <DialogContent className="bg-white p-0 overflow-hidden xs:rounded-[20px] rounded-none bottom-[0] border-none [&>button]:hidden z-200 gap-0 w-full xs:w-auto xs:max-h-[90vh] h-full !max-w-[100vw] xs:max-w-[100vw] z-999">
                     <DialogHeader className="lg:bg-[#000] bg-transparent items-center lg:relative absolute w-full flex flex-row justify-end items-center xs:px-6 px-4 xs:py-5 py-2 gap-0">
@@ -166,6 +163,11 @@ const [zoomOpen, setZoomOpen] = useState(false);
           />
         </div>
         </div>
+        {/* MOBILE ZOOM BUTTON (FIXED) */}
+        <div className="lg:hidden absolute top-3 right-3 z-30 bg-black/80 p-2 rounded-full cursor-pointer" onClick={() => setZoomOpen(true)} >
+          <ZoomInIcon width={24} height={24} className="text-white" />
+        </div>
+
       </div>
 
        

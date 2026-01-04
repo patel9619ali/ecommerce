@@ -106,3 +106,14 @@ body {
   font-weight: 500;
   font-size: 20px;
 }
+
+/* Hide browser cursor only where needed */
+.hidden-cursor {
+  cursor: none;
+}
+
+@media (max-width: 1023px) {
+  .hidden-cursor {
+    cursor: auto;
+  }
+}
