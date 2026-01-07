@@ -105,7 +105,7 @@ const MobileSpecs = ({ className }: MobileSpecs) => {
         <div>
           {products.map((product, index) => (
             <>
-            <motion.div className="w-full flex flex-col bg-black">
+            <motion.div  className="w-full flex flex-col bg-black">
               <ProductImage key={product.id} product={product} index={index} />
             </motion.div>
             <motion.div className="w-full flex flex-col" >

@@ -142,7 +142,7 @@ const [hasScrolled, setHasScrolled] = useState(false);
           </Button>
           <Button onClick={openCart} variant="ghost" size="icon" disabled={items.length === 0} >
               <ShoppingCart className="h-5 w-5" />
-            </Button>
+          </Button>
 
             <AddToCart />
         </div>
