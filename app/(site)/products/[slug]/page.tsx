@@ -41,7 +41,7 @@ export default function ProductPage() {
   return (
     <section className="bg-[#000]">
       <div className="px-2 container">
-        <div className="grid grid-cols-[2fr_2fr]">
+        <div className="grid md:grid-cols-[2fr_2fr]">
           <ProductImage variant={variant} product={product}/>
           <ProductEmiCartDescription  variant={variant} product={product}/>
         </div>

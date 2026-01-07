@@ -46,7 +46,7 @@ if (!hydrated) return null;
                     </button>
                 </SheetClose>
             </div>
-            <div className='mt-6'>
+            <div className='mt-6 overflow-y-auto custom-scroll h-[86vh]'>
 
                 {items.map((item,index) => (
                     <Link href={`/products/${item.slug}?variant=${item.variantKey}&editCart=true`} key={`${item.title}-${index}`} onClick={() => closeCart()} className='grid grid-cols-[1fr_3fr] gap-2 mx-4 first:pt-0 pt-5 pb-5 last:pb-0 last:border-0 border-b border-[#ffffff4f]'>
