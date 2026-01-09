@@ -39,56 +39,57 @@ export default function ImageHoverZoom({
 
   if (isTouch) {
     return (
-      <div className="relative rounded-xl overflow-hidden bg-black cursor-pointer ">
-        <Image src={src} alt={alt} width={400} height={400} className="object-cover" />
+      <div className="relative rounded-xl overflow-hidden bg-black cursor-pointer z-999">
+        <Image src={src} alt={alt} width={400} height={400} className="w-full object-cover" />
       </div>
     );
   }
 
-  return (
-    <div className="flex gap-6 items-start">
-      {/* MAIN IMAGE */}
-      <div
-        ref={containerRef}
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
-        onMouseMove={handleMouseMove}
-        className="relative overflow-hidden rounded-xl bg-black cursor-crosshair"
-        style={{ width: 500, height: 500 }} // 👈 control main image size here
-      >
-        <Image src={src} alt={alt} fill priority className="object-cover" />
+return (
+  <div className="relative flex">
+    {/* MAIN IMAGE */}
+    <div
+      ref={containerRef}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      onMouseMove={handleMouseMove}
+      className="relative overflow-hidden rounded-xl bg-black cursor-crosshair"
+      style={{ width: 500, height: 500 }}
+    >
+      <Image src={src} alt={alt} fill priority className="object-cover" />
 
-        {/* LENS */}
-        {isHovering && (
-          <div
-            className="cursor-pointer absolute pointer-events-none border border-white/60 bg-white/10"
-            style={{
-              width: 120,
-              height: 120,
-              left: `calc(${pos.x}% - 60px)`,
-              top: `calc(${pos.y}% - 60px)`,
-            }}
-          />
-        )}
-      </div>
-
-      {/* ZOOM PANEL */}
-      <div
-        className="relative overflow-hidden rounded-xl bg-black hidden lg:block"
-        style={{ width: 350, height: 350 }} // 👈 zoom panel size here
-      >
-        {isHovering && (
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `url(${imageUrl})`,
-              backgroundRepeat: "no-repeat",
-              backgroundSize: `${zoomScale * 100}%`,
-              backgroundPosition: `${pos.x}% ${pos.y}%`,
-            }}
-          />
-        )}
-      </div>
+      {/* LENS */}
+      {isHovering && (
+        <div
+          className="absolute pointer-events-none border border-white/60 bg-white/10"
+          style={{
+            width: 120,
+            height: 120,
+            left: `calc(${pos.x}% - 60px)`,
+            top: `calc(${pos.y}% - 60px)`,
+          }}
+        />
+      )}
     </div>
-  );
+
+    {/* ZOOM PANEL (ABSOLUTE – NO LAYOUT SHIFT) */}
+    {isHovering && (
+      <div
+        className="absolute top-0 left-[520px] hidden lg:block rounded-xl overflow-hidden bg-black"
+        style={{ width: "100%", height: "100%", zIndex: "999" }}
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url(${imageUrl})`,
+            backgroundRepeat: "no-repeat",
+            backgroundSize: `${zoomScale * 100}%`,
+            backgroundPosition: `${pos.x}% ${pos.y}%`,
+          }}
+        />
+      </div>
+    )}
+  </div>
+);
+
 }

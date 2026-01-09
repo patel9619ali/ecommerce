@@ -19,9 +19,9 @@ export default function ProductImage({ product, variant }: Props) {
   }, [variant.key]);
 
   return (
-    <div className="grid md:grid-cols-[80px_1fr] grid-cols-[1fr] gap-4 py-5">
+    <div className="grid lg:grid-cols-[80px_1fr] gap-4">
       {/* THUMBNAILS */}
-      <div className="flex md:flex-col flex-row gap-3 md:order-1 order-2">
+      <div className="flex lg:flex-col flex-row gap-3 lg:order-1 order-2">
         {variant.images.map((img, index) => (
           <button
             key={`${variant.key}-thumb-${index}`}
@@ -33,24 +33,15 @@ export default function ProductImage({ product, variant }: Props) {
                   : "border-white/30 opacity-70 hover:opacity-100"
               }`}
           >
-            <Image
-              src={img}
-              alt={`${variant.name} thumbnail`}
-              width={80}
-              height={80}
-              className="object-cover"
-            />
+            <Image src={img} alt={`${variant.name} thumbnail`} width={80} height={80} className="w-full object-cover" />
           </button>
         ))}
       </div>
 
       {/* MAIN IMAGE + ZOOM */}
       <AnimatePresence mode="wait">
-        <motion.div key={`${variant.key}-${activeIndex}`} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25, ease: "easeOut" }} className="md:order-2 order-1">
-          <ImageHoverZoom
-            src={variant.images[activeIndex]}
-            alt={`${product.title} - ${variant.name}`}
-          />
+        <motion.div key={`${variant.key}-${activeIndex}`} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25, ease: "easeOut" }} className="lg:order-2 order-1">
+          <ImageHoverZoom src={variant.images[activeIndex]} alt={`${product.title} - ${variant.name}`} />
         </motion.div>
       </AnimatePresence>
     </div>

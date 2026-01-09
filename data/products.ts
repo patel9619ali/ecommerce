@@ -15,7 +15,7 @@ export const PRODUCTS: Product[] = [
   {
     id: "dynasty-headphone",
     slug: "dynasty-headphone",
-    title: "DYNASTY HEADPHONE",
+    title: "Noise Newly Launched Airwave Max XR Wireless Over-Ear Headphones with 120H Playtime, ANC, HFA Tech, Spatial Audio, Dual Pairing",
     subtitle: "Ultimate over-ear headphones",
 
     variants: [

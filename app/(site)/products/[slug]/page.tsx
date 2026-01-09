@@ -20,6 +20,9 @@ export default function ProductPage() {
   const [variantKey, setVariantKey] = useState(
     variantFromUrl || product.variants[0].key
   );
+  const [previewVariantKey, setPreviewVariantKey] = useState<string | null>(null);
+  const activeVariant =
+  product.variants.find(v => v.key === (previewVariantKey ?? variantKey))!;
   const [quantity, setQuantity] = useState(1);
 
   const { items } = useCartStore();
@@ -39,11 +42,11 @@ export default function ProductPage() {
   router.replace(`?variant=${variantKey}`, { scroll: false });
 }, [variantKey, router]);
   return (
-    <section className="bg-[#000]">
-      <div className="px-2 container">
-        <div className="grid md:grid-cols-[2fr_2fr]">
-          <ProductImage variant={variant} product={product}/>
-          <ProductEmiCartDescription  variant={variant} product={product}/>
+    <section className="bg-[#000000cc] py-10">
+      <div className="px-2">
+        <div className="grid lg:grid-cols-[1fr_2fr_1fr] gap-3">
+          <ProductImage variant={activeVariant} product={product}/>
+          <ProductEmiCartDescription  variant={variant} product={product} setVariantKey={setVariantKey} setPreviewVariantKey={setPreviewVariantKey}/>
         </div>
       </div>
     </section>
