@@ -24,7 +24,6 @@ export default function ProductPage() {
   const activeVariant =
   product.variants.find(v => v.key === (previewVariantKey ?? variantKey))!;
   const [quantity, setQuantity] = useState(1);
-
   const { items } = useCartStore();
 
   useEffect(() => {
@@ -46,7 +45,7 @@ export default function ProductPage() {
       <div className="px-2">
         <div className="grid lg:grid-cols-[1fr_2fr_1fr] gap-3">
           <ProductImage variant={activeVariant} product={product}/>
-          <ProductEmiCartDescription  variant={variant} product={product} setVariantKey={setVariantKey} setPreviewVariantKey={setPreviewVariantKey}/>
+          <ProductEmiCartDescription  variant={variant} product={product} setVariantKey={setVariantKey} setPreviewVariantKey={setPreviewVariantKey} previewVariantKey={previewVariantKey}/>
         </div>
       </div>
     </section>

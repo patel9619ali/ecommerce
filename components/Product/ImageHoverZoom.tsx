@@ -48,14 +48,7 @@ export default function ImageHoverZoom({
 return (
   <div className="relative flex">
     {/* MAIN IMAGE */}
-    <div
-      ref={containerRef}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-      onMouseMove={handleMouseMove}
-      className="relative overflow-hidden rounded-xl bg-black cursor-crosshair"
-      style={{ width: 500, height: 500 }}
-    >
+    <div ref={containerRef} onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)} onMouseMove={handleMouseMove} className="relative overflow-hidden rounded-xl bg-black cursor-crosshair lg:w-[500px] lg:h-[500px] lg:w-[500px] lg:h-[500px] w-full h-full" >
       <Image src={src} alt={alt} fill priority className="object-cover" />
 
       {/* LENS */}
