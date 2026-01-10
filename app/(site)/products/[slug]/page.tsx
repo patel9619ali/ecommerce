@@ -6,6 +6,7 @@ import { useCartStore } from "@/store/useCartStore";
 import { useEffect, useState } from "react";
 import ProductImage from "@/components/Product/ProductImage";
 import ProductEmiCartDescription from "@/components/Product/ProductEmiCartDescription";
+import ProductCartAndCheckout from "@/components/Product/ProductCartAndCheckout";
 
 export default function ProductPage() {
   const { slug } = useParams();
@@ -43,9 +44,10 @@ export default function ProductPage() {
   return (
     <section className="bg-[#000000cc] py-10">
       <div className="px-2">
-        <div className="grid lg:grid-cols-[1fr_2fr_1fr] gap-3">
+        <div className="grid lg:grid-cols-[2fr_2fr_1fr] gap-3">
           <ProductImage variant={activeVariant} product={product}/>
           <ProductEmiCartDescription  variant={variant} product={product} setVariantKey={setVariantKey} setPreviewVariantKey={setPreviewVariantKey} previewVariantKey={previewVariantKey}/>
+          <ProductCartAndCheckout variant={activeVariant} product={product}/>
         </div>
       </div>
     </section>

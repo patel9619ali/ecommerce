@@ -13,6 +13,7 @@ type Props = {
 
 export default function ProductImage({ product, variant }: Props) {
   const [activeIndex, setActiveIndex] = useState(0);
+const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
 
   useEffect(() => {
     setActiveIndex(0);
@@ -25,6 +26,7 @@ export default function ProductImage({ product, variant }: Props) {
         {variant.images.map((img, index) => (
           <button
             key={`${variant.key}-thumb-${index}`}
+            onClick={() => setActiveIndex(index)}
             onMouseEnter={() => setActiveIndex(index)}
             className={`border rounded-lg overflow-hidden transition-all cursor-pointer duration-200
               ${
@@ -39,11 +41,31 @@ export default function ProductImage({ product, variant }: Props) {
       </div>
 
       {/* MAIN IMAGE + ZOOM */}
-      <AnimatePresence mode="wait">
-        <motion.div key={`${variant.key}-${activeIndex}`} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25, ease: "easeOut" }} className="lg:order-2 order-1">
-          <ImageHoverZoom src={variant.images[activeIndex]} alt={`${product.title} - ${variant.name}`} />
-        </motion.div>
-      </AnimatePresence>
+      {isMobile ? (
+  <div className="order-1">
+    <ImageHoverZoom
+      src={variant.images[activeIndex]}
+      alt={`${product.title} - ${variant.name}`}
+    />
+  </div>
+) : (
+  <AnimatePresence mode="wait">
+    <motion.div
+      key={`${variant.key}-${activeIndex}`}
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.25 }}
+      className="lg:order-2 order-1"
+    >
+      <ImageHoverZoom
+        src={variant.images[activeIndex]}
+        alt={`${product.title} - ${variant.name}`}
+      />
+    </motion.div>
+  </AnimatePresence>
+)}
+
     </div>
   );
 }

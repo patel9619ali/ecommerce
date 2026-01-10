@@ -48,9 +48,8 @@ export default function ImageHoverZoom({
 return (
   <div className="relative flex">
     {/* MAIN IMAGE */}
-    <div ref={containerRef} onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)} onMouseMove={handleMouseMove} className="relative overflow-hidden rounded-xl bg-black cursor-crosshair lg:w-[500px] lg:h-[500px] lg:w-[500px] lg:h-[500px] w-full h-full" >
-      <Image src={src} alt={alt} fill priority className="object-cover" />
-
+    <div ref={containerRef} onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)} onMouseMove={handleMouseMove} className="relative overflow-hidden rounded-xl bg-black w-full aspect-square lg:max-w-full lg:mx-auto" >
+      <Image src={src} alt={alt} fill sizes="(max-width: 768px) 100vw, 500px" className="object-cover" />
       {/* LENS */}
       {isHovering && (
         <div
@@ -58,17 +57,20 @@ return (
           style={{
             width: 120,
             height: 120,
-            left: `calc(${pos.x}% - 60px)`,
+            left: `calc(${pos.x}% - 100px)`,
             top: `calc(${pos.y}% - 60px)`,
           }}
         />
       )}
     </div>
 
+
+
+
     {/* ZOOM PANEL (ABSOLUTE – NO LAYOUT SHIFT) */}
     {isHovering && (
       <div
-        className="absolute top-0 left-[520px] hidden lg:block rounded-xl overflow-hidden bg-black"
+        className="absolute top-0 2xl:left-[600px] xl:left-[500px] lg:left-[200px] hidden lg:block rounded-xl overflow-hidden bg-black"
         style={{ width: "100%", height: "100%", zIndex: "999" }}
       >
         <div

@@ -1,6 +1,7 @@
 "use client"
 import { useRouter} from "next/navigation";
 import { useCartStore } from "@/store/useCartStore";
+import Image from "next/image";
 import Link from "next/link";
 import {
   Sheet,
@@ -26,7 +27,6 @@ export function AddToCart() {
 if (!hydrated) return null;
   
   const item = items[0]; // single-product store
-  console.log(items,"itemiitem");
   if (!item) return null;
   return (
  <>
@@ -50,7 +50,13 @@ if (!hydrated) return null;
 
                 {items.map((item,index) => (
                     <Link href={`/products/${item.slug}?variant=${item.variantKey}&editCart=true`} key={`${item.title}-${index}`} onClick={() => closeCart()} className='grid grid-cols-[1fr_3fr] gap-2 mx-4 first:pt-0 pt-5 pb-5 last:pb-0 last:border-0 border-b border-[#ffffff4f]'>
-                        <img src={item.image} alt={item.title} width={80} height={80} />
+                        <Image
+  src={item.image}
+  alt={item.title}
+  width={80}
+  height={80}
+  className="object-cover rounded-md"
+/>
                         <div className='flex flex-col gap-3 items-start mb-5'>
                             <div className="flex gap-3 justify-between w-full">
                                 <div>

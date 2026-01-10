@@ -23,7 +23,7 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
         <div>
             <div className="px-2 border-b border-[#f4f4f4] pb-3">
                 <h2 className="text-[#fff] lg:text-[24px] text-[18px] font-[600]">{`Noise Newly Launched Airwave Max XR Wireless Over-Ear Headphones with 120H Playtime, ANC, HFA Tech, Spatial Audio, Dual Pairing,BT V6.0 (Carbon ${variant.name})`}</h2>
-                <Link href="/" className="lg:text-[18px] text-[14px] hover:text-[#fff] text-[#2162a1] hover:no-underline mb-2 block">Visit our instagram store</Link>
+                <Link href="/" className="lg:text-[18px] text-[14px] hover:text-[#2162a1] text-[#fff] hover:no-underline mb-2 block">Visit our instagram store</Link>
                 <p className="text-[#fff] lg:text-[14px] text-[12px] font-[600]">500+ bought in past month</p>
             </div>
             <div className="pt-3">
