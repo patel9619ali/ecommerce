@@ -31,25 +31,45 @@ export function ProductColorSelector({
       <div className="flex gap-3">
         {product.variants.map((variant) => (
           <button
-            key={variant.key}
-            onMouseEnter={() => onHover(variant.key)}
-            onMouseLeave={onLeave}
-            onClick={() => onSelect(variant.key)}
-            className={`cursor-pointer border rounded-lg p-1 transition
-              ${
-                variant.key === activeKey
-                  ? "border-white"
-                  : "border-white/30 hover:border-white"
-              }`}
-          >
-            <Image
-              src={variant.images[0]}
-              alt={variant.name}
-              width={60}
-              height={60}
-              className="object-cover"
-            />
-          </button>
+  key={variant.key}
+  onMouseEnter={() => onHover(variant.key)}
+  onMouseLeave={onLeave}
+  onClick={() => onSelect(variant.key)}
+  className={`
+    cursor-pointer
+    w-[80px]
+    transition-transform duration-500 ease-out
+    hover:scale-110
+    border-2
+    overflow-hidden
+    rounded-tl-[8px] rounded-tr-[8px] rounded-bl-none rounded-br-none
+    ${
+      variant.key === activeKey
+        ? "border-white"
+        : "border-white/40 hover:border-white"
+    }
+  `}
+>
+  {/* IMAGE (NO PADDING) */}
+  <div className="w-full aspect-square">
+    <Image
+      src={variant.images[0]}
+      alt={variant.name}
+      width={80}
+      height={80}
+      className="w-full h-full object-cover"
+    />
+  </div>
+
+  {/* PRICE */}
+  <div className="bg-black text-center py-1">
+    <p className="text-[12px] text-white font-[500]">₹3,499</p>
+    <p className="line-through text-[11px] text-white/80 font-[500]">
+      ₹4,999
+    </p>
+  </div>
+</button>
+
         ))}
       </div>
     </div>
