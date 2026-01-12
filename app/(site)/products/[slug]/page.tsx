@@ -44,7 +44,7 @@ export default function ProductPage() {
   return (
     <section className="bg-[#dbd4d463] py-10">
       <div className="px-2">
-        <div className="grid lg:grid-cols-[2fr_1.5fr_1fr] gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1.5fr_1fr] gap-3">
           <ProductImage variant={activeVariant} product={product}/>
           <ProductEmiCartDescription  variant={variant} product={product} setVariantKey={setVariantKey} setPreviewVariantKey={setPreviewVariantKey} previewVariantKey={previewVariantKey}/>
           <ProductCartAndCheckout variant={activeVariant} product={product}/>

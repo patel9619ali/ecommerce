@@ -50,54 +50,48 @@ if (!hydrated) return null;
 
                 {items.map((item,index) => (
                     <Link href={`/products/${item.slug}?variant=${item.variantKey}&editCart=true`} key={`${item.title}-${index}`} onClick={() => closeCart()} className='grid grid-cols-[1fr_3fr] gap-2 mx-4 first:pt-0 pt-5 pb-5 last:pb-0 last:border-0 border-b border-[#ffffff4f]'>
-                        <Image
-  src={item.image}
-  alt={item.title}
-  width={80}
-  height={80}
-  className="object-cover rounded-md"
-/>
-                        <div className='flex flex-col gap-3 items-start mb-5'>
-                            <div className="flex gap-3 justify-between w-full">
-                                <div>
-                                    <h3 className='lg:text-[14px] text-[12px] font-[700]'>{item.title}</h3>
-                                    <p className='text-[#fafafa8c] lg:text-[12px] text-[10px]'>Variant: {item.variantKey}</p>
-                                </div>
-                                <span className='lg:text-[15px] text-[12px] font-[700]'>₹ {item.price}</span>
+                        <Image src={item.image} alt={item.title} width={80} height={80} className="object-cover rounded-md" />
+                    <div className='flex flex-col gap-3 items-start mb-5'>
+                        <div className="flex gap-3 justify-between w-full">
+                            <div>
+                                <h3 className='lg:text-[14px] text-[12px] font-[700]'>{item.title}</h3>
+                                <p className='text-[#fafafa8c] lg:text-[12px] text-[10px]'>Variant: {item.variantKey}</p>
                             </div>
-                            <div className='flex w-full justify-between'>
-                                {/* Increment counter */}
-                                <div className='flex items-center border border-[#ffffff5c] rounded-md overflow-hidden'>
-                                    <button onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        updateQuantity(item.id, Math.max(1, item.quantity - 1));
-                                    }}  className='px-2 cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed lg:h-[30px] h-[25px]'>
-                                        <Minus size={10} />
-                                    </button>
+                            <span className='lg:text-[15px] text-[12px] font-[700]'>₹ {item.price}</span>
+                        </div>
+                        <div className='flex w-full justify-between'>
+                            {/* Increment counter */}
+                            <div className='flex items-center border border-[#ffffff5c] rounded-md overflow-hidden'>
+                                <button onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    updateQuantity(item.id, Math.max(1, item.quantity - 1));
+                                }}  className='px-2 cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed lg:h-[30px] h-[25px]'>
+                                    <Minus size={10} />
+                                </button>
 
-                                    <span className='px-2 text-center lg:text-[17px] text-[14px] font-semibold border-x border-[#ffffff5c]'>{item.quantity}</span>
-
-                                    <button onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        updateQuantity(item.id, item.quantity + 1);
-                                    }}  className='px-2 transition-colors cursor-pointer lg:h-[30px] h-[25px]' aria-label="Increase quantity">
-                                        <Plus size={10} />
-                                    </button>
-                                </div>
+                                <span className='px-2 text-center lg:text-[17px] text-[14px] font-semibold border-x border-[#ffffff5c]'>{item.quantity}</span>
 
                                 <button onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    removeItem(item.id);
-                                }} className='cursor-pointer opacity-70 hover:opacity-100 transition-opacity' aria-label="Remove item">
-                                {TrashSVG}
+                                    updateQuantity(item.id, item.quantity + 1);
+                                }}  className='px-2 transition-colors cursor-pointer lg:h-[30px] h-[25px]' aria-label="Increase quantity">
+                                    <Plus size={10} />
                                 </button>
                             </div>
+
+                            <button onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                removeItem(item.id);
+                            }} className='cursor-pointer opacity-70 hover:opacity-100 transition-opacity' aria-label="Remove item">
+                            {TrashSVG}
+                            </button>
                         </div>
-                    </Link >
-                ))}
+                    </div>
+                </Link >
+            ))}
             </div>
           
         </div>

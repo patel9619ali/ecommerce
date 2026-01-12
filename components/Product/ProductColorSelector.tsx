@@ -27,8 +27,9 @@ export function ProductColorSelector({
       <p className="text-[#000] font-medium mb-2">
         Color: <span className="font-semibold">{displayKey}</span>
       </p>
+<div className="overflow-x-auto overflow-y-hidden scrollbar-hide w-full">
 
-      <div className="flex gap-3">
+      <div className="flex gap-3 pb-2 w-max">
         {product.variants.map((variant) => (
           <button
   key={variant.key}
@@ -72,6 +73,7 @@ export function ProductColorSelector({
 
         ))}
       </div>
+    </div>
     </div>
   );
 }

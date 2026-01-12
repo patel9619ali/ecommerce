@@ -22,7 +22,8 @@ const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
   return (
     <div className="grid lg:grid-cols-[120px_1fr] gap-4">
       {/* THUMBNAILS */}
-      <div className="flex lg:flex-col flex-row gap-3 lg:order-1 order-2">
+      <div className="flex lg:flex-col flex-row gap-3 lg:order-1 order-2 lg:overflow-x-hidden overflow-x-auto">
+
         {variant.images.map((img, index) => (
           <button
             key={`${variant.key}-thumb-${index}`}
@@ -56,7 +57,7 @@ const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.25 }}
-      className="lg:order-2 order-1"
+      className="lg:order-2 order-1 "
     >
       <ImageHoverZoom
         src={variant.images[activeIndex]}
