@@ -34,8 +34,8 @@ if (!hydrated) return null;
     <Sheet open={isCartOpen} onOpenChange={(open) => { if (!open) closeCart(); }} >
         <SheetTitle className="hidden">Menu</SheetTitle>
         <SheetContent side="right" className="menu-sheet-hide-close lg:!max-w-[450px] md:!max-w-[350px] lg:w-[450px] md:w-[350px] justify-between w-full bg-black text-white border-white/10 duration-500 ease-out px-0">
-        <div>
-            <div className={`flex justify-between items-start relative pb-3 after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-full after:bg-[linear-gradient(325deg,#049cff_0%,#35ee7a_100%)] px-4`}>
+        <div className="h-screen overflow-y-auto custom-scroll pb-[150px]">
+            <div className={`flex justify-between items-start relative pb-3 after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-full after:bg-[linear-gradient(325deg,#049cff_0%,#35ee7a_100%)] px-4 `}>
                 <div>
                     <p className='text-[16px] font-[700] uppercase mb-3'>Cart</p>
                     <p className='text-[12px] font-[600]'>You are eligible for free shipping.</p>
@@ -46,7 +46,7 @@ if (!hydrated) return null;
                     </button>
                 </SheetClose>
             </div>
-            <div className='mt-6 overflow-y-auto custom-scroll h-[86vh]'>
+            <div className='mt-6 overflow-y-auto'>
 
                 {items.map((item,index) => (
                     <Link href={`/products/${item.slug}?variant=${item.variantKey}&editCart=true`} key={`${item.title}-${index}`} onClick={() => closeCart()} className='grid grid-cols-[1fr_3fr] gap-2 mx-4 first:pt-0 pt-5 pb-5 last:pb-0 last:border-0 border-b border-[#ffffff4f]'>

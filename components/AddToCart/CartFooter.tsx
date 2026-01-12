@@ -49,7 +49,7 @@ export function CartFooter({ onCheckout }: { onCheckout: () => void }) {
   );
   return (
         <>
-            <div>
+            <div className='sticky bottom-[0]'>
                 <div className='flex flex-col gap-3 items-center mt-5 justify-between'>
                     <div className="flex items-center mt-5 justify-center border-y border-[#ffffff5c] py-2 px-4 divide-x divide-[#ffffff5c] w-full">
                         <button onClick={() => setSheetNoteOpen(true)} className="cursor-pointer flex items-center gap-2 text-white lg:px-6 px-4" >
