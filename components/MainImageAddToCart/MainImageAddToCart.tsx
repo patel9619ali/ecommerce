@@ -19,7 +19,7 @@ export const MainImageAddToCart = () => {
     (v) => v.key === variantKey
   ) as Variant;
   return (
-    <section className="w-full bg-[#000000e6] py-5">
+    <section className="w-full bg-[#fff] py-5">
         <div className="container mx-auto">
             <div className="grid lg:grid-cols-[2.5fr_1.5fr]">
                 <ProductGallery variant={selectedVariant} />

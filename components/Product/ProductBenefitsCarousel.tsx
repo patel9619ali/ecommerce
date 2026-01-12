@@ -8,7 +8,7 @@ export function ProductBenefitsCarousel({ benefits }: any) {
     <div ref={emblaRef} className="overflow-hidden py-2">
       <div className="flex gap-4">
         {benefits.map((b: any) => (
-          <div key={b.id} className="text-center border rounded-lg p-3 text-white" >
+          <div key={b.id} className="text-center border rounded-lg p-3 text-black" >
             <div className="text-[10px] font-semibold">{b.label}</div>
           </div>
         ))}

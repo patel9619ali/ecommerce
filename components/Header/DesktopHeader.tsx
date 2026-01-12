@@ -19,9 +19,9 @@ import CurrencySelector from "./CurrencySelector";
 import { AddToCart } from "../AddToCart/AddToCart";
 const HamBurger = (
   <svg xmlns="http://www.w3.org/2000/svg" width="21" height="16" viewBox="0 0 21 16" fill="none">
-    <path d="M1.25 1.25H19.2483" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M1.25 7.84961H11.8372" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M1.25 14.4492H15.0134" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M1.25 1.25H19.2483" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M1.25 7.84961H11.8372" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M1.25 14.4492H15.0134" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
 );
 const user = (
@@ -35,19 +35,13 @@ const user = (
 export function DesktopHeader() {
   const items = useCartStore((state) => state.items);
   const {  openCart } = useCartStore();
-  const [isVisible, setIsVisible] = useState(true)
-  const [lastScrollY, setLastScrollY] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const router = useRouter();
  const pathName = usePathname();
   const isHomePage = pathName === '/';
   const [isMobile, setIsMobile] = useState(false);
-const [hasScrolled, setHasScrolled] = useState(false);
   // page lists path name
-  const headerNotFixedpages = [
-    '',
-  ];
+
   useEffect(() => {
   const checkMobile = () => {
     setIsMobile(window.innerWidth < 768);
@@ -58,38 +52,43 @@ const [hasScrolled, setHasScrolled] = useState(false);
 
   return () => window.removeEventListener("resize", checkMobile);
   }, []);
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+const [isFixed, setIsFixed] = useState(false)
+const [isVisible, setIsVisible] = useState(true)
+const [lastScrollY, setLastScrollY] = useState(0)
 
-      // Mobile: switch to fixed after scroll
-      setHasScrolled(currentScrollY > 60);
+useEffect(() => {
+  const handleScroll = () => {
+    const currentScrollY = window.scrollY
 
-      // Hide / show on scroll
-      if (currentScrollY < lastScrollY || currentScrollY < 10) {
-        setIsVisible(true);
-      } else if (currentScrollY > lastScrollY && currentScrollY > 80) {
-        setIsVisible(false);
-      }
+    // 1️⃣ Become fixed after leaving top
+    if (currentScrollY > 50) {
+      setIsFixed(true)
+    } else {
+      setIsFixed(false)
+      setIsVisible(true) // always visible at top
+    }
 
-      setLastScrollY(currentScrollY);
-    };
+    // 2️⃣ Hide on scroll down, show on scroll up
+    if (currentScrollY > lastScrollY && currentScrollY > 50) {
+      setIsVisible(false) // scrolling down
+    } else {
+      setIsVisible(true) // scrolling up
+    }
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
+    setLastScrollY(currentScrollY)
+  }
+
+  window.addEventListener("scroll", handleScroll, { passive: true })
+  return () => window.removeEventListener("scroll", handleScroll)
+}, [lastScrollY])
 
 
-  // Determine if header should be fixed
-  const shouldBeFixed = isMobile
-  ? hasScrolled          // mobile: fixed AFTER scroll
-  : isHomePage || isScrolled; // desktop behavior
   return (
     <header className={cn(
-        "top-0 left-0 right-0 z-50 bg-[#000] text-white transition-transform duration-300", 
-        shouldBeFixed ? "fixed" : "relative",
-        isVisible ? "translate-y-0" : "-translate-y-full", 
-      )}>
+    "top-0 left-0 right-0 z-50 bg-white transition-transform duration-300",
+    isFixed ? "fixed" : "relative", isFixed && "backdrop-blur-md bg-white/90",
+    isVisible ? "translate-y-0" : "-translate-y-full"
+  )}>
     
       <div className="flex items-center justify-between px-4 py-4">
         {/* Left: Hamburger Menu */}
@@ -103,10 +102,10 @@ const [hasScrolled, setHasScrolled] = useState(false);
             </SheetTrigger>
             <SheetTitle className="hidden">Menu</SheetTitle>
               
-              <SheetContent side="left" className="menu-sheet-hide-close w-[300px] bg-black text-white border-white/10 duration-500 ease-out">
+              <SheetContent side="left" className="menu-sheet-hide-close w-[300px] bg-[#fff] text-[#000] border-white/10 duration-500 ease-out">
                 <SheetClose asChild>
-                    <button className="cursor-pointer relative text-[#fff] opacity-70 hover:opacity-100">
-                      <X fill="#fff40" size={30} className="bg-[#fafafa20] rounded-full p-1"/>
+                    <button className="cursor-pointer relative text-[#000] opacity-70 hover:opacity-100">
+                      <X fill="#fff40" size={30} className="bg-[#fff] rounded-full p-1"/>
                     </button>
                 </SheetClose>
                 <div className="h-full flex flex-col justify-between border-t-[1px] border-b-[1px] border-[#C9C9C950] py-0">

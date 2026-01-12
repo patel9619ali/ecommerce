@@ -24,8 +24,8 @@ export function ProductColorSelector({
 
   return (
     <div>
-      <p className="text-white font-medium mb-2">
-        Colour: <span className="font-semibold">{displayKey}</span>
+      <p className="text-[#000] font-medium mb-2">
+        Color: <span className="font-semibold">{displayKey}</span>
       </p>
 
       <div className="flex gap-3">

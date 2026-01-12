@@ -5,13 +5,14 @@ interface Product {
   id: number;
   title: string;
   description: string;
-  image: string;
+  media: string; // can be image OR video
 }
+
 
 const products: Product[] = [
   {
     id: 1,
-    title: "Included In The Box",
+    title: "Portable",
     description: `<ul>
         <li>Dynasty Headphone</li>
         <li>Aluminium carrying case</li>
@@ -23,11 +24,12 @@ const products: Product[] = [
         <li>Greeting card</li>
         <li>Instruction and care card</li>
     </ul>`,
-    image: "/assets/specs/collection-1.jpg",
+    media: "/assets/Blender/self_cleaning.mp4",
+   
   },
   {
     id: 2,
-    title: "Sounding",
+    title: "Powerful",
      description: `<p>Fit<br/>True wireless In-ear<br/>
 Fit for sport</p>
 <p>EarGels<br/>4 pairs of silicone tips (XS, S,M,L)
@@ -37,25 +39,24 @@ Comply™ Foam tips (M size)
 <p>Materials<br/>Aluminium, Polymer, Silicon</p>
 <p>Dust and Waterproof Rating
 <br/>IP57 rating:</p>`,
-    image: "/assets/specs/collection-2.jpg",
+    
+    media: "/assets/Blender/portable_charger.mp4",
   },
   {
     id: 3,
-    title: "Design",
-    description: `<p>Battery Life<br/>
-Up to 30 hours with charging case at moderate volume</p>
+    title: "USB-C Rechargeable",
+    description: `<p>Get 15+ blends from just one hour of charging with any USB port. </p>
 
-<p>Charging Time<br/>
-Earphones: approx. 2 ½ h<br/>
-Charging Case (USB-C): 2 h<br/>
-Charging Case (Qi Wireless): 2 ½ h</p>
+<p>The BlendJet 2 portable blender is equipped with a water-resistant USB-C port that makes it easier than ever to power up.<br/>
+And the included cable is smartly reversible, so there’s no wrong way to plug it in.</p>
 
 <p>Charging for 20 minutes gives approximately 1½ hour playback.</p>`,
-    image: "/assets/specs/collection-3.jpg",
+    
+    media: "/assets/specs/collection-2.jpg",
   },
   {
     id: 4,
-    title: "Battery",
+    title: "Self Cleaning",
     description: `<p>Battery Life<br/>
 Up to 30 hours with charging case at moderate volume</p>
 
@@ -65,21 +66,29 @@ Charging Case (USB-C): 2 h<br/>
 Charging Case (Qi Wireless): 2 ½ h</p>
 
 <p>Charging for 20 minutes gives approximately 1½ hour playback.</p>`,
-    image: "/assets/specs/collection-4.jpg",
+     media: "/assets/specs/collection-1.jpg",
+    
   },
 ];
+const isVideo = (src: string): boolean => {
+  return src.endsWith(".mp4") || src.endsWith(".webm") || src.endsWith(".ogg");
+};
+const ProductImage = ({ product}: { product: Product}) => {
+  const video = isVideo(product.media);
 
-const ProductImage = ({ product, index }: { product: Product; index: number }) => (
-  <div className="h-screen w-full flex items-center justify-center p-12 flex-shrink-0">
-    <div className="relative w-full max-w-md">
-      <img 
-        src={product.image} 
-        alt={product.title} 
-        className="w-full h-auto object-contain rounded-xl" 
-      />
+  return (
+    <div className="h-screen w-full flex items-center justify-center p-12 flex-shrink-0">
+      <div className="relative w-full max-w-md rounded-xl overflow-hidden">
+        {video ? (
+          <video src={product.media} autoPlay muted loop playsInline className="w-full h-auto object-contain rounded-xl" />
+        ) : (
+          <img src={product.media} alt={product.title} className="w-full h-auto object-contain rounded-xl" />
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
+
 
 const ProductDescription = ({ product }: { product: Product }) => (
   <div className="h-screen w-full px-16 py-12 flex items-center flex-shrink-0 bg-[#3a4149]">
@@ -108,9 +117,9 @@ const DualSpecsScroll = ({ className }: DualSpecsScrollProps) => {
 
   return (
     <>
-    <section className={`${className} bg-[#000] py-10`}>
+    <section className={`${className} bg-[#dbd4d463] py-10`}>
       <div className='container mx-auto'>
-        <h2 className='text-[40px] text-[#fff] text-center font-[600] mb-5'>TECH SPECS</h2>
+        <h2 className='text-[40px] text-[#000] text-center font-[600] mb-5'>BlendRas Specs</h2>
         <div ref={containerRef} className="relative" style={{ height: `${products.length * 100}vh` }} >
           <div className="sticky top-0 h-screen w-full overflow-hidden">
             <div className="flex h-full">
@@ -124,10 +133,10 @@ const DualSpecsScroll = ({ className }: DualSpecsScrollProps) => {
               </motion.div>
               <motion.div
                 style={{ y: leftY }}
-                className="w-1/2 flex flex-col bg-black"
+                className="w-1/2 flex flex-col bg-transparent"
               >
                 {products.map((product, index) => (
-                  <ProductImage key={product.id} product={product} index={index} />
+                  <ProductImage key={product.id} product={product} />
                 ))}
               </motion.div>
 

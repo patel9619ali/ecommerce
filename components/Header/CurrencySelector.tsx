@@ -16,7 +16,6 @@ export default function CurrencySelector() {
     const { setLoading } = useLoading()
   const currencyOptions = [
     { value: 'inr', label: 'Indian (INR ₹)' },
-    { value: 'usd', label: 'Dollar (USA $)' },
   ];
 
   // Sort currencies so selected one is always on top
@@ -57,13 +56,12 @@ export default function CurrencySelector() {
             </span>
           </div>
         ) : (
-          <span className="text-[14px] font-[600] text-[#fff]">
+          <span className="text-[14px] font-[600] text-[#000]">
             {selectedCurrency}
           </span>
         )}
       </PopoverTrigger>
-      <PopoverContent 
-        className="shadow-[0px_4px_12px_0px_rgba(102,102,102,0.25)] border border-[#000] bg-[#000] px-2 py-2 mt-0 w-auto"
+      <PopoverContent className="shadow-[0px_4px_12px_0px_rgba(102,102,102,0.25)] border border-[#000] bg-[#000] px-2 py-2 mt-0 w-auto"
         align="center"
       >
         {sortedCurrencies.map((option) => (

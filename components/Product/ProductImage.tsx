@@ -20,7 +20,7 @@ const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
   }, [variant.key]);
 
   return (
-    <div className="grid lg:grid-cols-[80px_1fr] gap-4">
+    <div className="grid lg:grid-cols-[120px_1fr] gap-4">
       {/* THUMBNAILS */}
       <div className="flex lg:flex-col flex-row gap-3 lg:order-1 order-2">
         {variant.images.map((img, index) => (
@@ -35,7 +35,7 @@ const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
                   : "border-white/30 opacity-70 hover:opacity-100"
               }`}
           >
-            <Image src={img} alt={`${variant.name} thumbnail`} width={80} height={80} className="w-full object-cover" />
+            <Image src={img} alt={`${variant.name} thumbnail`} width={140 } height={140  } className="w-full object-cover" />
           </button>
         ))}
       </div>
