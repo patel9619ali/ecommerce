@@ -39,7 +39,7 @@ export default function ImageHoverZoom({
 
   if (isTouch) {
     return (
-      <div className="relative rounded-xl overflow-hidden bg-black cursor-pointer z-999">
+      <div className="relative rounded-xl overflow-hidden bg-black cursor-pointer lg:z-999">
         <Image src={src} alt={alt} width={400} height={400} className="w-full object-cover" />
       </div>
     );
