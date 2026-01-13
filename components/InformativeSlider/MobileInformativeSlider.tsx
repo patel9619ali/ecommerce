@@ -40,7 +40,7 @@ const sliderContent = [
     title: "Coconut White Edition",
     description:
       "Stylish portable juicer with easy cleaning and long battery life.",
-    href: "/products/portable-juicer?variant=coconut",
+    href: "/products/portable-juicer?variant=Coconot",
   },
   {
     img: img4,

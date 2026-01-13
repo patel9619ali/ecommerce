@@ -38,7 +38,7 @@ export const sliderContent = [
     subHeading: "Portable Juicer – Coconut White",
     information:
       "Minimal design with maximum power. Crush fruits and ice effortlessly in seconds.",
-    href: "/products/portable-juicer?variant=coconut",
+    href: "/products/portable-juicer?variant=Coconot",
   },
   {
     img: img4,

@@ -34,7 +34,6 @@ if (!hydrated) return null;
     <Sheet open={isCartOpen} onOpenChange={(open) => { if (!open) closeCart(); }} >
         <SheetTitle className="hidden">Menu</SheetTitle>
         <SheetContent side="right" className="menu-sheet-hide-close lg:!max-w-[450px] md:!max-w-[350px] lg:w-[450px] md:w-[350px] justify-between w-full bg-black text-white border-white/10 duration-500 ease-out px-0">
-        <div className="h-screen overflow-y-auto custom-scroll pb-[150px]">
             <div className={`flex justify-between items-start relative pb-3 after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-full after:bg-[linear-gradient(325deg,#049cff_0%,#35ee7a_100%)] px-4 `}>
                 <div>
                     <p className='text-[16px] font-[700] uppercase mb-3'>Cart</p>
@@ -46,18 +45,22 @@ if (!hydrated) return null;
                     </button>
                 </SheetClose>
             </div>
+        <div className="h-screen overflow-y-auto custom-scroll pb-[150px]">
             <div className='mt-6 overflow-y-auto'>
 
                 {items.map((item,index) => (
                     <Link href={`/products/${item.slug}?variant=${item.variantKey}&editCart=true`} key={`${item.title}-${index}`} onClick={() => closeCart()} className='grid grid-cols-[1fr_3fr] gap-2 mx-4 first:pt-0 pt-5 pb-5 last:pb-0 last:border-0 border-b border-[#ffffff4f]'>
-                        <Image src={item.image} alt={item.title} width={80} height={80} className="object-cover rounded-md" />
+                        <div className="lg:w-[120px] xs:w-[120px] w-[100px]">
+                        <Image src={item.image} alt={item.title} width={120} height={120} className="object-cover rounded-md" />
+
+                        </div>
                     <div className='flex flex-col gap-3 items-start mb-5'>
                         <div className="flex gap-3 justify-between w-full">
                             <div>
                                 <h3 className='lg:text-[14px] text-[12px] font-[700]'>{item.title}</h3>
                                 <p className='text-[#fafafa8c] lg:text-[12px] text-[10px]'>Variant: {item.variantKey}</p>
                             </div>
-                            <span className='lg:text-[15px] text-[12px] font-[700]'>₹ {item.price}</span>
+                            <span className='lg:text-[15px] flex gap-2 text-[12px] font-[700]'><span>₹</span><span>{item.price}</span> </span>
                         </div>
                         <div className='flex w-full justify-between'>
                             {/* Increment counter */}
