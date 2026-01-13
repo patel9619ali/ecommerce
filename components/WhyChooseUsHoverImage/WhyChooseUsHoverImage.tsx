@@ -65,7 +65,7 @@ const WhyChooseUsHoverImage = ({ className }: WhyChooseUsHoverImageProps) => {
   return (
     <section className={`w-full bg-[#000000e6] py-10 ${className}`}>
       <div className='container mx-auto'>
-          <h2 className='text-[40px] text-[#fff] text-center font-[600] mb-5'>WHY DYNASTY HEADPHONE</h2>
+          <h2 className='text-[40px] text-[#fff] text-center font-[600] mb-5'>Why BlendRas Portable Juicer</h2>
           
             <div className="h-[600px] flex gap-8">
               {/* Left Side - Text Items */}

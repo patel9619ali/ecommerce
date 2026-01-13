@@ -103,11 +103,12 @@ export const ProductGallery = ({ variant }: Props) => {
                   </DialogTrigger>
 
                   {/* ZOOM MODAL */}
-                  <DialogContent className="p-0 border-none w-full h-full max-w-none">
-                    <DialogHeader className="absolute top-4 right-4 z-10">
-                      <DialogClose>
-                        <X className="w-7 h-7 text-white" />
-                      </DialogClose>
+                  <DialogContent className="bg-white p-0 overflow-hidden xs:rounded-[20px] rounded-none bottom-[0] border-none [&>button]:hidden z-200 gap-0 w-full xs:w-auto xs:max-h-[90vh] h-full !max-w-[100vw] xs:max-w-[100vw] z-999">
+                    <DialogHeader className="bg-transparent items-center absolute w-full flex flex-row justify-end items-center lg:top-5 lg:right-5 xs:px-6 px-4 xs:py-5 py-2 gap-0">
+                        <DialogTitle className="text-white hidden text-start xs:text-[23px] text-md font-semibold break-all">Preview</DialogTitle>
+                        <DialogClose className="group lg:bg-[#fff] bg:transparent text-white hover:bg-transparent opacity-90 hover:opacity-100 cursor-pointer outline-none ring-0 focus:ring-0 focus-visible:ring-0 ring-offset-0 !p-0 cursor-pointer z-3">
+                                <X size={30} fill="#fff" stroke="#000" className="troke-black transition-colors duration-200 group-hover:stroke-white"/>
+                            </DialogClose>
                     </DialogHeader>
 
                     <div className="bg-black h-full overflow-y-auto">
@@ -226,12 +227,12 @@ export const ProductGallery = ({ variant }: Props) => {
 
       {/* ================= MOBILE THUMB DIALOG ================= */}
       <Dialog open={thumbDialogOpen} onOpenChange={setThumbDialogOpen}>
-        <DialogContent className="bottom-0 top-auto rounded-t-2xl p-0 max-h-[75vh] w-full">
-          <DialogHeader className="p-4 flex flex-row justify-between items-center">
-            <DialogTitle>All Images</DialogTitle>
-            <DialogClose>
-              <X />
-            </DialogClose>
+        <DialogContent className=" bottom-0 top-auto rounded-t-2xl p-0 max-h-[75vh] w-full">
+          <DialogHeader className="p-4 flex flex-row justify-between items-center border-b">
+              <DialogTitle className="text-[#000] text-start xs:text-[23px] text-md font-semibold break-all">All Images</DialogTitle>
+              <DialogClose className="group lg:bg-[#fff] bg:transparent text-white hover:bg-transparent opacity-90 hover:opacity-100 cursor-pointer outline-none ring-0 focus:ring-0 focus-visible:ring-0 ring-offset-0 !p-0 cursor-pointer z-3">
+                <X size={30} fill="#fff" stroke="#000" className="troke-black transition-colors duration-200 group-hover:stroke-white"/>
+              </DialogClose>
           </DialogHeader>
 
           <div className="grid grid-cols-4 gap-3 px-4 pb-6 overflow-y-auto">

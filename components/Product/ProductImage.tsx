@@ -118,43 +118,43 @@ export default function ProductImage({ product, variant }: Props) {
         </AnimatePresence>
       )}
 
-{/* ================= MOBILE THUMB DIALOG ================= */}
-<Dialog open={thumbDialogOpen} onOpenChange={setThumbDialogOpen}>
-  <DialogContent className="bottom-0 top-auto rounded-t-2xl p-0 max-h-[80vh] w-full">
-    <DialogHeader className="p-4 flex flex-row justify-between items-center border-b">
-      <DialogTitle>All Images</DialogTitle>
-      <DialogClose>
-        <X />
-      </DialogClose>
-    </DialogHeader>
+      {/* ================= MOBILE THUMB DIALOG ================= */}
+      <Dialog open={thumbDialogOpen} onOpenChange={setThumbDialogOpen}>
+        <DialogContent className=" bottom-0 top-auto rounded-t-2xl p-0 max-h-[75vh] w-full">
+          <DialogHeader className="p-4 flex flex-row justify-between items-center border-b">
+              <DialogTitle className="text-[#000] text-start xs:text-[23px] text-md font-semibold break-all">All Images</DialogTitle>
+              <DialogClose className="group lg:bg-[#fff] bg:transparent text-white hover:bg-transparent opacity-90 hover:opacity-100 cursor-pointer outline-none ring-0 focus:ring-0 focus-visible:ring-0 ring-offset-0 !p-0 cursor-pointer z-3">
+                      <X size={30} fill="#fff" stroke="#000" className="troke-black transition-colors duration-200 group-hover:stroke-white"/>
+                  </DialogClose>
+          </DialogHeader>
 
-    <div className="grid grid-cols-4 gap-3 px-4 py-4 overflow-y-auto">
-      {variant.images.map((img, index) => (
-        <button
-          key={`dialog-thumb-${index}`}
-          onClick={() => {
-            setActiveIndex(index);
-            setThumbDialogOpen(false);
-          }}
-          className={`relative aspect-square rounded-md overflow-hidden border
-            ${
-              activeIndex === index
-                ? "border-white"
-                : "border-white/30"
-            }`}
-        >
-          <Image
-            src={img}
-            alt={`${variant.name} thumbnail`}
-            fill
-            sizes="25vw"
-            className="object-cover"
-          />
-        </button>
-      ))}
-    </div>
-  </DialogContent>
-</Dialog>
+<div className="grid grid-cols-4 gap-3 px-4 py-4 overflow-y-auto">
+{variant.images.map((img, index) => (
+<button
+key={`dialog-thumb-${index}`}
+onClick={() => {
+  setActiveIndex(index);
+  setThumbDialogOpen(false);
+}}
+className={`relative aspect-square rounded-md overflow-hidden border
+  ${
+    activeIndex === index
+      ? "border-white"
+      : "border-white/30"
+  }`}
+>
+<Image
+  src={img}
+  alt={`${variant.name} thumbnail`}
+  fill
+  sizes="25vw"
+  className="object-cover"
+/>
+</button>
+))}
+</div>
+</DialogContent>
+      </Dialog>
 
     </div>
   );
