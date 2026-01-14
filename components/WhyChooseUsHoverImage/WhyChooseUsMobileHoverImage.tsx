@@ -16,7 +16,7 @@ const slides = [
     description:
       "You can see it in the soft lambskin leather, picked and stitched with exacting attention to detail. You can feel it in the precision-cut aluminium frame that's robust yet beautiful.",
     image:
-      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=1000&fit=crop",
+      "/assets/Blender/black1.jpg",
   },
   {
     id: "accessories",
@@ -25,7 +25,7 @@ const slides = [
     description:
       "Premium carrying case crafted from genuine leather. Magnetic closure ensures your headphones stay protected while maintaining that luxurious feel in your hands.",
     image:
-      "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=800&h=1000&fit=crop",
+      "/assets/Blender/royal_blue_1.jpg",
   },
   {
     id: "fidelity",
@@ -34,7 +34,7 @@ const slides = [
     description:
       "Advanced acoustic engineering meets ergonomic design. Memory foam ear cups adapt to your unique ear shape, providing hours of fatigue-free listening pleasure.",
     image:
-      "https://images.unsplash.com/photo-1545127398-14699f92334b?w=800&h=1000&fit=crop",
+      "/assets/Blender/coconot-1.jpg",
   },
   {
     id: "design",
@@ -43,7 +43,7 @@ const slides = [
     description:
       "Every component carefully selected for durability and aesthetics. From the brushed metal finish to the reinforced cables, these headphones are built for generations.",
     image:
-      "https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=800&h=1000&fit=crop",
+      "/assets/Blender/ice_blender_1.jpg",
   },
   {
     id: "wireless",
@@ -52,7 +52,7 @@ const slides = [
     description:
       "Latest Bluetooth technology ensures stable connection and all-day battery life with seamless multi-device pairing.",
     image:
-      "https://images.unsplash.com/photo-1524678606370-a47ad25cb82a?w=800&h=1000&fit=crop",
+      "/assets/Blender/Ruby_1.jpg",
   },
 ];
 
@@ -62,10 +62,10 @@ const WhyChooseUsMobileHoverImage = ({
   const [activeIndex, setActiveIndex] = useState(0); // first visible by default
 
   return (
-    <section className={clsx("w-full bg-black/90 py-16", className)}>
+    <section className={clsx("w-full bg-[#dbd4d463] py-16", className)}>
       <div className="container mx-auto !px-3">
-        <h2 className="text-[36px] text-white text-center font-semibold mb-12">
-          WHY DYNASTY HEADPHONE
+        <h2 className="text-[36px] text-[#000] text-center font-semibold mb-12">
+          Why BlendRas Portable Juicer
         </h2>
 
         <div className="bg-[#3a4149] rounded-lg">

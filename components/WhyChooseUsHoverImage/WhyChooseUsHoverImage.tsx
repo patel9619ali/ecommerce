@@ -16,19 +16,19 @@ const WhyChooseUsHoverImage = ({ className }: WhyChooseUsHoverImageProps) => {
       title: "CRAFTED FOR THE SENSES",
       subtitle: "LESS EFFORT. MORE EMOTION.",
       description: "You can see it in the soft lambskin leather, picked and stitched with exacting attention to detail. You can feel it in the precision-cut aluminium frame that's robust yet beautiful.",
-      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=1000&fit=crop"
+      image: "/assets/Blender/black1.jpg",
     },
     {
       title: "STANDOUT ACCESSORIES",
       subtitle: "MUSIC AT YOUR FINGERTIPS",
       description: "Premium carrying case crafted from genuine leather. Magnetic closure ensures your headphones stay protected while maintaining that luxurious feel in your hands.",
-      image: "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=800&h=1000&fit=crop"
+      image: "/assets/Blender/royal_blue_1.jpg",
     },
     {
       title: "FIDELITY THAT FLEXES",
       subtitle: "ALMOST-UNREAL COMFORT",
       description: "Advanced acoustic engineering meets ergonomic design. Memory foam ear cups adapt to your unique ear shape, providing hours of fatigue-free listening pleasure.",
-      image: "https://images.unsplash.com/photo-1545127398-14699f92334b?w=800&h=1000&fit=crop"
+      image: "/assets/Blender/coconot-1.jpg",
     },
     {
       title: "TIMELESS DESIGN",
