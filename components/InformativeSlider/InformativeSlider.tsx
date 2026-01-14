@@ -54,7 +54,7 @@ export const sliderContent = [
     subHeading: "Portable Juicer – Ruby Red",
     information:
       "Stylish, powerful, and portable. Your daily nutrition companion.",
-    href: "/products/portable-juicer?variant=red",
+    href: "/products/portable-juicer?variant=ruby",
   },
 ];
 

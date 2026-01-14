@@ -16,31 +16,31 @@ const WhyChooseUsHoverImage = ({ className }: WhyChooseUsHoverImageProps) => {
       title: "CRAFTED FOR THE SENSES",
       subtitle: "LESS EFFORT. MORE EMOTION.",
       description: "You can see it in the soft lambskin leather, picked and stitched with exacting attention to detail. You can feel it in the precision-cut aluminium frame that's robust yet beautiful.",
-      image: "/assets/Blender/black1.jpg",
+      image: "/assets/Blender/BlackBlender/black1.jpg",
     },
     {
       title: "STANDOUT ACCESSORIES",
       subtitle: "MUSIC AT YOUR FINGERTIPS",
       description: "Premium carrying case crafted from genuine leather. Magnetic closure ensures your headphones stay protected while maintaining that luxurious feel in your hands.",
-      image: "/assets/Blender/royal_blue_1.jpg",
+      image: "/assets/Blender/BlueBlender/royal_blue_1.jpg",
     },
     {
       title: "FIDELITY THAT FLEXES",
       subtitle: "ALMOST-UNREAL COMFORT",
       description: "Advanced acoustic engineering meets ergonomic design. Memory foam ear cups adapt to your unique ear shape, providing hours of fatigue-free listening pleasure.",
-      image: "/assets/Blender/coconot-1.jpg",
+      image: "/assets/Blender/CoconotBlender/coconot-1.jpg",
     },
     {
       title: "TIMELESS DESIGN",
       subtitle: "MADE TO LAST",
       description: "Every component carefully selected for durability and aesthetics. From the brushed metal finish to the reinforced cables, these headphones are built for generations.",
-      image: "https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=800&h=1000&fit=crop"
+      image: "/assets/Blender/IceBlender/ice_blender_1.jpg",
     },
     {
       title: "WIRELESS FREEDOM",
       subtitle: "SEAMLESS CONNECTIVITY",
       description: "Latest Bluetooth 5.0 technology ensures stable connection up to 30 feet. Quick pairing with all your devices, and battery life that lasts all day long.",
-      image: "https://images.unsplash.com/photo-1524678606370-a47ad25cb82a?w=800&h=1000&fit=crop"
+      image: "/assets/Blender/RubyBlender/Ruby_1.jpg",
     }
   ];
 
@@ -63,25 +63,25 @@ const WhyChooseUsHoverImage = ({ className }: WhyChooseUsHoverImageProps) => {
   }, [emblaApi]);
 
   return (
-    <section className={`w-full bg-[#000000e6] py-10 ${className}`}>
+    <section className={`w-full bg-[#fff] py-10 ${className}`}>
       <div className='container mx-auto'>
-          <h2 className='text-[40px] text-[#fff] text-center font-[600] mb-5'>Why BlendRas Portable Juicer</h2>
+          <h2 className='text-[40px] text-[#000] text-center font-[600] mb-5'>Why BlendRas Portable Juicer</h2>
           
             <div className="h-[600px] flex gap-8">
               {/* Left Side - Text Items */}
               <div className="flex flex-col w-1/2 justify-center">
                 {slides.map((slide, index) => (
-                  <div key={index} onMouseEnter={() => scrollTo(index)} className={`p-6 rounded-lg cursor-pointer transition-all duration-500 ${ selectedIndex === index ? 'bg-[#000]' : 'bg-transparent hover:bg-white/5' }`} >
+                  <div key={index} onMouseEnter={() => scrollTo(index)} className={`p-6 rounded-lg cursor-pointer transition-all duration-500 ${ selectedIndex === index ? 'bg-[#dbd4d463]' : 'bg-transparent hover:bg-white/5' }`} >
                     <h3
                       className={`text-xl font-bold mb-1 transition-colors duration-300 ${
-                        selectedIndex === index ? 'text-white' : 'text-gray-400'
+                        selectedIndex === index ? 'text-black' : 'text-white-400'
                       }`}
                     >
                       {slide.title}
                     </h3>
                     <p
                       className={`text-sm transition-colors duration-300 ${
-                        selectedIndex === index ? 'text-gray-300' : 'text-gray-500'
+                        selectedIndex === index ? 'text-black-700' : 'text-gray-500'
                       }`}
                     >
                       {slide.subtitle}
@@ -89,7 +89,7 @@ const WhyChooseUsHoverImage = ({ className }: WhyChooseUsHoverImageProps) => {
                     <div
                       className={`mt-3 text-sm leading-relaxed transition-all duration-500 overflow-hidden ${
                         selectedIndex === index
-                          ? 'max-h-40 opacity-100 text-gray-300'
+                          ? 'max-h-40 opacity-100 text-black-700'
                           : 'max-h-0 opacity-0'
                       }`}
                     >

@@ -56,7 +56,7 @@ const sliderContent = [
     title: "Ruby Red Edition",
     description:
       "Your daily nutrition partner. Blend fresh juice in seconds.",
-    href: "/products/portable-juicer?variant=red",
+    href: "/products/portable-juicer?variant=ruby",
   },
 ];
 

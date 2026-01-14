@@ -15,8 +15,7 @@ const slides = [
     subtitle: "LESS EFFORT. MORE EMOTION.",
     description:
       "You can see it in the soft lambskin leather, picked and stitched with exacting attention to detail. You can feel it in the precision-cut aluminium frame that's robust yet beautiful.",
-    image:
-      "/assets/Blender/black1.jpg",
+    image: "/assets/Blender/BlackBlender/black1.jpg",
   },
   {
     id: "accessories",
@@ -24,8 +23,7 @@ const slides = [
     subtitle: "MUSIC AT YOUR FINGERTIPS",
     description:
       "Premium carrying case crafted from genuine leather. Magnetic closure ensures your headphones stay protected while maintaining that luxurious feel in your hands.",
-    image:
-      "/assets/Blender/royal_blue_1.jpg",
+    image: "/assets/Blender/BlueBlender/royal_blue_1.jpg",
   },
   {
     id: "fidelity",
@@ -33,8 +31,7 @@ const slides = [
     subtitle: "ALMOST-UNREAL COMFORT",
     description:
       "Advanced acoustic engineering meets ergonomic design. Memory foam ear cups adapt to your unique ear shape, providing hours of fatigue-free listening pleasure.",
-    image:
-      "/assets/Blender/coconot-1.jpg",
+    image: "/assets/Blender/CoconotBlender/coconot-1.jpg",
   },
   {
     id: "design",
@@ -42,8 +39,7 @@ const slides = [
     subtitle: "MADE TO LAST",
     description:
       "Every component carefully selected for durability and aesthetics. From the brushed metal finish to the reinforced cables, these headphones are built for generations.",
-    image:
-      "/assets/Blender/ice_blender_1.jpg",
+    image: "/assets/Blender/IceBlender/ice_blender_1.jpg",
   },
   {
     id: "wireless",
@@ -51,8 +47,7 @@ const slides = [
     subtitle: "SEAMLESS CONNECTIVITY",
     description:
       "Latest Bluetooth technology ensures stable connection and all-day battery life with seamless multi-device pairing.",
-    image:
-      "/assets/Blender/Ruby_1.jpg",
+    image: "/assets/Blender/RubyBlender/Ruby_1.jpg",
   },
 ];
 
