@@ -1,180 +1,131 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useState, useTransition } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import CountryCodeSelector from "@/components/SignUp/CountryCodeSelector";
-import { ChevronDown } from "lucide-react";
-import ConfirmOtp from "@/components/SignUp/ConfirmOtp";
 import Link from "next/link";
-
-type View = "signup" | "country" | "otp";
+import { signup } from "@/actions/signup";
+import { FormError } from "@/components/auth/FormError";
+import { FormSuccess } from "@/components/auth/FormSuccess";
 
 type SignUpFormValues = {
-  firstName: string;
-  phone: string;
+  name: string;
+  email: string;
   password: string;
 };
 
 export default function SignUpPage() {
-  const [view, setView] = useState<View>("signup");
-  const [countryCode, setCountryCode] = useState("+91");
+  const [error, setError] = useState<string | undefined>();
+  const [success, setSuccess] = useState<string | undefined>();
+  const [isPending, startTransition] = useTransition();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
-    watch,
   } = useForm<SignUpFormValues>();
 
-  const phoneValue = watch("phone");
-
-  /* SUBMIT → GO TO OTP */
   const onSubmit = (data: SignUpFormValues) => {
-    console.log({
-      countryCode,
-      ...data,
-    });
+    setError(undefined);
+    setSuccess(undefined);
 
-    setView("otp"); // OTP screen (you’ll implement later)
+    startTransition(() => {
+      signup(data).then((res) => {
+        setError(res.error);
+        setSuccess(res.success);
+      });
+    });
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#000000e6]">
-      <div className="bg-white p-6 rounded-md w-full max-w-sm shadow">
+    <div className="min-h-screen flex items-center justify-center bg-white/50">
+      <div className="bg-white p-6 rounded-md w-full max-w-sm shadow space-y-4">
 
-        {/* ================= SIGN UP FORM ================= */}
-        {view === "signup" && (
-          <>
-            <form onSubmit={handleSubmit(onSubmit)} className="border-b border-[#00000052] pb-4">
-              <h1 className="text-[28px] font-[600] mb-4 text-[#000000e6]">
-                Create Account
-              </h1>
+        <h1 className="text-[26px] font-semibold text-black">
+          Create account
+        </h1>
 
+        <FormError message={error} />
+        <FormSuccess message={success} />
 
-              {/* MOBILE NUMBER */}
-              <div className="mb-4">
-                <Label className="text-[#000000e6]">Mobile number</Label>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
-                <div className="bg-[#fff] flex gap-2 mt-2">
-                  {/* COUNTRY CODE */}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setView("country")}
-                    className="bg-[#fff] text-[#000000e6] flex items-center gap-1"
-                  >
-                    {countryCode}
-                    <ChevronDown size={16} />
-                  </Button>
+          {/* FIRST NAME */}
+          <div>
+            <Label className="text-black/80 text-[15px]">First name</Label>
+            <Input disabled={isPending} {...register("name", { required: true })} className="bg-[#fff] border-[#000] placeholder:text-[#000] text-[#000] focus-visible:!ring-0" />
+            {errors.name && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.name.message}
+              </p>
+            )}
+          </div>
 
-                  {/* PHONE INPUT */}
-                  <Input className={`bg-[#fff] placeholder:text-[#000000e6] text-[#000000e6] focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none  ${errors.phone ? "focus-visible:border-tranparent focus-visible:outline-none border-[2px] border-[#c10015]" : "border-[1px] border-[#0000004a]"
-                }`} type="tel" inputMode="numeric" pattern="[0-9]*" placeholder="Mobile number"
-                    {...register("phone", {
-                      required: "Mobile number is required",
-                      minLength: {
-                        value: 7,
-                        message: "Minimum 7 digits",
-                      },
-                      pattern: {
-                        value: /^\d+$/,
-                        message: "Only numbers allowed",
-                      },
-                    })}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, "");
-                      setValue("phone", value);
-                    }}
-                  />
-                </div>
+          {/* EMAIL */}
+          <div>
+            <Label className="text-black/80 text-[15px]">Email</Label>
+            <Input
+              type="email"
+              disabled={isPending}
+              {...register("email", { required: true })} className="bg-[#fff] border-[#000] placeholder:text-[#000] text-[#000] focus-visible:!ring-0"
+            />
+            {errors.email && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
 
-                {errors.phone && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.phone.message}
-                  </p>
-                )}
-              </div>
+          {/* PASSWORD */}
+          <div>
+            <Label className="text-black/80 text-[15px]">Password</Label>
+            <Input
+              type="password"
+              disabled={isPending}
+              {...register("password", { required: true })} className="bg-[#fff] border-[#000] placeholder:text-[#000] text-[#000] focus-visible:!ring-0"
+            />
+            {errors.password && (
+              <p className="text-xs text-red-600 mt-1">
+                {errors.password.message}
+              </p>
+            )}
+          </div>
 
-              {/* FIRST NAME */}
-              <div className="mb-4">
-                <Label className="text-[#000000e6] mb-2 block">First name</Label>
-                <Input className={`bg-[#fff] placeholder:text-[#000000e6] text-[#000000e6] focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none  ${errors.firstName ? "focus-visible:border-tranparent focus-visible:outline-none border-[2px] border-[#c10015]" : "border-[1px] border-[#0000004a]"
-                }`} placeholder="Your name" {...register("firstName", { required: "First name is required", minLength: { value: 2, message: "At least 2 characters", }, })} />
-                {errors.firstName && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.firstName.message}
-                  </p>
-                )}
-              </div>
+          <Button
+            disabled={isPending}
+            className="w-full bg-yellow-400 text-black"
+          >
+            {isPending ? "Creating account..." : "Create account"}
+          </Button>
+        </form>
 
+        {/* DIVIDER */}
+        <div className="flex items-center my-4">
+          <div className="flex-1 h-px bg-gray-300" />
+          <span className="px-2 text-sm text-gray-500">OR</span>
+          <div className="flex-1 h-px bg-gray-300" />
+        </div>
 
+        {/* GOOGLE SIGNUP */}
+        <Button variant="outline" className="w-full bg-[#fff] text-[#000]">
+          Continue with Google
+        </Button>
 
-              {/* PASSWORD */}
-              <div className="mb-4">
-                <Label className="text-[#000000e6] ">Password</Label>
-                <Input className={`bg-[#fff] placeholder:text-[#000000e6] text-[#000000e6] focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none  ${errors.password ? "focus-visible:border-tranparent focus-visible:outline-none border-[2px] border-[#c10015]" : "border-[1px] border-[#0000004a]"
-                }`} 
-                  type="password"
-                  placeholder="At least 6 characters"
-                  {...register("password", {
-                    required: "Password is required",
-                    minLength: {
-                      value: 6,
-                      message: "Minimum 6 characters",
-                    },
-                  })}
-                />
-                {errors.password && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.password.message}
-                  </p>
-                )}
-              </div>
-              <Label className="text-[#000000e6] text-[14px] leading-[18px] mb-3 block">To verify your number, we will send you a text message with a temporary code. Message and data rates may apply.</Label>
-              {/* SUBMIT */}
-              <Button
-                type="submit"
-                className="w-full bg-yellow-400 text-black"
-                disabled={!phoneValue}
-              >
-                Verify mobile number
-              </Button>
-            </form>
-            <div className="my-2">
-              <Label className="text-[#000000e6] text-[14px] block mb-0 font-[700]">Already a customer?</Label>
-              <Link href="/sign-in" className="text-blue-600 text-[14px]">Sign in</Link>
-            </div>
-            <p className="text-xs text-gray-600 mt-4">
-              By continuing, you agree to our{" "}
-              <Link href="#" className="text-blue-600">Terms</Link> &{" "}
-              <Link href="#" className="text-blue-600">Privacy</Link>.
-            </p>
-          </>
-        )}
+        {/* SIGN IN LINK */}
+        <p className="text-sm text-center text-gray-600">
+          Already have an account?{" "}
+          <Link href="/sign-in" className="text-blue-600">
+            Sign in
+          </Link>
+        </p>
 
-        {/* ================= COUNTRY CODE ================= */}
-        {view === "country" && (
-          <CountryCodeSelector
-            handleSelect={(code) => {
-              setCountryCode(code);
-              setView("signup");
-            }}
-            goBack={() => setView("signup")}
-          />
-        )}
-
-        {/* ================= OTP PLACEHOLDER ================= */}
-        {view === "otp" && (
-          <ConfirmOtp
-            phoneNumber={watch("phone")}
-            countryCode={countryCode}
-            goBack={() => setView("signup")}
-          />
-        )}
+        <p className="text-xs text-gray-600 text-center">
+          By continuing, you agree to our{" "}
+          <Link href="#" className="text-blue-600">Terms</Link> &{" "}
+          <Link href="#" className="text-blue-600">Privacy Policy</Link>.
+        </p>
       </div>
     </div>
   );
