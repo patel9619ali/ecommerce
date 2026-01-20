@@ -51,14 +51,14 @@ export const BuyCartSection = ({
       </div>
 
       {/* Benefits */}
-      <div className="mt-6">
+      {/* <div className="mt-6">
         {selectedVariant.benefits.map((b) => (
           <div key={b.id} className="flex items-center gap-2">
             <b.icon className="w-5 h-5" />
             <span>{b.label}</span>
           </div>
         ))}
-      </div>
+      </div> */}
       <p className="mt-6 text-[14px] text-black/80">Hurry, only 7 items left in stock!</p>
       <div className="mt-6">
         <AddToCartButton productId={product.id} slug={product.slug} title={product.title} variant={selectedVariant}/>
@@ -67,7 +67,7 @@ export const BuyCartSection = ({
         <BuyNow/>
       </div>
       <div className="flex cursor-pointer items-center">
-        <Share className="mt-6 w-6 h-6 cursor-pointer hover:text-white/80 transition-colors duration-300 ease-out rotate-90" />
+        <Share className="mt-6 w-6 h-6 cursor-pointer dark:text-black/60 hover:text-white/80  transition-colors duration-300 ease-out rotate-90" />
         <span className="text-black/80 text-[18px] ml-2 mt-6 hover:underline">Share</span>
       </div>
     </section>
