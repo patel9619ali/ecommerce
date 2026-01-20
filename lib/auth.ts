@@ -1,27 +1,44 @@
 import NextAuth from "next-auth"
 import { PrismaAdapter } from "@auth/prisma-adapter"
+import { UserRole } from "@prisma/client"
 import { PrismaClient } from "@prisma/client"
 import authConfig from "@/auth.config"
 import { db } from "./db"
-console.log("Hello")
-export const { auth, handlers: {GET, POST}, signIn, signOut } = NextAuth({
-  callbacks: {
-    async session({
-      token,
-      session
-    }){
-      if (token.sub && session.user){
-        session.user.id = token.sub;
-      }
-      console.log(session,"Session");
-       return session
-    },
-    async jwt({
-      token
-    }){
-      return token
-    }
+import { getUserById } from "@/data/user"
+
+export const { auth, handlers, signIn, signOut } = NextAuth({
+  pages: {
+    signIn: '/sign-in',
+    signOut: '/sign-out',
+    error: '/error',
   },
+  events: {
+  async linkAccount({user}) {
+    await db.user.update({
+      where: { id: user.id },
+      data: { emailVerified: new Date() },
+  });
+}},
+callbacks: {
+  async jwt({ token }) {
+    if (!token.sub) return token;
+
+    const existingUser = await getUserById(token.sub);
+    if (!existingUser) return token;
+
+    token.role = existingUser.role as UserRole;
+    return token;
+  },
+
+  async session({ session, token }) {
+    if (session.user && token.sub) {
+      session.user.id = token.sub;
+      session.user.role = token.role as UserRole;
+    }
+    return session;
+  },
+},
+
   adapter: PrismaAdapter(db),
   session: { strategy: "jwt" },
   ...authConfig,
