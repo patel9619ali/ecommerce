@@ -116,7 +116,7 @@ const MobileInformativeSlider = ({ className }: Props) => {
       </div>
 
       {/* ================= TEXT CONTENT (STATIC) ================= */}
-      <div className="px-5 py-8">
+      <div className="px-5 py-8 dark:bg-[#fffffff0]">
         <AnimatePresence mode="wait">
           <motion.div
             key={selectedIndex}

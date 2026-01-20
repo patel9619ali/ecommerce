@@ -18,10 +18,10 @@ interface NavSheetDrawerProps {
 }
 
 const HamBurger = (
-  <svg width="21" height="16" viewBox="0 0 21 16" fill="none">
-    <path d="M1.25 1.25H19.2483" stroke="#fff" strokeWidth="2.5" />
-    <path d="M1.25 7.85H11.8372" stroke="#fff" strokeWidth="2.5" />
-    <path d="M1.25 14.45H15.0134" stroke="#fff" strokeWidth="2.5" />
+  <svg width="21" height="16" viewBox="0 0 21 16" fill="none"  className="dark:text-black dark:!stroke-black">
+    <path d="M1.25 1.25H19.2483" stroke="#fff" strokeWidth="2.5"  className="dark:text-black dark:!stroke-black"/>
+    <path d="M1.25 7.85H11.8372" stroke="#fff" strokeWidth="2.5"  className="dark:text-black dark:!stroke-black"/>
+    <path d="M1.25 14.45H15.0134" stroke="#fff" strokeWidth="2.5"  className="dark:text-black dark:!stroke-black"/>
   </svg>
 )
 
@@ -39,7 +39,7 @@ export default function NavSheetDrawer({
           variant="ghost"
           size="icon"
           className={cn(
-            "flex flex-col gap-1 items-center hover:bg-transparent",
+            "flex flex-col gap-1 items-center hover:bg-transparent dark:text-black",
             className
           )}
         >

@@ -12,16 +12,16 @@ export default function MobileBottomHeader({ visible }: { visible: boolean }) {
 
   return (
     <nav
-      className={` fixed bottom-0 left-0 w-full bg-black text-white flex justify-around py-2 z-50 transition-transform duration-300 ${visible ? "translate-y-0" : "translate-y-full"} sm:hidden `} >
+      className={` fixed bottom-0 left-0 w-full bg-black dark:bg-[#fff] text-white flex justify-around py-2 z-50 transition-transform duration-300 ${visible ? "translate-y-0" : "translate-y-full"} sm:hidden `} >
       {/* HOME */}
-      <Link href="/" className="flex flex-col items-center gap-1">
-        <HomeIcon size={15} stroke="#f9f9f996"/>
+      <Link href="/" className="flex flex-col items-center gap-1 dark:text-black">
+        <HomeIcon size={15} stroke="#f9f9f996" className="dark:text-black dark:!stroke-black"/>
         <span className="text-[10px]">HOME</span>
       </Link>
 
       {/* USER */}
-      <Link href="/sign-in" className="flex flex-col items-center gap-1">
-        <svg width="20" height="20" viewBox="0 0 14 18" stroke="#f9f9f996" fill="none">
+      <Link href="/sign-in" className="flex flex-col items-center gap-1 dark:text-black">
+        <svg width="20" height="20" viewBox="0 0 14 18" stroke="#f9f9f996" fill="none" className="dark:text-black dark:!stroke-black">
           <path d="M7 10c-3 0-5 2-5 5h10c0-3-2-5-5-5z" />
           <circle cx="7" cy="4" r="3" />
         </svg>
@@ -31,9 +31,9 @@ export default function MobileBottomHeader({ visible }: { visible: boolean }) {
       {/* CART (opens sheet) */}
       <button
         onClick={openCart}
-        className="flex flex-col items-center gap-1"
+        className="flex flex-col items-center gap-1 dark:text-black"
       >
-        <ShoppingCart className="h-5 w-5" stroke="#f9f9f996"/>
+        <ShoppingCart stroke="#f9f9f996" className="h-5 w-5 dark:text-black dark:!stroke-black"/>
         <span className="text-[10px]">CART</span>
       </button>
 
