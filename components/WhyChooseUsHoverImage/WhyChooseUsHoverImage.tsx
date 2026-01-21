@@ -81,7 +81,7 @@ const WhyChooseUsHoverImage = ({ className }: WhyChooseUsHoverImageProps) => {
                     </h3>
                     <p
                       className={`text-sm transition-colors duration-300 ${
-                        selectedIndex === index ? 'text-black-700' : 'text-gray-500'
+                        selectedIndex === index ? 'text-black-700 dark:text-black' : 'text-gray-500 dark:text-black'
                       }`}
                     >
                       {slide.subtitle}
@@ -89,7 +89,7 @@ const WhyChooseUsHoverImage = ({ className }: WhyChooseUsHoverImageProps) => {
                     <div
                       className={`mt-3 text-sm leading-relaxed transition-all duration-500 overflow-hidden ${
                         selectedIndex === index
-                          ? 'max-h-40 opacity-100 text-black-700'
+                          ? 'max-h-40 opacity-100 text-black-700 dark:text-black'
                           : 'max-h-0 opacity-0'
                       }`}
                     >
