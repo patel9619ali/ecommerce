@@ -74,7 +74,7 @@ const WhyChooseUsHoverImage = ({ className }: WhyChooseUsHoverImageProps) => {
                   <div key={index} onMouseEnter={() => scrollTo(index)} className={`p-6 rounded-lg cursor-pointer transition-all duration-500 ${ selectedIndex === index ? 'bg-[#dbd4d463]' : 'bg-transparent hover:bg-white/5' }`} >
                     <h3
                       className={`text-xl font-bold mb-1 transition-colors duration-300 ${
-                        selectedIndex === index ? 'text-black' : 'text-white-400'
+                        selectedIndex === index ? 'text-black dark:text-black' : 'dark:text-black text-white-400'
                       }`}
                     >
                       {slide.title}

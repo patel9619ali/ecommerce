@@ -25,7 +25,7 @@ const HamBurger = (
     </svg>
 );
 const user = (
-  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" width="2" height="2" strokeWidth="1.5" fill="none" viewBox="0 0 14 18">
+  <svg className="dark:text-black" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" width="2" height="2" strokeWidth="1.5" fill="none" viewBox="0 0 14 18">
       <path d="M7.34497 10.0933C4.03126 10.0933 1.34497 12.611 1.34497 15.7169C1.34497 16.4934 1.97442 17.1228 2.75088 17.1228H11.9391C12.7155 17.1228 13.345 16.4934 13.345 15.7169C13.345 12.611 10.6587 10.0933 7.34497 10.0933Z" stroke="currentColor"></path>
       <ellipse cx="7.34503" cy="5.02631" rx="3.63629" ry="3.51313" stroke="currentColor" strokeLinecap="square"></ellipse>
     </svg>
@@ -132,15 +132,15 @@ useEffect(() => {
         {/* Right: Actions */}
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" className=" cursor-pointer transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:bg-transparent ">
-            <Search className="h-5 w-5" />
+            <Search className="h-5 w-5 dark:text-black" />
             <span className="sr-only">Search</span>
           </Button>
-          <Button onClick={() => router.push('/sign-in')} variant="ghost" size="icon" className=" cursor-pointer transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:bg-transparent ">
+          <Button onClick={() => router.push('/sign-in')} variant="ghost" size="icon" className=" cursor-pointer transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:bg-transparent">
             {user}
             <span className="sr-only">Account</span>
           </Button>
           <Button onClick={openCart} variant="ghost" size="icon" disabled={items.length === 0} >
-              <ShoppingCart className="h-5 w-5" />
+              <ShoppingCart className="h-5 w-5 dark:text-black" />
           </Button>
 
             <AddToCart />

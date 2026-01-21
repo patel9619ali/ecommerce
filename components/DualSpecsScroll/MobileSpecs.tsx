@@ -108,7 +108,7 @@ const MobileSpecs = ({ className }: MobileSpecs) => {
  
   return (
     <>
-    <section className={`${className} bg-[#dbd4d463] py-10`}>
+    <section className={`${className} bg-[#dbd4d463] dark:bg-[#fffffff0] py-10`}>
       <div className='container mx-auto !px-0'>
         <h2 className='text-[28px] text-[#000] text-center font-[600] mb-5'>TECH SPECS</h2>
         <div>

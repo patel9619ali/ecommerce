@@ -227,7 +227,7 @@ export const ProductGallery = ({ variant }: Props) => {
 
       {/* ================= MOBILE THUMB DIALOG ================= */}
       <Dialog open={thumbDialogOpen} onOpenChange={setThumbDialogOpen}>
-        <DialogContent className=" bottom-0 top-auto rounded-t-2xl p-0 max-h-[75vh] w-full">
+        <DialogContent className=" bottom-0 top-auto rounded-t-2xl p-0 max-h-[75vh] w-full dark:bg-[#fffffff0]">
           <DialogHeader className="p-4 flex flex-row justify-between items-center border-b">
               <DialogTitle className="text-[#000] text-start xs:text-[23px] text-md font-semibold break-all">All Images</DialogTitle>
               <DialogClose className="group lg:bg-[#fff] bg:transparent text-white hover:bg-transparent opacity-90 hover:opacity-100 cursor-pointer outline-none ring-0 focus:ring-0 focus-visible:ring-0 ring-offset-0 !p-0 cursor-pointer z-3">
