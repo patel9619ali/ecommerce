@@ -5,7 +5,9 @@ import { DEFAULT_REDIRECT_PAGE } from "@/route";
 import { LoginSchema } from "@/schemas/login-schema";
 import type { AuthResponse } from "@/types/auth";
 import { AuthError } from "next-auth";
-
+import { generateVerificationToken } from "@/lib/token";
+import { getUserByEmail } from "@/data/user";
+import { sendVerificationEmail } from "@/lib/mail";
 export async function login(values: unknown): Promise<AuthResponse> {
   const validatedFields = LoginSchema.safeParse(values);
 
@@ -16,7 +18,15 @@ export async function login(values: unknown): Promise<AuthResponse> {
   }
 
   const { email, password } = validatedFields.data;
-
+const existingUser = await getUserByEmail(email);
+if(!existingUser || !existingUser.email || !existingUser.password) {
+  return { error: "Invalid email or password" };
+}
+if(!existingUser.emailVerified) {
+ const verificationToken = await generateVerificationToken(existingUser.email);
+ return { error: "Email not verified. Please check your inbox for the verification email." }; 
+}
+  
   try {
     await signIn("credentials",{
       email,
@@ -39,8 +49,10 @@ export async function login(values: unknown): Promise<AuthResponse> {
   // 🔜 Call Strapi here
   // 🔜 Verify password
   // 🔜 Create session
-
-  return {
-    success: "Login successful",
-  };
+  const verificationToken = await generateVerificationToken(email);
+  await sendVerificationEmail(
+    verificationToken.email,
+    verificationToken.token
+  );
+  return { success: "Confirmation email sent!" };
 }

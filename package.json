@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --no-turbo",
+    "dev": "next dev --turbo",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint"
@@ -38,6 +38,7 @@
     "react-hook-form": "^7.69.0",
     "react-medium-image-zoom": "^5.4.0",
     "react-textarea-autosize": "^8.5.9",
+    "resend": "^6.8.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^13.0.0",

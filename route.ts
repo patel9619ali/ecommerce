@@ -1,5 +1,6 @@
 export const publicRoutes: string[] = [
-  '/'
+  '/',
+  '/new-verification',
 ];
 
 export const authRoutes: string[] = [

@@ -4,7 +4,8 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { SignupSchema } from "@/schemas/signup-schema";
 import type { AuthResponse } from "@/types/auth";
-
+import { generateVerificationToken } from "@/lib/token";
+import { sendVerificationEmail } from "@/lib/mail";
 export async function signup(values: unknown): Promise<AuthResponse> {
   const validatedFields = SignupSchema.safeParse(values);
 
@@ -31,6 +32,12 @@ export async function signup(values: unknown): Promise<AuthResponse> {
       password: hashedPassword,
     },
   });
-// TODO send verification token email
-  return { success: "Account created successfully" };
+
+
+  const verificationToken = await generateVerificationToken(email);
+  await sendVerificationEmail(
+    verificationToken.email,
+    verificationToken.token
+  );
+  return { success: "Confirmation email sent!" };
 }
