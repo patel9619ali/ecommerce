@@ -45,20 +45,20 @@ return (
       <AuthCard
         title="Email Verification"
         description="Confirming your email address..."
-        icon={<MailCheck className="h-6 w-6 text-primary-foreground" />}
+        icon={<MailCheck className="h-6 w-6 text-[#000000]" />}
       >
         <div className="space-y-4">
           {isLoading && (
             <div className="flex flex-col items-center justify-center gap-3 py-4">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-sm text-muted-foreground">Verifying your email...</p>
+              <Loader2 className="h-8 w-8 animate-spin text-[#000000]" />
+              <p className="text-sm text-[#000000]">Verifying your email...</p>
             </div>
           )}
 
           {!isLoading && success && (
             <div className="space-y-4">
               <FormSuccess message={success} />
-              <Button className="w-full" asChild>
+              <Button className="text-[#fff] w-full" asChild>
                 <a href="/sign-in">Continue to Login</a>
               </Button>
             </div>
@@ -67,7 +67,7 @@ return (
           {!isLoading && error && (
             <div className="space-y-4">
               <FormError message={error} />
-              <Button variant="outline" className="w-full" onClick={() => window.location.reload()}>
+              <Button variant="outline" className="text-[#fff] w-full" onClick={() => window.location.reload()}>
                 Try Again
               </Button>
             </div>

@@ -56,7 +56,7 @@ export const ForgotPasswordForm = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="flex min-h-screen items-center justify-center bg-white/50 p-4">
       <AuthCard
         title="Forgot Password"
         description="Enter your email and we'll send you a reset link"
@@ -66,7 +66,8 @@ export const ForgotPasswordForm = () => {
           {!success ? (
             <>
               <div className="space-y-2">
-                <Label htmlFor="email">Email address</Label>
+                <Label className="text-black/80 text-[15px]" htmlFor="email">Email address</Label>
+                
                 <Input
                   id="email"
                   type="email"
@@ -74,16 +75,16 @@ export const ForgotPasswordForm = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading}
-                  className="h-11"
+                  className="bg-[#fff] border-[#000] placeholder:text-[#000] text-[#000] focus-visible:!ring-0"
                 />
               </div>
 
               {error && <FormError message={error} />}
 
-              <Button type="submit" className="w-full h-11" disabled={isLoading}>
+              <Button type="submit" className="w-full h-11 mb-0 text-[#000000] border-b-2 rounded-none border-[#000000]" disabled={isLoading}>
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin text-[#000000]" />
                     Sending...
                   </>
                 ) : (
@@ -92,9 +93,9 @@ export const ForgotPasswordForm = () => {
               </Button>
             </>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 text-[#000000]">
               <FormSuccess message={success} />
-              <p className="text-center text-sm text-muted-foreground">
+              <p className="text-center text-sm text-[#000000]">
                 Didn't receive the email?{" "}
                 <button
                   type="button"
@@ -102,7 +103,7 @@ export const ForgotPasswordForm = () => {
                     setSuccess(undefined);
                     setEmail("");
                   }}
-                  className="font-medium text-primary hover:underline"
+                  className="font-medium text-[#000000] hover:text-[#000000] hover:underline"
                 >
                   Try again
                 </button>
@@ -114,11 +115,11 @@ export const ForgotPasswordForm = () => {
             <Button
               type="button"
               variant="ghost"
-              className="w-full text-muted-foreground hover:text-foreground"
+              className="w-full text-[#000000] hover:text-[#000000]"
               asChild
             >
-              <a href="/login">
-                <ArrowLeft className="mr-2 h-4 w-4" />
+              <a className="text-[#000000]" href="/sign-in">
+                <ArrowLeft className="text-[#000000] mr-2 h-4 w-4" />
                 Back to Login
               </a>
             </Button>
