@@ -5,7 +5,8 @@ export const publicRoutes: string[] = [
 
 export const authRoutes: string[] = [
   '/sign-in',
-  '/sign-up'
+  '/sign-up',
+  '/forgot-password',
 ];
 
 export const apiAuthPrefix: string = '/api/auth';

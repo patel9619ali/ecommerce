@@ -96,8 +96,11 @@ useEffect(() => {
             )}
           </div>
 
-          <Button disabled={isPending} className="w-full bg-yellow-400 text-black">
+          <Button disabled={isPending} className="w-full bg-yellow-400 text-black mb-0">
             {isPending ? "Signing in..." : "Sign in"}
+          </Button>
+          <Button className="text-sm text-gray-600 p-0 hover:text-black" >
+            <Link href="/forgot-password">Forgot your password?</Link>
           </Button>
         </form>
 

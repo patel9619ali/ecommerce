@@ -1,51 +1,39 @@
+
+import authConfig from "@/auth.config";
+import NextAuth from "next-auth";
 import {
-  publicRoutes,
-  authRoutes,
-  apiAuthPrefix,
-  DEFAULT_REDIRECT_PAGE,
-} from "@/route";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-
-export default function middleware(req: NextRequest) {
-  const { nextUrl } = req;
-
-  // ✅ replaces req.auth (Edge-safe)
-  const sessionToken =
-    req.cookies.get("__Secure-next-auth.session-token") ||
-    req.cookies.get("next-auth.session-token");
-
-  const isLogginIn = !!sessionToken;
-
+  publicRoutes,authRoutes,apiAuthPrefix,DEFAULT_REDIRECT_PAGE
+}
+from "@/route";
+const {auth} = NextAuth(authConfig);
+export default auth((req) => {
+  const {nextUrl} = req;
+  let isLogginIn = !!req.auth;
   const isApiAuthRoutes = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoutes = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoutes = authRoutes.includes(nextUrl.pathname);
-
-  if (isApiAuthRoutes) {
-    return NextResponse.next();
+  if (isApiAuthRoutes){
+    return null;
   }
-
-  if (isAuthRoutes) {
-    if (isLogginIn) {
-      return NextResponse.redirect(
-        new URL(DEFAULT_REDIRECT_PAGE, nextUrl)
-      );
+  if (isAuthRoutes){
+    if (isLogginIn){
+      return Response.redirect(new URL(DEFAULT_REDIRECT_PAGE,nextUrl));
     }
-    return NextResponse.next();
+    return null;
   }
 
-  if (!isLogginIn && !isPublicRoutes) {
-    return NextResponse.redirect(
-      new URL("/sign-in", nextUrl)
-    );
+  if (!isLogginIn && !isPublicRoutes){
+    return Response.redirect(new URL ('/sign-in',nextUrl))
   }
-
-  return NextResponse.next();
-}
-
+  return null;
+});
+ 
+// Optionally, don't invoke Middleware on some paths
 export const config = {
   matcher: [
-    "/((?!_next|.*\\..*).*)",
-    "/(api|trpc)(.*)",
+    // Skip Next.js internals and all static files, unless found in search params
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
   ],
-};
+}
