@@ -33,6 +33,7 @@ if(!existingUser.emailVerified) {
       password,
       redirectTo: DEFAULT_REDIRECT_PAGE
     })
+    return { success: "Signed in successfully" };
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
