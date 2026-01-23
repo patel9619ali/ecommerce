@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { KeyRound, ArrowLeft, Loader2 } from "lucide-react";
 import { AuthCard } from "./AuthCard";
 import { Button } from "@/components/ui/button";
@@ -8,17 +8,11 @@ import { Label } from "@/components/ui/label";
 import { z } from "zod";
 import { FormError } from "../auth/FormError";
 import { FormSuccess } from "../auth/FormSuccess";
+import { forgotPassword } from "@/actions/forgot-password";
+import { useForm } from "react-hook-form";
 
-const emailSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address" }),
-});
-
-// Mock function - replace with your actual reset password action
-const sendResetEmail = async (email: string): Promise<{ error?: string; success?: string }> => {
-  // Simulate API call
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-  // Return success or error based on your backend logic
-  return { success: `Password reset link sent to ${email}` };
+type FormValues = {
+  email: string;
 };
 
 export const ForgotPasswordForm = () => {
@@ -26,35 +20,26 @@ export const ForgotPasswordForm = () => {
   const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(undefined);
-    setSuccess(undefined);
-
-    // Validate email
-    // const validation = emailSchema.safeParse({ email });
-    // if (!validation.success) {
-    //   setError(validation.error.errors[0].message);
-    //   return;
-    // }
-
-    setIsLoading(true);
-
-    try {
-      const data = await sendResetEmail(email);
-      if (data.error) {
-        setError(data.error);
-      } else if (data.success) {
-        setSuccess(data.success);
-      }
-    } catch {
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  const [isPending, startTransition] = useTransition();
+  
+    const {
+      register,
+      handleSubmit,
+      formState: { errors },
+    } = useForm<FormValues>();
+  
+    const onSubmit = (data: FormValues) => {
+      setError(undefined);
+      setSuccess(undefined);
+  
+      startTransition(() => {
+        forgotPassword(data).then((res) => {
+          console.log("Forgot Password Response:", res);
+          setError(res.error);
+          setSuccess(res.success);
+        });
+      });
+    };
   return (
     <div className="flex min-h-screen items-center justify-center bg-white/50 p-4">
       <AuthCard
@@ -62,21 +47,13 @@ export const ForgotPasswordForm = () => {
         description="Enter your email and we'll send you a reset link"
         icon={<KeyRound className="h-6 w-6 text-primary-foreground" />}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {!success ? (
             <>
               <div className="space-y-2">
                 <Label className="text-black/80 text-[15px]" htmlFor="email">Email address</Label>
                 
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
-                  className="bg-[#fff] border-[#000] placeholder:text-[#000] text-[#000] focus-visible:!ring-0"
-                />
+                <Input id="email" type="email" placeholder="Write your email" value={email} {...register("email", { required: "Email is required" })} onChange={(e) => setEmail(e.target.value)} disabled={isPending} className="bg-[#fff] border-[#000] placeholder:text-[#0f0f0] text-[#000] focus-visible:!ring-0" />
               </div>
 
               {error && <FormError message={error} />}
@@ -103,7 +80,7 @@ export const ForgotPasswordForm = () => {
                     setSuccess(undefined);
                     setEmail("");
                   }}
-                  className="font-medium text-[#000000] hover:text-[#000000] hover:underline"
+                  className="cursor-pointer font-medium text-[#000000] hover:text-[#000000] hover:underline"
                 >
                   Try again
                 </button>
