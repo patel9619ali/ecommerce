@@ -8,6 +8,7 @@ import DualSpecsScroll from "@/components/DualSpecsScroll/DualSpecsScroll";
 import MobileSpecs from "@/components/DualSpecsScroll/MobileSpecs";
 import WhyChooseUsHoverImage from "@/components/WhyChooseUsHoverImage/WhyChooseUsHoverImage";
 import WhyChooseUsMobileHoverImage from "@/components/WhyChooseUsHoverImage/WhyChooseUsMobileHoverImage";
+import FAQ from "@/components/FAQ/FAQ";
 
 export default function Home() {
   return (
@@ -20,6 +21,7 @@ export default function Home() {
       <MobileSpecs className={`block md:hidden`}/>
       <WhyChooseUsHoverImage className={`hidden md:block`}/>
       <WhyChooseUsMobileHoverImage className={`block md:hidden`}/>
+      <FAQ className={{ wrapper: "block", alignMent: "start",widthHeading: "3xl",searchFunctionalityVisiblity:"block", modal:false }}/>
     </>
   );
 }

@@ -2,6 +2,18 @@ import { Resend } from "resend";
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+export const sendTwoFactorTokenEmail = async (
+  email: string,
+  token: string
+) => {
+  await resend.emails.send({
+    from: "BlendRas <support@blendras.in>",
+    to: email,
+    subject: "Your (2FA) two-factor authentication code",
+    html: `<p>Your 2FA code is: ${token}</p>`,
+  });
+};
+
 export const sendPasswordResetEmail = async (
   email: string,
   token: string

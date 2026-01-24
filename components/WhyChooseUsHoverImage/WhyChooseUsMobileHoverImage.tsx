@@ -57,7 +57,7 @@ const WhyChooseUsMobileHoverImage = ({
   const [activeIndex, setActiveIndex] = useState(0); // first visible by default
 
   return (
-    <section className={clsx("w-full bg-[#dbd4d463] py-16", className)}>
+    <section className={clsx("w-full py-16 bg-[#dbd4d463] dark:bg-[#fffffff]", className)}>
       <div className="container mx-auto !px-3">
         <h2 className="text-[36px] text-[#000] text-center font-semibold mb-12">
           Why BlendRas Portable Juicer

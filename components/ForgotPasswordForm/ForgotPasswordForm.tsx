@@ -51,7 +51,7 @@ export const ForgotPasswordForm = () => {
           {!success ? (
             <>
               <div className="space-y-2">
-                <Label className="text-black/80 text-[15px]" htmlFor="email">Email address</Label>
+                <Label className="text-black/80 text-[15px] mb-1" htmlFor="email">Email address</Label>
                 
                 <Input id="email" type="email" placeholder="Write your email" value={email} {...register("email", { required: "Email is required" })} onChange={(e) => setEmail(e.target.value)} disabled={isPending} className="bg-[#fff] border-[#000] placeholder:text-[#0f0f0] text-[#000] focus-visible:!ring-0" />
               </div>

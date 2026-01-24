@@ -66,7 +66,7 @@ export const NewPasswordForm = () => {
           {!success ? (
             <>
               <div className="space-y-2">
-                <Label className="text-black/80 text-[15px]" htmlFor="password">
+                <Label className="text-black/80 text-[15px] mb-1 block" htmlFor="password">
                   New Password
                 </Label>
                 <div className="relative">
@@ -82,7 +82,7 @@ export const NewPasswordForm = () => {
                       },
                     })}
                     disabled={isPending}
-                    className="bg-[#fff] border-[#000] placeholder:text-[#0f0f0] text-[#000] focus-visible:!ring-0 pr-10"
+                    className="cursor-pointer bg-[#fff] border-[#000] placeholder:text-[#0f0f0] text-[#000] focus-visible:!ring-0 pr-10"
                   />
                   <button
                     type="button"
@@ -102,7 +102,7 @@ export const NewPasswordForm = () => {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-black/80 text-[15px]" htmlFor="confirmPassword">
+                <Label className="text-black/80 text-[15px] mb-1 block" htmlFor="confirmPassword">
                   Confirm Password
                 </Label>
                 <div className="relative">
