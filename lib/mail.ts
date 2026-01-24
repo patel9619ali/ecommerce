@@ -23,7 +23,27 @@ export const sendPasswordResetEmail = async (
     from: "BlendRas <support@blendras.in>",
     to: email,
     subject: "Reset your password",
-    html: `<p>Click <a href="${confirmLink}">here</a> to reset your password.</p>`,
+    html: `<p>You requested to reset your password for <b>BlendRas</b>.</p>
+
+<p>
+  Click the button below to reset your password.  
+  This link is valid for 1 hour.
+</p>
+
+<p>
+  <a href="${confirmLink}"
+     style="padding:10px 16px;background:#000;color:#fff;text-decoration:none;border-radius:6px;">
+     Reset Password
+  </a>
+</p>
+
+<p>If you didn’t request this, you can safely ignore this email.</p>
+
+<hr/>
+<p style="font-size:12px;color:#666">
+  © BlendRas · support@blendras.in
+</p>
+`,
   });
 };
 export const sendEmailVerificationOtp = async (

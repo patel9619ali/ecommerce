@@ -29,20 +29,23 @@ export const generateTwoFactorToken = async (email:string) => {
 }
 
 export const generatePasswordResetToken = async (email:string) => {
-    const token = uuidv4();
-    const expiresAt = new Date(); 
-    expiresAt.setHours(expiresAt.getHours() + 1); // Token valid for 1 hour
+    // const token = uuidv4();
+    // const expiresAt = new Date(); 
+    // expiresAt.setHours(expiresAt.getHours() + 1); // Token valid for 1 hour
     const existingToken = await getPasswordResetTokenByEmail(email);
 
-        if (existingToken) {
-        await db.passwordResetToken.delete({
-            where: {
-                id: existingToken.id,
-            },
-        });
-        }
+          if (existingToken && existingToken.expires > new Date()) {
+                return existingToken; // reuse token
+            }
 
-        const passwordResetToken = await db.passwordResetToken.create({
+            if (existingToken) {
+                await db.passwordResetToken.delete({
+                where: { id: existingToken.id },
+                });
+            }
+            const token = uuidv4();
+            const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+            const passwordResetToken = await db.passwordResetToken.create({
             data: {
                 email,
                 token,

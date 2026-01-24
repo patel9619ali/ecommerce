@@ -169,7 +169,7 @@ useEffect(() => {
             </>
           }
 
-          <Button disabled={isPending} className="w-full bg-yellow-400 text-[#0f0f0f] mb-0">
+          <Button disabled={isPending} className="cursor-pointer w-full bg-yellow-400 text-[#0f0f0f] mb-0">
             {showTwoFactor 
               ? (isPending ? "Verifying..." : "Verify Code")
               : (isPending ? "Signing in..." : "Sign in")

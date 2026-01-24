@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { signup } from "@/actions/signup";
 import { FormError } from "@/components/auth/FormError";
+import { Eye, EyeOff } from "lucide-react";
 
 type SignUpFormValues = {
   name: string;
@@ -22,7 +23,7 @@ export default function SignUpPage() {
 
   const [error, setError] = useState<string | undefined>();
   const [isPending, startTransition] = useTransition();
-
+const [showPassword, setShowPassword] = useState(false);
   const {
     register,
     handleSubmit,
@@ -90,20 +91,32 @@ export default function SignUpPage() {
           {/* PASSWORD */}
           <div>
             <Label className="text-black/80 text-[15px]">Password</Label>
-            <Input
-              type="password"
-              disabled={isPending}
-              {...register("password", { required: "Password is required" })}
-              className="bg-[#fff] border-[#000]"
-            />
-            {errors.password && (
-              <p className="text-xs text-red-600 mt-1">
-                {errors.password.message}
-              </p>
-            )}
+            <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  disabled={isPending}
+                  {...register("password", { required: "Password is required" })} className="bg-[#fff] border-[#000] placeholder:text-[#000] text-[#000] focus-visible:!ring-0"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 text-[#000]/60 hover:text-[#000]"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-xs text-red-600 mt-1">
+                  {errors.password.message}
+                </p>
+              )}
           </div>
 
-          <Button disabled={isPending} className="w-full bg-yellow-400 text-black">
+          <Button disabled={isPending} className="cursor-pointer w-full bg-yellow-400 text-black">
             {isPending ? "Creating account..." : "Create account"}
           </Button>
         </form>
