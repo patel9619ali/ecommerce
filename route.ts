@@ -1,6 +1,6 @@
 export const publicRoutes: string[] = [
   '/',
-  '/new-verification',
+  '/verify-email',
 ];
 
 export const authRoutes: string[] = [

@@ -26,16 +26,18 @@ export const sendPasswordResetEmail = async (
     html: `<p>Click <a href="${confirmLink}">here</a> to reset your password.</p>`,
   });
 };
-export const sendVerificationEmail = async (
+export const sendEmailVerificationOtp = async (
   email: string,
   token: string
 ) => {
-  const confirmLink = `${baseUrl}/new-verification?token=${token}`;
-
   await resend.emails.send({
     from: "BlendRas <support@blendras.in>",
     to: email,
-    subject: "Confirm your email",
-    html: `<p>Click <a href="${confirmLink}">here</a> to confirm email.</p>`,
+    subject: "Verify your email",
+    html: `
+      <p>Your email verification code is:</p>
+      <h2 style="letter-spacing:4px">${token}</h2>
+      <p>This code expires in 10 minutes.</p>
+    `,
   });
 };

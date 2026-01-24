@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const publicRoutes = ['/', '/new-verification'];
+const publicRoutes = ['/', '/verify-email'];
 const authRoutes = ['/sign-in', '/sign-up', '/forgot-password','/new-password'];
 const apiAuthPrefix = '/api/auth';
 const DEFAULT_REDIRECT_PAGE = '/settings';

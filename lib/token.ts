@@ -51,26 +51,22 @@ export const generatePasswordResetToken = async (email:string) => {
         });
         return passwordResetToken;
 }
-export const generateVerificationToken = async (email:string) => {
-    const token = uuidv4();
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 1); // Token valid for 1 hour
-    const existingToken = await getVerificationTokenByEmail(email);
+export const generateEmailVerificationOtp = async (email: string) => {
+  const token = crypto.randomInt(100000, 999999).toString();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
 
-        if (existingToken) {
-        await db.verificationToken.delete({
-            where: {
-            id: existingToken.id,
-            },
-        });
-        }
+  const existingToken = await getVerificationTokenByEmail(email);
+  if (existingToken) {
+    await db.verificationToken.delete({
+      where: { id: existingToken.id },
+    });
+  }
 
-        const verificationToken = await db.verificationToken.create({
-        data: {
-            email,
-            token,
-            expires: expiresAt,
-        },
-        });
-        return verificationToken;
-}
+  return db.verificationToken.create({
+    data: {
+      email,
+      token,
+      expires: expiresAt,
+    },
+  });
+};
