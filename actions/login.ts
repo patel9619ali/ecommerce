@@ -6,9 +6,9 @@ import { LoginSchema } from "@/schemas/login-schema";
 import type { AuthResponse } from "@/types/auth";
 import { AuthError } from "next-auth";
 import { getTwoFactorTokenByEmail } from "@/data/two-factor-token";
-import { generateVerificationToken,generateTwoFactorToken } from "@/lib/token";
+import { generateTwoFactorToken, generateEmailVerificationOtp } from "@/lib/token";
 import { getUserByEmail } from "@/data/user";
-import { sendVerificationEmail,sendTwoFactorTokenEmail } from "@/lib/mail";
+import { sendTwoFactorTokenEmail, sendEmailVerificationOtp } from "@/lib/mail";
 import { getTwoFactorConfirmationByUserId } from "@/data/two-factor-confirmation";
 import { db } from "@/lib/db";
 export async function login(values: unknown): Promise<AuthResponse> {
@@ -25,9 +25,11 @@ export async function login(values: unknown): Promise<AuthResponse> {
   if(!existingUser || !existingUser.email || !existingUser.password) {
     return { error: "Invalid email or password" };
   }
-  if(!existingUser.emailVerified) {
-    const verificationToken = await generateVerificationToken(existingUser.email);
-    return { error: "Email not verified. Please check your inbox for the verification email." }; 
+  if (!existingUser.emailVerified) {
+    const otp = await generateEmailVerificationOtp(existingUser.email);
+    await sendEmailVerificationOtp(otp.email, otp.token);
+
+    return { verifyEmailOtp: true };
   }
   if (existingUser.isTwoFactorEnabled && existingUser.email){
    if (code) {
@@ -90,10 +92,5 @@ export async function login(values: unknown): Promise<AuthResponse> {
   // 🔜 Call Strapi here
   // 🔜 Verify password
   // 🔜 Create session
-  const verificationToken = await generateVerificationToken(email);
-  await sendVerificationEmail(
-    verificationToken.email,
-    verificationToken.token
-  );
   return { success: "Confirmation email sent!" };
 }

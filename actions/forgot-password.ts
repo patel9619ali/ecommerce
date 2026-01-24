@@ -3,8 +3,8 @@
 import { ResetSchema } from "@/schemas/login-schema";
 import { getUserByEmail } from "@/data/user";
 import type { AuthResponse } from "@/types/auth";
-import { generatePasswordResetToken, generateVerificationToken } from "@/lib/token";
-import { sendPasswordResetEmail, sendVerificationEmail } from "@/lib/mail";
+import { generatePasswordResetToken } from "@/lib/token";
+import { sendPasswordResetEmail } from "@/lib/mail";
 export async function forgotPassword(values: unknown): Promise<AuthResponse> {
   const validatedFields = ResetSchema.safeParse(values);
   console.log("Validated Fields:", validatedFields);
@@ -20,10 +20,14 @@ export async function forgotPassword(values: unknown): Promise<AuthResponse> {
   if (!existingUser) {
     return { error: "Email not found" };
   }
-  const passwordResetToken = await generatePasswordResetToken(email);
+  // ✅ Generate PASSWORD reset token
+  const resetToken = await generatePasswordResetToken(email);
+
+  // ✅ Send PASSWORD reset email
   await sendPasswordResetEmail(
-    passwordResetToken.email,
-    passwordResetToken.token
+    resetToken.email,
+    resetToken.token
   );
-  return { success: "Confirmation email sent!" };
+
+  return { success: "Password reset email sent!" };
 }
