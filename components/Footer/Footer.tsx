@@ -42,7 +42,7 @@ export default function Footer() {
     }
   }, [loginOpen]);
   return (
-    <section className="bg-[#dbd4d463] text-white rounded-t-[20px] lg:pt-10 pt-6 lg:pb-6 pb-4 px-4 lg:px-12">
+    <section className="bg-[#dbd4d463] text-white rounded-t-[0] lg:pt-10 pt-6 lg:pb-6 pb-4 px-4 lg:px-12">
       <footer className="container">
         {/* <div className="w-full flex gap-3 mb-5">
           <svg width="97" height="47" viewBox="0 0 97 47" fill="none" xmlns="http://www.w3.org/2000/svg">

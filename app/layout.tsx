@@ -16,7 +16,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <SessionProvider session={session}>
       <html lang="en" className="dark">
-        <body className="bg-transparent dark:!bg-[#fff]">
+        <body className="dark:bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)]">
           <SpeedInsights />
           <LoadingProvider>
             <LoaderWrapper>{children}</LoaderWrapper>
