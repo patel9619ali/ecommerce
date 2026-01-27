@@ -47,6 +47,7 @@ callbacks: {
     if (!existingUser) return token;
 
     token.role = existingUser.role as UserRole;
+    token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
     return token;
   },
 
@@ -54,6 +55,7 @@ callbacks: {
     if (session.user && token.sub) {
       session.user.id = token.sub;
       session.user.role = token.role as UserRole;
+      session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
     }
     return session;
   },

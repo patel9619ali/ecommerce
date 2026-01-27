@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server';
 const publicRoutes = ['/', '/verify-email'];
 const authRoutes = ['/sign-in', '/sign-up', '/forgot-password','/new-password'];
 const apiAuthPrefix = '/api/auth';
-const DEFAULT_REDIRECT_PAGE = '/settings';
+const DEFAULT_REDIRECT_PAGE = '/';
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;

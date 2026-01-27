@@ -11,6 +11,7 @@ import { getUserByEmail } from "@/data/user";
 import { sendTwoFactorTokenEmail, sendEmailVerificationOtp } from "@/lib/mail";
 import { getTwoFactorConfirmationByUserId } from "@/data/two-factor-confirmation";
 import { db } from "@/lib/db";
+
 export async function login(values: unknown): Promise<AuthResponse> {
   const validatedFields = LoginSchema.safeParse(values);
 
@@ -20,77 +21,80 @@ export async function login(values: unknown): Promise<AuthResponse> {
     };
   }
 
-  const { email, password,code } = validatedFields.data;
+  const { email, password, code } = validatedFields.data;
   const existingUser = await getUserByEmail(email);
-  if(!existingUser || !existingUser.email || !existingUser.password) {
+  
+  if (!existingUser || !existingUser.email || !existingUser.password) {
     return { error: "Invalid email or password" };
   }
+  
   if (!existingUser.emailVerified) {
     const otp = await generateEmailVerificationOtp(existingUser.email);
     await sendEmailVerificationOtp(otp.email, otp.token);
-
     return { verifyEmailOtp: true };
   }
-  if (existingUser.isTwoFactorEnabled && existingUser.email){
-   if (code) {
-        const twoFactorToken = await getTwoFactorTokenByEmail(
-        existingUser.email
-      );
+  
+  if (existingUser.isTwoFactorEnabled && existingUser.email) {
+    if (code) {
+      const twoFactorToken = await getTwoFactorTokenByEmail(existingUser.email);
+      
       if (!twoFactorToken) {
         return { error: "Invalid code!" };
       }
+      
       if (twoFactorToken.token !== code) {
         return { error: "Invalid code!" };
       }
+      
       const hasExpired = new Date() > new Date(twoFactorToken.expires);
+      
       if (hasExpired) {
         return { error: "Code has expired. Please request a new one." };
       }
+      
       await db.twoFactorToken.delete({  
         where: { id: twoFactorToken.id },
       });
-      // Create two factor confirmation record
+      
       const existingConfirmation = await getTwoFactorConfirmationByUserId(existingUser.id);
-        if (existingConfirmation) {
-          await db.twoFactorConfirmation.delete({
+      
+      if (existingConfirmation) {
+        await db.twoFactorConfirmation.delete({
           where: { id: existingConfirmation.id }
         });
+      }
+      
+      await db.twoFactorConfirmation.create({
+        data: {
+          userId: existingUser.id,
         }
-        await db.twoFactorConfirmation.create({
-          data: {
-            userId: existingUser.id,
-          }
-        });
+      });
     } else {
-    const twoFactorToken = await generateTwoFactorToken(existingUser.email);
-    await sendTwoFactorTokenEmail(
-      twoFactorToken.email,
-      twoFactorToken.token
-    );
-    return { twoFactor: true };
+      const twoFactorToken = await generateTwoFactorToken(existingUser.email);
+      await sendTwoFactorTokenEmail(twoFactorToken.email, twoFactorToken.token);
+      return { twoFactor: true };
+    }
   }
-  }
+  
   try {
-    await signIn("credentials",{
+    // IMPORTANT: Remove redirectTo to handle redirect manually in the client
+    await signIn("credentials", {
       email,
       password,
-      redirectTo: DEFAULT_REDIRECT_PAGE
-    })
+      redirect: false, // Don't auto-redirect
+    });
+    
+    return { success: "Login successful!" };
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
         case "CredentialsSignin":
           return { error: "Invalid email or password" };
-
         default:
           return { error: "Something went wrong" };
       }
     }
-    throw error
+    throw error;
   }
-
-  // 🔜 Call Strapi here
-  // 🔜 Verify password
-  // 🔜 Create session
-  return { success: "Confirmation email sent!" };
+  
 }
