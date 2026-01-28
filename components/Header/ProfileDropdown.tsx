@@ -24,13 +24,13 @@ export default function ProfileDropdown({ user }: ProfileDropdownProps) {
       <DropdownMenuTrigger asChild className="!cursor-pointer">
         <Button
           variant="ghost"
-          className="flex items-center gap-2 !cursor-pointer !pointer-events-auto"
+          className="flex items-center md:gap-2 gap-0 !cursor-pointer !pointer-events-auto pl-0"
         >
           <div className="bg-[#053E54] text-white p-2 rounded-full !cursor-pointer !pointer-events-auto">
             <User size={18} />
           </div>
 
-          <span className="font-semibold text-sm text-[#000] !cursor-pointer !pointer-events-auto">
+          <span className="pl-1 font-semibold text-sm text-[#000] !cursor-pointer !pointer-events-auto">
             {user.name.length > 10
               ? `${user.name.slice(0, 10)}...`
               : user.name}
@@ -51,7 +51,7 @@ export default function ProfileDropdown({ user }: ProfileDropdownProps) {
 
         {/* Links */}
         <DropdownMenuItem asChild>
-          <Link href="/profile" className="flex gap-2 text-[#000]">
+          <Link href="/user-profile/my-profile" className="cursor-pointer flex gap-2 text-[#000]">
             <User size={16} /> My Profile
           </Link>
         </DropdownMenuItem>
@@ -63,7 +63,7 @@ export default function ProfileDropdown({ user }: ProfileDropdownProps) {
         </DropdownMenuItem> */}
 
         <DropdownMenuItem asChild>
-          <Link href="/wishlist" className="flex gap-2 text-[#000]">
+          <Link href="/wishlist" className="cursor-pointer flex gap-2 text-[#000]">
             <Heart size={16} /> My Wishlist
           </Link>
         </DropdownMenuItem>

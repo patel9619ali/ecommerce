@@ -53,12 +53,14 @@ export default function NavSheetDrawer({
       {/* DRAWER */}
       <SheetContent
         side="left"
-        className="w-[300px] bg-black text-white border-white/10"
+        className="w-[300px] bg-[#fff] text-white border-white/10"
       >
         {/* CLOSE ICON */}
-        <SheetClose asChild className="[&>svg]:w-[30px] [&>svg]:h-[30px]">
-          
-        </SheetClose>
+        <SheetClose asChild>
+                <button className="cursor-pointer relative text-[#000] opacity-70 hover:opacity-100">
+                  <X fill="#fff40" size={30} className="bg-[#fff] rounded-full p-1"/>
+                </button>
+              </SheetClose>
 
         {/* LINKS */}
         <nav className="flex flex-col">
@@ -72,7 +74,7 @@ export default function NavSheetDrawer({
             <SheetClose asChild key={item.href}>
               <Link
                 href={item.href}
-                className="border-b border-white/20 py-4 text-[18px] font-semibold"
+                className="border-b-[2px] last:border-0 border-[#C9C9C950] py-4 text-[18px] font-semibold text-black"
               >
                 {item.label}
               </Link>

@@ -5,11 +5,12 @@ import { HomeIcon, ShoppingCart } from "lucide-react"
 import { useCartStore } from "@/store/useCartStore"
 import { useUIStore } from "@/store/useUIStore"
 import NavSheetDrawer from "./NavSheetDrawer"
+import { useCurrentUser } from "@/hooks/use-current-user"
 
 export default function MobileBottomHeader({ visible }: { visible: boolean }) {
   const { openCart } = useCartStore()
   const { openMobileMenu } = useUIStore()
-
+  const user = useCurrentUser();
   return (
     <nav
       className={` fixed bottom-0 left-0 w-full bg-black dark:bg-[#fff] text-white flex justify-around py-2 z-50 transition-transform duration-300 ${visible ? "translate-y-0" : "translate-y-full"} sm:hidden `} >
@@ -20,7 +21,7 @@ export default function MobileBottomHeader({ visible }: { visible: boolean }) {
       </Link>
 
       {/* USER */}
-      <Link href="/sign-in" className="flex flex-col items-center gap-1 dark:text-black">
+      <Link href={`${user ? "/user-profile/my-profile" : "/sign-in"}`} className="flex flex-col items-center gap-1 dark:text-black">
         <svg width="20" height="20" viewBox="0 0 14 18" stroke="#f9f9f996" fill="none" className="dark:text-black dark:!stroke-black">
           <path d="M7 10c-3 0-5 2-5 5h10c0-3-2-5-5-5z" />
           <circle cx="7" cy="4" r="3" />

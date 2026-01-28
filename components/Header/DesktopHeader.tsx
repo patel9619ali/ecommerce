@@ -121,7 +121,7 @@ export function DesktopHeader() {
         Logo
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center md:gap-2 gap-0">
           <Button variant="ghost" size="icon" className="cursor-pointer transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:bg-transparent">
             <Search className="h-5 w-5 dark:text-black" />
             <span className="sr-only">Search</span>
