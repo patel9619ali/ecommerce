@@ -1,6 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
-import { KeyRound, ArrowLeft, Loader2 } from "lucide-react";
+import { KeyRound, ArrowLeft, Loader2, Lock } from "lucide-react";
 import { AuthCard } from "./AuthCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,30 +42,40 @@ export const ForgotPasswordForm = () => {
     };
   return (
     <div className="flex min-h-screen items-center justify-center bg-white/50 p-4">
-      <AuthCard
-        title="Forgot Password"
-        description="Enter your email and we'll send you a reset link"
-        icon={<KeyRound className="h-6 w-6 text-primary-foreground" />}
-      >
+      <div className="rounded-2xl shadow-md p-6 w-full max-w-sm relative bg-[#fff]">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-xl bg-[#fff2e5] flex items-center justify-center">
+            <Lock className="h-5 w-5 text-[#ff8000]" />
+          </div>
+          <h1 className="text-xl font-semibold text-[#020817]">{`Forgot Password`}</h1>
+        </div>
+        <p className="text-sm text-[#64748b] mb-6">{`Enter your email that you used to register your account, so we can send you a link to reset your password`}</p>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {!success ? (
             <>
               <div className="space-y-2">
-                <Label className="text-black/80 text-[15px] mb-1" htmlFor="email">Email address</Label>
+                <Label htmlFor="email" className="text-[#020817] text-sm mb-1 block">
+                  Email <span className="text-[#ef4444]">*</span>
+                </Label>
                 
-                <Input id="email" type="email" placeholder="Write your email" value={email} {...register("email", { required: "Email is required" })} onChange={(e) => setEmail(e.target.value)} disabled={isPending} className="bg-[#fff] border-[#000] placeholder:text-[#0f0f0] text-[#000] focus-visible:!ring-0" />
+                <Input id="email" type="email" placeholder="Write your email" value={email} {...register("email", { required: "Email is required" })} onChange={(e) => setEmail(e.target.value)} disabled={isPending} className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]" />
               </div>
 
               {error && <FormError message={error} />}
 
-              <Button type="submit" className="w-full h-11 mb-0 text-[#000000] border-b-2 rounded-none border-[#000000]" disabled={isLoading}>
-                {isLoading ? (
+              <Button
+                type="submit"
+                className="cursor-pointer w-full h-11"
+                variant="auth"
+                disabled={isPending}
+              >
+                {isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin text-[#000000]" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Sending...
                   </>
                 ) : (
-                  "Send Reset Link"
+                  "Send link"
                 )}
               </Button>
             </>
@@ -92,17 +102,17 @@ export const ForgotPasswordForm = () => {
             <Button
               type="button"
               variant="ghost"
-              className="w-full text-[#000000] hover:text-[#000000]"
+              className="w-full text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#020817]"
               asChild
             >
-              <a className="text-[#000000]" href="/sign-in">
-                <ArrowLeft className="text-[#000000] mr-2 h-4 w-4" />
+              <a href="/sign-in">
+                
                 Back to Login
               </a>
             </Button>
           </div>
         </form>
-      </AuthCard>
+      </div>
     </div>
   );
 };

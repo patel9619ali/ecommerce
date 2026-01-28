@@ -29,9 +29,6 @@ export const generateTwoFactorToken = async (email:string) => {
 }
 
 export const generatePasswordResetToken = async (email:string) => {
-    // const token = uuidv4();
-    // const expiresAt = new Date(); 
-    // expiresAt.setHours(expiresAt.getHours() + 1); // Token valid for 1 hour
     const existingToken = await getPasswordResetTokenByEmail(email);
 
           if (existingToken && existingToken.expires > new Date()) {
@@ -55,8 +52,8 @@ export const generatePasswordResetToken = async (email:string) => {
         return passwordResetToken;
 }
 export const generateEmailVerificationOtp = async (email: string) => {
-  const token = crypto.randomInt(100000, 999999).toString();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+  const token = crypto.randomInt(1000, 9999).toString(); // ✅ 4 digit OTP
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // ✅ 1 hour
 
   const existingToken = await getVerificationTokenByEmail(email);
   if (existingToken) {

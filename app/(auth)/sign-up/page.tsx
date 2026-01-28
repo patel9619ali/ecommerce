@@ -10,7 +10,9 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { signup } from "@/actions/signup";
 import { FormError } from "@/components/auth/FormError";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff,UserPlus } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator/PasswordStrengthIndicator";
 
 type SignUpFormValues = {
   name: string;
@@ -22,8 +24,10 @@ export default function SignUpPage() {
   const router = useRouter();
 
   const [error, setError] = useState<string | undefined>();
-  const [isPending, startTransition] = useTransition();
-const [showPassword, setShowPassword] = useState(false);
+    const [isPending, startTransition] = useTransition();
+  const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
   const {
     register,
     handleSubmit,
@@ -31,6 +35,10 @@ const [showPassword, setShowPassword] = useState(false);
   } = useForm<SignUpFormValues>();
 
   const onSubmit = (data: SignUpFormValues) => {
+    if (!agreeToTerms) {
+      setError("You must agree to the Terms and Privacy Policy");
+      return;
+    }
     setError(undefined);
 
     startTransition(() => {
@@ -49,83 +57,123 @@ const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white/50">
-      <div className="bg-white p-6 rounded-md w-full max-w-sm shadow space-y-4">
-        <h1 className="text-[26px] font-semibold text-black">
-          Create account
-        </h1>
-
+      <div className="rounded-2xl shadow-md p-6 w-full max-w-sm relative bg-[#fff]">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-xl bg-[#fff2e5] flex items-center justify-center">
+            <UserPlus className="h-5 w-5 text-[#ff8000]" />
+          </div>
+          <h1 className="text-xl font-semibold text-[#020817]">{`Sign up`}</h1>
+        </div>
         <FormError message={error} />
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <p className="text-sm text-[#64748b] mb-6">{`Create your account - enjoy our services with most updated features.`}</p>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
           {/* NAME */}
-          <div>
-            <Label className="text-black/80 text-[15px]">First name</Label>
+          <div className="space-y-2">
+            <Label htmlFor="name" className="text-[#020817] text-sm mb-1 block">
+              Name <span className="text-[#ef4444]">*</span>
+            </Label>
             <Input
+              id="name"
               disabled={isPending}
+              placeholder="Enter your name"
               {...register("name", { required: "Name is required" })}
-              className="bg-[#fff] border-[#000]"
+              className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
             />
             {errors.name && (
-              <p className="text-xs text-red-600 mt-1">
+              <p className="text-xs text-[#ef4444] mt-1">
                 {errors.name.message}
               </p>
             )}
           </div>
 
           {/* EMAIL */}
-          <div>
-            <Label className="text-black/80 text-[15px]">Email</Label>
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-[#020817] text-sm mb-1 block">
+              Email <span className="text-[#ef4444]">*</span>
+            </Label>
             <Input
+              id="email"
               type="email"
               disabled={isPending}
+              placeholder="Enter your email"
               {...register("email", { required: "Email is required" })}
-              className="bg-[#fff] border-[#000]"
+              className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
             />
             {errors.email && (
-              <p className="text-xs text-red-600 mt-1">
+              <p className="text-xs text-[#ef4444] mt-1">
                 {errors.email.message}
               </p>
             )}
           </div>
 
           {/* PASSWORD */}
-          <div>
-            <Label className="text-black/80 text-[15px]">Password</Label>
+          <div className="space-y-2">
+            <Label htmlFor="password" className="text-[#020817] text-sm mb-1 block">
+              Password <span className="text-[#ef4444]">*</span>
+            </Label>
             <div className="relative">
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  disabled={isPending}
-                  {...register("password", { required: "Password is required" })} className="bg-[#fff] border-[#000] placeholder:text-[#000] text-[#000] focus-visible:!ring-0"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 text-[#000]/60 hover:text-[#000]"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
-              {errors.password && (
-                <p className="text-xs text-red-600 mt-1">
-                  {errors.password.message}
-                </p>
-              )}
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                disabled={isPending}
+                placeholder="Enter your password"
+                {...register("password", { required: "Password is required" })}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748b] hover:text-[#020817] transition-colors focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+              >
+                {showPassword ? (
+                  <EyeOff className="cursor-pointer h-4 w-4" />
+                ) : (
+                  <Eye className="cursor-pointer h-4 w-4" />
+                )}
+              </button>
+            </div>
+            {errors.password && (
+              <p className="text-xs text-[#ef4444] mt-1">
+                {errors.password.message}
+              </p>
+            )}
+            <PasswordStrengthIndicator password={password} />
           </div>
 
-          <Button disabled={isPending} className="cursor-pointer w-full bg-yellow-400 text-black">
-            {isPending ? "Creating account..." : "Create account"}
+          {/* TERMS CHECKBOX */}
+          <div className="flex items-center space-x-2">
+            <Checkbox id="terms" checked={agreeToTerms} onCheckedChange={(checked) => setAgreeToTerms(checked as boolean)} disabled={isPending} className="cursor-pointer border-[#254fda] data-[state=checked]:bg-[#254fda] data-[state=checked]:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda]"/>
+            <label
+              htmlFor="terms"
+              className="text-sm text-[#64748b] cursor-pointer"
+            >
+              I agree with{" "}
+              <a href="/terms" className="cursor-pointer text-[#254fda] hover:underline">
+                Terms
+              </a>{" "}
+              and{" "}
+              <a href="/privacy" className="cursor-pointer text-[#254fda] hover:underline">
+                Privacy
+              </a>
+            </label>
+          </div>
+
+          <Button
+            type="submit"
+            disabled={isPending}
+            variant="auth"
+            className="cursor-pointer w-full h-11"
+          >
+            {isPending ? "Creating account..." : "Let's roll"}
           </Button>
         </form>
 
-        <p className="text-sm text-center text-gray-600">
-          Already have an account?{" "}
-          <Link href="/sign-in" className="text-blue-600">
-            Sign in
-          </Link>
+        <p className="text-sm text-center text-[#64748b] mt-4">
+          Already have account?{" "}
+          <a href="/sign-in" className="text-[#254fda] hover:underline font-medium">
+            Login
+          </a>
         </p>
       </div>
     </div>

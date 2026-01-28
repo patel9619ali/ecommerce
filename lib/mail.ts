@@ -57,7 +57,7 @@ export const sendEmailVerificationOtp = async (
     html: `
       <p>Your email verification code is:</p>
       <h2 style="letter-spacing:4px">${token}</h2>
-      <p>This code expires in 10 minutes.</p>
+      <p>This code expires in 1 hour.</p>
     `,
   });
 };

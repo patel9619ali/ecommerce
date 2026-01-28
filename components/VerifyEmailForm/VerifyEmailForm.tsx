@@ -9,7 +9,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2, Mail } from "lucide-react";
 import { verifyEmailOtp } from "@/actions/verify-email";
 
 export default function VerifyEmailForm() {
@@ -53,8 +53,8 @@ export default function VerifyEmailForm() {
     e.preventDefault();
     setError(undefined);
 
-    if (otp.length !== 6 || !email) {
-      setError("Please enter a valid 6-digit OTP");
+    if (otp.length !== 4 || !email) {
+      setError("Please enter a valid 4-digit OTP");
       return;
     }
 
@@ -70,78 +70,96 @@ export default function VerifyEmailForm() {
       });
     });
   };
-
+const maskedEmail = email?.replace(/(.{2})(.*)(@.*)/, "$1***$3");
   return (
     <div className="min-h-screen flex items-center justify-center bg-white/50">
-      <div className="bg-white p-6 rounded-md w-full max-w-sm shadow space-y-4">
+      <div className="rounded-2xl shadow-md p-6 w-full max-w-sm relative bg-[#fff]">
         {/* HEADER */}
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="text-black flex items-center gap-1"
-          >
-            <ArrowLeft size={18} />
-          </button>
-          <h2 className="text-lg font-semibold text-black">
-            Verify your email
-          </h2>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-[#fff2e5] flex items-center justify-center">
+            <Mail className="h-5 w-5 text-[#ff8000]" />
+          </div>
+          <h1 className="text-xl font-semibold text-[#020817]">{`Check your email`}</h1>
         </div>
 
-        <p className="text-sm text-gray-600">
-          We sent a 6-digit verification code to{" "}
-          <span className="font-semibold text-black">{email}</span>
-        </p>
-
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-1 -mt-2">
+            <p className="text-sm text-[#64748b]">
+              We sent a verification code to{" "}
+              <span className="font-medium text-[#020817]">{maskedEmail}</span>
+            </p>
+            <p className="text-sm text-[#64748b]">
+              Enter the 4-digit code mentioned in the email
+            </p>
+          </div>
           {/* OTP INPUT */}
           <InputOTP
             value={otp}
             onChange={setOtp}
-            maxLength={6}
+            maxLength={4}
             pattern={REGEXP_ONLY_DIGITS}
             className="!w-full"
             disabled={isPending}
           >
             <InputOTPGroup className="flex justify-center gap-4 !w-full">
-              {[0, 1, 2, 3, 4, 5].map((i) => (
+              {[0, 1, 2, 3].map((i) => (
                 <InputOTPSlot
                   key={i}
                   index={i}
-                  className="border border-[#C9C9C9] !rounded-[20px] w-[45px] h-[45px] text-[22px] font-semibold text-black data-[active=true]:bg-[#C8FFFA] data-[active=true]:border-black data-[active=true]:ring-0"
+                  className="border border-[#C9C9C9] h-14 w-14 text-[22px] rounded-xl font-semibold text-black data-[active=true]:bg-[#64748b47] data-[active=true]:border-[#254fda] data-[active=true]:border-[2px] data-[active=true]:ring-0 transition-colors border-1 rounded-xl first:rounded-xl last:rounded-xl "
                 />
+                
               ))}
             </InputOTPGroup>
           </InputOTP>
 
           {error && (
-            <p className="text-red-500 text-sm text-center mt-2">
+            <p className="text-red-500 text-sm text-center mt-2 mb-2">
               {error}
             </p>
           )}
-
-          {/* RESEND */}
-          <div className="text-center mt-4 text-sm text-gray-700">
-            Didn’t receive the code?{" "}
-            <button
-              type="button"
-              disabled={otpTimer > 0}
-              onClick={resendOtp}
-              className="text-blue-600 font-medium disabled:opacity-50"
-            >
-              {otpTimer > 0 ? `Resend in ${otpTimer}s` : "Resend"}
-            </button>
-          </div>
-
-          <div ref={submitRef} className="mt-4">
+          <div ref={submitRef} className="mt-4 mb-2">
             <Button
               type="submit"
               disabled={isPending}
-              className="w-full bg-yellow-400 text-black"
+              variant="auth"
+              className="w-full h-10 cursor-pointer"
             >
-              {isPending ? "Verifying..." : "Verify OTP"}
+              {isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Verifying...
+              </>
+            ) : (
+              "Verify Code"
+            )}
             </Button>
           </div>
+          {/* RESEND */}
+          <p className="text-center text-sm text-[#64748b]">
+            Haven't got the email yet?{" "}
+            <button
+              type="button"
+              disabled={otpTimer > 0 || isPending}
+              onClick={resendOtp}
+              className="cursor-pointer font-medium mt-3 text-[#254fda] hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {otpTimer > 0 ? `Resend in ${otpTimer}s` : "Resend email"}
+            </button>
+          </p>
+          <div className="pt-2">
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full text-[#64748b] hover:text-[#020817] hover:bg-[#f1f5f9]"
+              asChild
+            >
+              <a className="text-[#000000]" href="/sign-up">
+                Back to Sign up
+              </a>
+            </Button>
+          </div>
+          
         </form>
       </div>
     </div>
