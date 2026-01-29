@@ -30,8 +30,8 @@ export default function ChangeName({
 const { update } = useSession();
     const user = useCurrentUser();
     const [view, setView] = useState<"changeName" | "changeNameSuccess">("changeName");
-  const [error, setError] = useState<string | undefined>();
-  const [success, setSuccess] = useState<string | undefined>();
+    const [error, setError] = useState<string | undefined>();
+    const [success, setSuccess] = useState<string | undefined>();
     const {
         register,
         handleSubmit,

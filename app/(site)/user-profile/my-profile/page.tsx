@@ -11,7 +11,7 @@ import SupportCard from "@/components/UserProfile/MyProfile/SupportCard";
 import Sidebar from "@/components/UserProfile/Sidebar";
 import ChangeEmail from "@/components/UserProfile/MyProfile/ChangeEmail/ChangeEmail";
 import ChangePhone from "@/components/UserProfile/MyProfile/ChangePhone/ChangePhone";
-
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 const breadcrumbItems: any[] = [
     { label: 'Home', href: '/' },
@@ -27,8 +27,9 @@ export default function MyProfile() {
     const [newEmail, setNewEmail] = useState("");
     const [manageOpen, setManageOpen] = useState(false);
     const [isChangeEmail, setIsChangeEmail] = useState(false);
-    const [openManageDocuments, setOpenManageDocuments] = useState(false);
-
+    const [openPassword, setOpenPassword] = useState(false);
+    const user = useCurrentUser();
+    console.log(user,"useruseruser")
     return (
         <>
             <section className="bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)]">
@@ -47,10 +48,12 @@ export default function MyProfile() {
                                 <SupportCard />
                                 <Logout />
                             </div>
-                            
-                            <div>
-                                <SettingsOptions setOpenManageDocuments={setOpenManageDocuments} setOpenChangePhone={setOpenChangePhone} setOpenChangeEmail={setOpenChangeEmail} setIsChangeEmail={setIsChangeEmail} />
-                            </div>
+                            {user?.isOAuth === false &&
+                                <div>
+                                    <SettingsOptions setOpenPassword={setOpenPassword} setOpenChangePhone={setOpenChangePhone} setOpenChangeEmail={setOpenChangeEmail} setIsChangeEmail={setIsChangeEmail} />
+                                </div>
+                            }
+
                         </div> 
                     </div>
                 </div>
@@ -60,15 +63,12 @@ export default function MyProfile() {
             <ChangeName openChangeName={openChangeName} setOpenChangeName={setOpenChangeName} />
             {/* Change Email Modal */}
             <ChangeEmail openChangeEmail={openChangeEmail} setOpenChangeEmail={setOpenChangeEmail} newEmail={newEmail} setNewEmail={setNewEmail} setIsChangeEmail={setIsChangeEmail} isChangeEmail={isChangeEmail} />
-            {/* Change Phone Modal */}
-            <ChangePhone openChangePhone={openChangePhone} setOpenChangePhone={setOpenChangePhone} newcountryCode={newcountryCode} setNewCountryCode={setNewCountryCode} newPhoneNumber={newPhoneNumber} setNewPhoneNumber={setNewPhoneNumber} />
-            {/* Change Phone Modal */}
+            {/* Change Name Modal */}
+            {/* <ChangePassword openPassword={openPassword} setOpenPassword={setOpenPassword} /> */}
 
-            {/* Manage settings drawer for mobile */}
-            {/* <ManageSettingsDrawer manageOpen={manageOpen} setManageOpen={setManageOpen} setOpenChangePhone={setOpenChangePhone} setOpenChangeEmail={setOpenChangeEmail} setIsChangeEmail={setIsChangeEmail} setOpenManageDocuments={setOpenManageDocuments} /> */}
-
-            {/* Manage Documents Modal */}
-            {/* <ManageDocuments openManageDocuments={openManageDocuments} setOpenManageDocuments={setOpenManageDocuments} /> */}
+            {/* Change Phone Modal */}
+            {/* <ChangePhone openChangePhone={openChangePhone} setOpenChangePhone={setOpenChangePhone} newcountryCode={newcountryCode} setNewCountryCode={setNewCountryCode} newPhoneNumber={newPhoneNumber} setNewPhoneNumber={setNewPhoneNumber} /> */}
+            {/* Change Phone Modal */}
         </>
     )
 }

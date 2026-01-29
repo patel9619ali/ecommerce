@@ -84,7 +84,7 @@ export default function SignIn() {
   };
   const [showPassword, setShowPassword] = useState(false);
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white/50">
+    <div className="min-h-screen flex items-center justify-center bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)]">
       <div className="rounded-2xl shadow-md p-6 w-full max-w-sm relative bg-[#fff]">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 rounded-xl bg-[#fff2e5] flex items-center justify-center">
@@ -204,7 +204,7 @@ export default function SignIn() {
                 )}
               </div>
               
-              <Button type="submit" disabled={isPending} variant="auth" className="cursor-pointer w-full h-11" >
+              <Button type="submit" disabled={isPending} variant="auth" className="cursor-pointer text-[#fff] w-full h-11" >
                 {showTwoFactor 
                   ? (isPending ? "Verifying..." : "Verify Code")
                   : (isPending ? "Signing in..." : "Sign in")

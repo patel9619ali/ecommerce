@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 // import CountryCodeSelector from "@/components/LoginSignUp/CountryCodeSelector";
-import ConfirmOtp from "./ConfirmOtp";
 // import VerifyingOtp from "@/components/LoginSignUp/VerifyingOtp";
 import PhoneChanged from "./PhoneChanged";
 
@@ -72,17 +71,7 @@ export default function ChangePhone({ openChangePhone, setOpenChangePhone, newco
 
                 {/* OTP confirmation */}
                 {view === "confirmOtp" && (
-                    <ConfirmOtp
-                        otpTimer={otpTimer}
-                        setOtpTimer={setOtpTimer}
-                        errorOtpMsg={errorOtpMsg}
-                        setErrorOtpMsg={setErrorOtpMsg}
-                        goBack={() => setView("changePhone")}
-                        invalidOtp={() => setView("confirmOtp")}
-                        verifyingOtp={() => setView("verifying")}
-                        newPhoneNumber={newPhoneNumber}
-                        phoneChanged={() => setView("phoneChanged")}
-                    />
+                    <></>
                 )}
 
                 {/* OTP verifying */}

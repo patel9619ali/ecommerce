@@ -6,7 +6,7 @@ const authRoutes = ['/sign-in', '/sign-up', '/forgot-password','/new-password'];
 const apiAuthPrefix = '/api/auth';
 const DEFAULT_REDIRECT_PAGE = '/';
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   
   // Check if user is logged in via session cookie

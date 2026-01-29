@@ -72,7 +72,7 @@ export default function VerifyEmailForm() {
   };
 const maskedEmail = email?.replace(/(.{2})(.*)(@.*)/, "$1***$3");
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white/50">
+    <div className="min-h-screen flex items-center justify-center bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)]">
       <div className="rounded-2xl shadow-md p-6 w-full max-w-sm relative bg-[#fff]">
         {/* HEADER */}
         <div className="flex items-center gap-3 mb-4">
