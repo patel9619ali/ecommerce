@@ -4,7 +4,8 @@ import { Card } from "@/components/ui/card";
 import { signOut } from "next-auth/react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUser } from "@/hooks/use-current-user";
-
+import { Switch } from "@/components/ui/switch"
+import { Label } from "radix-ui";
 type ProfileDetailsCardProps = {
     setOpenChangeName: (open: boolean) => void;
     setOpenChangeEmail: (open: boolean) => void;
@@ -31,6 +32,10 @@ export default function ProfileDetailsCard({ setOpenChangeName, setOpenChangeEma
                             <path d="M18.7425 0C12.5434 0 7.5 5.04336 7.5 11.2425C7.5 17.4415 12.5434 22.4849 18.7425 22.4849C24.9415 22.4849 29.9849 17.4415 29.9849 11.2425C29.9849 5.04336 24.9415 0 18.7425 0Z" />
                             <path d="M32.7252 29.8293C29.6473 26.7041 25.5669 24.983 21.2357 24.983H16.2391C11.908 24.983 7.82758 26.7041 4.74964 29.8293C1.68678 32.9392 0 37.0443 0 41.3886C0 42.0785 0.559291 42.6378 1.24916 42.6378H36.2257C36.9155 42.6378 37.4748 42.0785 37.4748 41.3886C37.4748 37.0443 35.7881 32.9392 32.7252 29.8293Z" />
                         </svg>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Switch className=" cursor-pointer" id="2-factor-mfa" />
+                        <label className="text-[#000]" htmlFor="2-factor-mfa">2 Factor Authentification</label>
                     </div>
                     <button
                         onClick={handleLogout}

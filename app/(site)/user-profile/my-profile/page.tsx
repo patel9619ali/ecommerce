@@ -49,7 +49,7 @@ export default function MyProfile() {
                             </div>
                             
                             <div>
-                                {/* <SettingsOptions setOpenManageDocuments={setOpenManageDocuments} setOpenChangePhone={setOpenChangePhone} setOpenChangeEmail={setOpenChangeEmail} setIsChangeEmail={setIsChangeEmail} /> */}
+                                <SettingsOptions setOpenManageDocuments={setOpenManageDocuments} setOpenChangePhone={setOpenChangePhone} setOpenChangeEmail={setOpenChangeEmail} setIsChangeEmail={setIsChangeEmail} />
                             </div>
                         </div> 
                     </div>

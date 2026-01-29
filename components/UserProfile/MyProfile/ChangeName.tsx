@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react";
+import { useState, useEffect,useTransition } from "react";
 import { Check, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import {
@@ -10,24 +10,28 @@ import {
     DialogTitle
 } from "@/components/ui/dialog";
 import { useCurrentUser } from "@/hooks/use-current-user";
-
+import { FormError } from "@/components/auth/FormError";
+import { FormSuccess } from "@/components/auth/FormSuccess";
+import { updateSetting } from "@/actions/settings";
+import { useSession } from "next-auth/react";
 type ChangeNameProps = {
     openChangeName: boolean;
     setOpenChangeName: (open: boolean) => void;
 };
 
 type FormValues = {
-    fullName: string;
+    name: string;
 };
 
 export default function ChangeName({
     openChangeName,
     setOpenChangeName
 }: ChangeNameProps) {
-
+const { update } = useSession();
     const user = useCurrentUser();
     const [view, setView] = useState<"changeName" | "changeNameSuccess">("changeName");
-
+  const [error, setError] = useState<string | undefined>();
+  const [success, setSuccess] = useState<string | undefined>();
     const {
         register,
         handleSubmit,
@@ -35,15 +39,19 @@ export default function ChangeName({
         reset,
     } = useForm<FormValues>({
         defaultValues: {
-            fullName: "",
+            name: "",
         },
     });
 
     useEffect(() => {
-        if (!user || !openChangeName) return;
+    if (!user || !openChangeName) return;
 
-        // reset({ fullName: user.name });
+    reset({
+        name: user.name || "",
+    });
     }, [user, openChangeName, reset]);
+
+
     useEffect(() => {
         if (!openChangeName) {
             const timeout = setTimeout(() => {
@@ -53,11 +61,28 @@ export default function ChangeName({
             return () => clearTimeout(timeout);
         }
     }, [openChangeName]);
+    const [isPending, startTransition] = useTransition();
+    const onSubmit = (values: FormValues) => {
+    setError(undefined);
+    setSuccess(undefined);
 
-    const onSubmit = (data: FormValues) => {
-        console.log("Submitted Full Name:", data.fullName);
-        setView("changeNameSuccess");
+    startTransition(() => {
+        updateSetting(values)
+        .then((res) => {
+            if (res?.error) {
+            setError(res.error);
+            }
+
+            if (res?.success) {
+            update(); // refresh session
+            setView("changeNameSuccess");
+            setSuccess(res.success);
+            }
+        })
+        .catch(() => setError("Something went wrong"));
+    });
     };
+
 
     // if (!isReady) {
     //     return null;
@@ -83,14 +108,14 @@ export default function ChangeName({
 
                         <div className="bg-white xs:px-6 px-4 xs:py-6 py-4 h-full">
                             <div className="flex flex-col justify-between h-full">
-                                <div>
-                                    <label className="font-semibold text-[#053E54]">
-                                        Full Name (As per document)
-                                    </label>
+                            <form onSubmit={handleSubmit(onSubmit)}>
+                                <label className="font-semibold text-[#053E54]">
+                                    Full Name (As per document)
+                                </label>
 
                                     <input
                                         type="text"
-                                        {...register("fullName", {
+                                        {...register("name", {
                                             required: "Please enter your full name",
                                             pattern: {
                                                 value: /^[A-Za-z ]+$/,
@@ -100,21 +125,21 @@ export default function ChangeName({
                                         className="w-full border border-[#C9C9C9] rounded-[20px] px-4 py-3 mt-2 outline-none text-[#053E54] placeholder:text-[#C9C9C9] font-medium outline-none ring-0 focus:ring-0 focus-visible:ring-0 ring-offset-0 focus-visible:border-[#053E54] focus-visible:border-[1.5px]"
                                     />
 
-                                    {errors.fullName && (
+                                    {errors.name && (
                                         <p className="text-red-500 text-sm mt-2">
-                                            {errors.fullName.message}
+                                            {errors.name.message}
                                         </p>
                                     )}
-                                </div>
 
                                 <div className="sticky bottom-0 pb-[20px] xs:mt-5 xs:[position:unset] xs:[bottom:unset] xs:pb-0">
-                                    <button
-                                        onClick={handleSubmit(onSubmit)}
+                                    <button type="submit"
+                                        disabled={isPending}
                                         className="w-full h-[50px] leading-[50px] bg-[#053E54] rounded-[20px] text-white font-semibold text-[19px] cursor-pointer"
-                                    >
-                                        Done
+                                        >
+                                        {isPending ? "Saving..." : "Done"}
                                     </button>
                                 </div>
+                            </form>
                             </div>
                         </div>
                     </>
@@ -135,7 +160,7 @@ export default function ChangeName({
                             </div>
 
                             <div className="sticky bottom-0 pb-[20px] xs:mt-5 xs:[position:unset] xs:[bottom:unset] xs:pb-0">
-                                <button
+                                <button 
                                     onClick={() => setOpenChangeName(false)}
                                     className="w-full h-[50px] bg-[#053E54] rounded-[20px] text-white font-semibold text-[19px] cursor-pointer"
                                 >
