@@ -65,18 +65,10 @@ export default function NewEmail({
   };
 
   return (
+    
     <form onSubmit={handleSubmit(onSubmit)} className={`${isMounted ? "overflow-y-auto" : "overflow-y-hidden"} h-full`}>
       {/* HEADER */}
-      <div className={`${isChangeEmail ? "justify-end" : "justify-start"} bg-[#053E54] items-start relative h-[200px] flex xs:px-6 px-4 xs:py-5 py-2 rounded-2xl`}>
-        {!isChangeEmail && (
-          <Button
-            type="button"
-            onClick={goBack}
-            className="bg-transparent text-white hover:bg-transparent !p-0"
-          >
-            <ChevronLeft className="w-8 h-8" />
-          </Button>
-        )}
+      {/* <div className={`${isChangeEmail ? "justify-end" : "justify-start"} bg-[#053E54] items-start relative h-[150px] flex xs:px-6 px-4 xs:py-5 py-2 rounded-2xl`}>
 
         <Image
           src={`${process.env.NEXT_PUBLIC_APP_URL}/assets/images/email-vector.svg`}
@@ -96,14 +88,14 @@ export default function NewEmail({
             <X className="w-8 h-8" />
           </Button>
         )}
-      </div>
+      </div> */}
 
       {/* BODY */}
-      <div className="bg-white xs:px-6 px-4 xs:py-6 py-4 h-full">
-        <div className="flex flex-col justify-between h-full">
+      <div className="bg-white xs:px-6 px-4 xs:py-6 py-4">
+        <div className="flex flex-col justify-between">
 
           <div>
-            <h2 className="xs:text-[23px] text-md font-bold bg-gradient-to-r from-[#053E54] to-[#057C72] bg-clip-text text-transparent mb-4 uppercase">
+            <h2 className="xs:text-[28px] text-[25px] font-bold bg-gradient-to-r from-[#053E54] to-[#057C72] bg-clip-text text-transparent mb-4 uppercase">
               Your New Email
             </h2>
 
@@ -136,7 +128,7 @@ export default function NewEmail({
           </div>
 
           {/* BUTTON */}
-          <div className="cursor-pointer sticky bottom-0 pb-[20px] xs:mt-5 xs:[position:unset] xs:[bottom:unset] xs:pb-0">
+          <div className="cursor-pointer absolute w-full left-0 px-8 bottom-0 pb-[20px] xs:mt-5 xs:[position:unset] xs:[bottom:unset] xs:pb-0">
             <button
               type="submit"
               disabled={isPending}

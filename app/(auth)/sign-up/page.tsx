@@ -163,7 +163,7 @@ export default function SignUpPage() {
             type="submit"
             disabled={isPending}
             variant="auth"
-            className="cursor-pointer w-full h-11"
+            className="text-[#fff] cursor-pointer w-full h-11"
           >
             {isPending ? "Creating account..." : "Let's roll"}
           </Button>

@@ -10,6 +10,7 @@ import {
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { Loader2, Mail } from "lucide-react";
 import { verifyEmailOtp } from "@/actions/verify-email";
+import { useSession } from "next-auth/react";
 
 type ConfirmOtpProps = {
   goToConfirmEmail: () => void;
@@ -28,7 +29,7 @@ export default function ConfirmOtp({
   newEmail,
   verifiedEmail,
 }: ConfirmOtpProps) {
-
+ const { update } = useSession();   // ✅ HERE
   const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | undefined>();
   const [isPending, startTransition] = useTransition();
@@ -52,7 +53,6 @@ export default function ConfirmOtp({
       setError("Please enter 4 digit OTP");
       return;
     }
-
     startTransition(() => {
       verifyEmailOtp(newEmail, otp)
         .then((res) => {
@@ -61,7 +61,7 @@ export default function ConfirmOtp({
           }
 
           if (res?.success) {
-            
+            update();   // 🔥 refresh session
             verifiedEmail();
           }
         })
@@ -127,7 +127,7 @@ export default function ConfirmOtp({
               type="submit"
               disabled={isPending}
               variant="auth"
-              className="w-full h-10 cursor-pointer"
+              className="text-[#fff] w-full h-10 cursor-pointer"
             >
               {isPending ? (
               <>

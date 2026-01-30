@@ -12,6 +12,7 @@ import Sidebar from "@/components/UserProfile/Sidebar";
 import ChangeEmail from "@/components/UserProfile/MyProfile/ChangeEmail/ChangeEmail";
 import ChangePhone from "@/components/UserProfile/MyProfile/ChangePhone/ChangePhone";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import ManageSettingsDrawer from "@/components/ManageSettingsDrawer/ManageSettingsDrawer";
 
 const breadcrumbItems: any[] = [
     { label: 'Home', href: '/' },
@@ -69,6 +70,9 @@ export default function MyProfile() {
             {/* Change Phone Modal */}
             {/* <ChangePhone openChangePhone={openChangePhone} setOpenChangePhone={setOpenChangePhone} newcountryCode={newcountryCode} setNewCountryCode={setNewCountryCode} newPhoneNumber={newPhoneNumber} setNewPhoneNumber={setNewPhoneNumber} /> */}
             {/* Change Phone Modal */}
+
+            {/* Manage settings drawer for mobile */}
+            <ManageSettingsDrawer manageOpen={manageOpen} setManageOpen={setManageOpen} setOpenChangePhone={setOpenChangePhone} setOpenChangeEmail={setOpenChangeEmail} setIsChangeEmail={setIsChangeEmail} />
         </>
     )
 }

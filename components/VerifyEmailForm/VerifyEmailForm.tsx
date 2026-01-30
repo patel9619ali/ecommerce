@@ -123,7 +123,7 @@ const maskedEmail = email?.replace(/(.{2})(.*)(@.*)/, "$1***$3");
               type="submit"
               disabled={isPending}
               variant="auth"
-              className="w-full h-10 cursor-pointer"
+              className="text-[#fff] w-full h-10 cursor-pointer"
             >
               {isPending ? (
               <>

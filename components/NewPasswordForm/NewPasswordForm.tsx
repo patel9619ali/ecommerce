@@ -144,7 +144,7 @@ export const NewPasswordForm = () => {
 
               <Button
                 type="submit"
-                className="cursor-pointer w-full h-11"
+                className="text-[#fff] cursor-pointer w-full h-11"
                 variant="auth"
                 disabled={isPending}
               >
