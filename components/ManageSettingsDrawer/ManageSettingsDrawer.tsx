@@ -18,7 +18,7 @@ export default function ManageSettingsDrawer({ manageOpen, setManageOpen, setOpe
     return (
         <Drawer open={manageOpen} onOpenChange={setManageOpen} >
             <DrawerContent
-                className="rounded-t-[20px] px-0 pb-0 z-[200] md:hidden"
+                className="rounded-t-[20px] px-0 pb-0 z-[200] md:hidden bg-[#fff]"
                 onInteractOutside={(e: any) => e.preventDefault()}
                 onEscapeKeyDown={(e: any) => e.preventDefault()} >
 

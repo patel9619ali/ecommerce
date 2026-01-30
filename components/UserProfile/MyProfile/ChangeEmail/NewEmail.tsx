@@ -113,7 +113,7 @@ export default function NewEmail({
                   message: "Please enter a valid email address",
                 },
               })}
-              className="w-full border border-[#C9C9C9] rounded-[20px] px-4 py-3 mt-2 outline-none placeholder:text-[#053E54]"
+              className="w-full border border-[#C9C9C9] rounded-[20px] px-4 py-3 mt-2 outline-none placeholder:text-[#053E54] text-[#053E54]"
             />
 
             {errors.email && (
