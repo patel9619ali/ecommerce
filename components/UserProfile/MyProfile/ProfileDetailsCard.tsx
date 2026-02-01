@@ -2,10 +2,13 @@
 
 import { Card } from "@/components/ui/card";
 import { signOut } from "next-auth/react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Switch } from "@/components/ui/switch"
-import { Label } from "radix-ui";
+import { updateSetting } from "@/actions/settings";
+import { useTransition } from "react";
+import { toast } from "sonner";
+import { useSession } from "next-auth/react";
+
 type ProfileDetailsCardProps = {
     setOpenChangeName: (open: boolean) => void;
     setOpenChangeEmail: (open: boolean) => void;
@@ -14,7 +17,22 @@ type ProfileDetailsCardProps = {
 
 export default function ProfileDetailsCard({ setOpenChangeName, setOpenChangeEmail, setManageOpen }: ProfileDetailsCardProps) {
     const user = useCurrentUser();
-
+    const [isPending, startTransition] = useTransition();
+    const { update } = useSession();
+    const handleTwoFactorToggle = (checked: boolean) => {
+    startTransition(() => {
+        updateSetting({ isTwoFactorEnabled: checked })
+        .then((res) => {
+            if (res?.error) {
+            toast.error(res.error);
+            }
+            if (res?.success) {
+            update();
+            toast.success(res.success);
+            }
+        });
+    });
+    };
     //   Handle Logout
     const handleLogout = async () => {
         await signOut({
@@ -45,7 +63,7 @@ export default function ProfileDetailsCard({ setOpenChangeName, setOpenChangeEma
                     </button>
                     </div>
                     <div className="flex items-center flex-row space-x-2 shadow-none bg-white rounded-[20px] border border-[#C9C9C9] p-4">
-                        <Switch className=" cursor-pointer" id="two-factor-mfa" />
+                        <Switch className=" cursor-pointer" id="two-factor-mfa" checked={user?.isTwoFactorEnabled} disabled={isPending} onCheckedChange={handleTwoFactorToggle} />
                         <label className="text-[#000] font-[600] text-[14px]" htmlFor="two-factor-mfa">Two Factor Authentification</label>
                     </div>
                     

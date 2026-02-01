@@ -77,7 +77,20 @@ if (values.password && values.newPassword) {
 
   return { success: "Password updated successfully" };
 }
+if (typeof values.isTwoFactorEnabled === "boolean") {
+  await db.user.update({
+    where: { id: dbUser.id },
+    data: {
+      isTwoFactorEnabled: values.isTwoFactorEnabled,
+    },
+  });
 
+  return {
+    success: values.isTwoFactorEnabled
+      ? "Two factor authentication enabled"
+      : "Two factor authentication disabled",
+  };
+}
   await db.user.update({
     where: { id: dbUser.id },
     data: {

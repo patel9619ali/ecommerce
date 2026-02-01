@@ -63,7 +63,6 @@ export default function SignIn() {
       login(res)
         .then((res) => {
           if (res?.error) {
-            reset();
             setError(res.error);
           }
           if (res?.success) {
@@ -82,6 +81,33 @@ export default function SignIn() {
         .catch(() => setError("Something went wrong"));
     });
   };
+  const onSubmitTwoFactor = (res: FormValues) => {
+  setError(undefined);
+  setSuccess(undefined);
+
+  startTransition(() => {
+    login({
+      email: res.email,
+      password: res.password,
+      code: res.code,
+    })
+      .then((res) => {
+        if (res?.error) {
+          setError(res.error);
+        }
+
+        if (res?.success) {
+          setSuccess(res.success);
+
+          setTimeout(() => {
+            window.location.href = DEFAULT_REDIRECT_PAGE;
+          }, 1000);
+        }
+      })
+      .catch(() => setError("Something went wrong"));
+  });
+};
+
   const [showPassword, setShowPassword] = useState(false);
   return (
     <div className="min-h-screen flex items-center justify-center bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)]">
@@ -96,7 +122,7 @@ export default function SignIn() {
         <p className="text-sm text-[#64748b] mb-6">{`Login to your account - enjoy exclusive features and many more.`}</p>
         <FormSuccess message={success} />
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={ showTwoFactor ? handleSubmit(onSubmitTwoFactor) : handleSubmit(onSubmit) } className="space-y-4">
           {showTwoFactor && (
             <>
               <div className="space-y-2">
@@ -111,19 +137,24 @@ export default function SignIn() {
                       value={field.value || ""}
                       onChange={field.onChange}
                       disabled={isPending}
-                      className="justify-center"
+                       className="!w-full"
                     >
-                      <InputOTPGroup className="gap-4">
-                        <InputOTPSlot index={0} className="border border-[#C9C9C9] !rounded-[20px] md:w-[40px] md:h-[40px] md:text-[25px] w-[32px] h-[32px] text-[20px] font-semibold text-[#0f0f0f] data-[active=true]:bg-[#C8FFFA] data-[active=true]:border-[#0f0f0f] data-[active=true]:ring-0" />
-                        <InputOTPSlot index={1} className="border border-[#C9C9C9] !rounded-[20px] md:w-[40px] md:h-[40px] md:text-[25px] w-[32px] h-[32px] text-[20px] font-semibold text-[#0f0f0f] data-[active=true]:bg-[#C8FFFA] data-[active=true]:border-[#0f0f0f] data-[active=true]:ring-0" />
-                        <InputOTPSlot index={2} className="border border-[#C9C9C9] !rounded-[20px] md:w-[40px] md:h-[40px] md:text-[25px] w-[32px] h-[32px] text-[20px] font-semibold text-[#0f0f0f] data-[active=true]:bg-[#C8FFFA] data-[active=true]:border-[#0f0f0f] data-[active=true]:ring-0" />
-                        <InputOTPSlot index={3} className="border border-[#C9C9C9] !rounded-[20px] md:w-[40px] md:h-[40px] md:text-[25px] w-[32px] h-[32px] text-[20px] font-semibold text-[#0f0f0f] data-[active=true]:bg-[#C8FFFA] data-[active=true]:border-[#0f0f0f] data-[active=true]:ring-0" />
-                        <InputOTPSlot index={4} className="border border-[#C9C9C9] !rounded-[20px] md:w-[40px] md:h-[40px] md:text-[25px] w-[32px] h-[32px] text-[20px] font-semibold text-[#0f0f0f] data-[active=true]:bg-[#C8FFFA] data-[active=true]:border-[#0f0f0f] data-[active=true]:ring-0" />
-                        <InputOTPSlot index={5} className="border border-[#C9C9C9] !rounded-[20px] md:w-[40px] md:h-[40px] md:text-[25px] w-[32px] h-[32px] text-[20px] font-semibold text-[#0f0f0f] data-[active=true]:bg-[#C8FFFA] data-[active=true]:border-[#0f0f0f] data-[active=true]:ring-0" />
+                      <InputOTPGroup className="flex justify-center gap-4 !w-full">
+                        <InputOTPSlot index={0} className="border border-[#C9C9C9] !rounded-[20px] w-[60px] h-[60px] text-[35px] font-semibold text-[#000000e6] data-[active=true]:bg-[#C8FFFA] data-[active=true]:border-[#053E54] data-[active=true]:ring-0" />
+                        <InputOTPSlot index={1} className="border border-[#C9C9C9] !rounded-[20px] w-[60px] h-[60px] text-[35px] font-semibold text-[#000000e6] data-[active=true]:bg-[#C8FFFA] data-[active=true]:border-[#053E54] data-[active=true]:ring-0" />
+                        <InputOTPSlot index={2} className="border border-[#C9C9C9] !rounded-[20px] w-[60px] h-[60px] text-[35px] font-semibold text-[#000000e6] data-[active=true]:bg-[#C8FFFA] data-[active=true]:border-[#053E54] data-[active=true]:ring-0" />
+                        <InputOTPSlot index={3} className="border border-[#C9C9C9] !rounded-[20px] w-[60px] h-[60px] text-[35px] font-semibold text-[#000000e6] data-[active=true]:bg-[#C8FFFA] data-[active=true]:border-[#053E54] data-[active=true]:ring-0" />
                       </InputOTPGroup>
                     </InputOTP>
                   )}
+                  
                 />
+                <Button type="submit" disabled={isPending} variant="auth" className="cursor-pointer text-[#fff] w-full h-11" >
+                {showTwoFactor 
+                  ? (isPending ? "Verifying..." : "Verify Code")
+                  : (isPending ? "Signing in..." : "Sign in")
+                }
+              </Button>
                 {errors.code && (
                   <p className="text-xs text-red-600 mt-1">
                     {errors.code.message}
@@ -166,7 +197,7 @@ export default function SignIn() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748b] cursor-pointer hover:text-foreground transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748b] cursor-pointer hover:text-[#64748b] transition-colors"
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
