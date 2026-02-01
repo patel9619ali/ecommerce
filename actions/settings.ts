@@ -64,6 +64,20 @@ if(values.password && values.newPassword && dbUser.password){
     return {error: "Incorrect Password!"};
   }
 }
+
+if (values.password && values.newPassword) {
+  const hashedPassword = await bcrypt.hash(values.newPassword, 10);
+
+  await db.user.update({
+    where: { id: dbUser.id },
+    data: {
+      password: hashedPassword,
+    },
+  });
+
+  return { success: "Password updated successfully" };
+}
+
   await db.user.update({
     where: { id: dbUser.id },
     data: {

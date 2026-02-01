@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Toaster } from "sonner";
 import { LoadingProvider } from "@/context/LoadingContext";
 import LoaderWrapper from "@/components/Loader/LoaderWrapper";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -16,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SessionProvider>
           <SpeedInsights />
           <LoadingProvider>
-            <LoaderWrapper>{children}</LoaderWrapper>
+            <LoaderWrapper>{children}<Toaster richColors position="top-right" /></LoaderWrapper>
           </LoadingProvider>
         </SessionProvider>
         </body>

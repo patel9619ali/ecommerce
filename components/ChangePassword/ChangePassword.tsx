@@ -1,80 +1,83 @@
-import { useState } from "react";
+"use client";
+import { useState, useTransition } from "react";
+import PasswordInput from "./PasswordInput";
+import { PasswordStrengthIndicator } from "../PasswordStrengthIndicator/PasswordStrengthIndicator";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Lock, Shield, CheckCircle2 } from "lucide-react";
-import PasswordInput from "./PasswordInput";
-import { toast } from "@/hooks/use-toast";
-import { PasswordStrengthIndicator } from "../PasswordStrengthIndicator/PasswordStrengthIndicator";
+import { Lock, Shield, CheckCircle2, X } from "lucide-react";
 import { DialogClose } from "@radix-ui/react-dialog";
-import { Check, X } from "lucide-react";
+import { toast } from "sonner";
+import { updateSetting } from "@/actions/settings";
+import { useSession } from "next-auth/react";
 type ChangePasswordProps = {
     openPassword: boolean;
     setOpenPassword: (open: boolean) => void;
 }
-const ChangePassword = ({ openPassword, setOpenPassword }: ChangePasswordProps) => {
+const ChangePassword = ({
+  openPassword,
+  setOpenPassword,
+}: ChangePasswordProps) => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
-    const passwordsMatch =
-    Boolean(newPassword) &&
-    Boolean(confirmPassword) &&
-    newPassword === confirmPassword;
+  const [isPending, startTransition] = useTransition();
+  const { update } = useSession();
 
-    const passwordsDontMatch =
-    Boolean(confirmPassword) &&
-    newPassword !== confirmPassword;
+  const passwordsMatch =
+    !!newPassword && !!confirmPassword && newPassword === confirmPassword;
 
+  const passwordsDontMatch =
+    !!confirmPassword && newPassword !== confirmPassword;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // -----------------------------
+  // Submit
+  // -----------------------------
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!currentPassword || !newPassword || !confirmPassword) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in all password fields.",
-        variant: "destructive",
-      });
+      toast.error("Missing fields");
       return;
     }
 
-    if (newPassword !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "New password and confirmation must match.",
-        variant: "destructive",
-      });
+    if (passwordsDontMatch) {
+      toast.error("Passwords don't match");
       return;
     }
 
     if (newPassword.length < 8) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 8 characters long.",
-        variant: "destructive",
-      });
+      toast.error("Password must be at least 8 characters");
       return;
     }
 
-    setIsLoading(true);
-    
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    setIsLoading(false);
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    
-    toast({
-      title: "Password changed!",
-      description: "Your password has been updated successfully.",
+    startTransition(() => {
+      updateSetting({
+        password: currentPassword,
+        newPassword: newPassword,
+      })
+        .then(async (res) => {
+          if (res?.error) {
+            toast.error(res.error);
+            return;
+          }
+
+          if (res?.success) {
+            toast.success(res.success);
+            setCurrentPassword("");
+            setNewPassword("");
+            setConfirmPassword("");
+            setOpenPassword(false);
+            await update(); // refresh session
+          }
+        })
+        .catch(() => {
+          toast.error("Something went wrong");
+        });
     });
   };
-
   return (
     <Dialog open={openPassword} onOpenChange={setOpenPassword}>
         <DialogContent
@@ -101,32 +104,32 @@ const ChangePassword = ({ openPassword, setOpenPassword }: ChangePasswordProps) 
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="space-y-2">
-                    <Label htmlFor="current-password" className="text-[#000] text-sm font-medium block !mb-3">
-                    Current Password
-                    </Label>
-                    <PasswordInput
-                    id="current-password"
-                    placeholder="Enter current password"
-                    value={currentPassword}
-                    onChange={setCurrentPassword}
-                    className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] pr-10"
-                    />
-                </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="current-password" className="text-[#000] text-sm font-medium block !mb-3">
+                        Current Password
+                        </Label>
+                        <PasswordInput
+                        id="current-password"
+                        placeholder="Enter current password"
+                        value={currentPassword}
+                        onChange={setCurrentPassword}
+                        className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] pr-10"
+                        />
+                    </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="new-password" className="text-[#000] text-sm font-medium block !mb-3">
-                    New Password
-                    </Label>
-                    <PasswordInput
-                    id="new-password"
-                    placeholder="Enter new password"
-                    value={newPassword}
-                    onChange={setNewPassword}
-                    className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] pr-10"
-                    />
-                    <PasswordStrengthIndicator password={newPassword} />
-                </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="new-password" className="text-[#000] text-sm font-medium block !mb-3">
+                        New Password
+                        </Label>
+                        <PasswordInput
+                        id="new-password"
+                        placeholder="Enter new password"
+                        value={newPassword}
+                        onChange={setNewPassword}
+                        className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] pr-10"
+                        />
+                        <PasswordStrengthIndicator password={newPassword} />
+                    </div>
 
                 <div className="space-y-2">
                     <Label htmlFor="confirm-password" className="text-[#000] text-sm font-medium block !mb-3">
@@ -159,9 +162,9 @@ const ChangePassword = ({ openPassword, setOpenPassword }: ChangePasswordProps) 
                     type="submit" 
                     className="!cursor-pointer w-full h-12 text-base font-semibold "
                     variant="auth"
-                    disabled={isLoading || !currentPassword || !newPassword || !confirmPassword || passwordsDontMatch}
+                    disabled={isPending || !currentPassword || !newPassword || !confirmPassword || passwordsDontMatch}
                 >
-                    {isLoading ? (
+                    {isPending ? (
                     <span className="flex items-center gap-2">
                         <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full text-[#000] animate-spin" />
                         Updating...
