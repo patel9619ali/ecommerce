@@ -7,12 +7,12 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 type ManageSettingsDrawerProps = {
     manageOpen: boolean;
     setManageOpen: (open: boolean) => void;
-    setOpenChangePhone: (open: boolean) => void;
+    setOpenPassword: (open: boolean) => void;
     setOpenChangeEmail: (open: boolean) => void;
     setIsChangeEmail: (change: boolean) => void;
 };
 
-export default function ManageSettingsDrawer({ manageOpen, setManageOpen, setOpenChangePhone, setOpenChangeEmail, setIsChangeEmail }: ManageSettingsDrawerProps) {
+export default function ManageSettingsDrawer({ manageOpen, setManageOpen, setOpenPassword, setOpenChangeEmail, setIsChangeEmail }: ManageSettingsDrawerProps) {
     const user = useCurrentUser();
 
     return (
@@ -54,7 +54,7 @@ export default function ManageSettingsDrawer({ manageOpen, setManageOpen, setOpe
                     <div className="first:pt-0 pt-5 pb-5 last:pb-0 border-b border-[#C9C9C9] last:border-0">
                         <button
                             onClick={() => {
-                                setOpenChangePhone(true)
+                                setOpenPassword(true)
                                 setManageOpen(false)
                             }}
                             className="flex items-center gap-3 w-full cursor-pointer ring-0 focus-visible:outline-none">
@@ -65,14 +65,14 @@ export default function ManageSettingsDrawer({ manageOpen, setManageOpen, setOpe
                                     <path d="M7.73998 12.5438C7.61137 12.6723 7.5391 12.8467 7.53906 13.0286V15.7714C7.53906 15.9533 7.61131 16.1277 7.7399 16.2563C7.8685 16.3849 8.04291 16.4571 8.22478 16.4571H10.9676C11.1495 16.4571 11.3239 16.3848 11.4524 16.2562L17.4819 10.2267L13.7695 6.51428L7.73998 12.5438Z" fill="#053E54" />
                                 </svg>
                             </div>
-                            <span className="text-start text-sm text-[#053E54] font-semibold ">Change Phone Number</span>
+                            <span className="text-start text-sm text-[#053E54] font-semibold ">Change Password</span>
                         </button>
                     </div>
                     <div className="first:pt-0 pt-5 pb-5 last:pb-0 border-b border-[#C9C9C9] last:border-0">
                         <button
                             onClick={() => {
                                 setIsChangeEmail(true)
-                                setOpenChangeEmail(true)
+                                setIsChangeEmail(true)
                                 setManageOpen(false)
                             }}
                             className="flex items-center gap-3 w-full cursor-pointer ring-0 focus-visible:outline-none">

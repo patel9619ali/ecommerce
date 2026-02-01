@@ -13,6 +13,7 @@ import ChangeEmail from "@/components/UserProfile/MyProfile/ChangeEmail/ChangeEm
 import ChangePhone from "@/components/UserProfile/MyProfile/ChangePhone/ChangePhone";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import ManageSettingsDrawer from "@/components/ManageSettingsDrawer/ManageSettingsDrawer";
+import ChangePassword from "@/components/ChangePassword/ChangePassword";
 
 const breadcrumbItems: any[] = [
     { label: 'Home', href: '/' },
@@ -65,14 +66,14 @@ export default function MyProfile() {
             {/* Change Email Modal */}
             <ChangeEmail openChangeEmail={openChangeEmail} setOpenChangeEmail={setOpenChangeEmail} newEmail={newEmail} setNewEmail={setNewEmail} setIsChangeEmail={setIsChangeEmail} isChangeEmail={isChangeEmail} />
             {/* Change Name Modal */}
-            {/* <ChangePassword openPassword={openPassword} setOpenPassword={setOpenPassword} /> */}
+            <ChangePassword openPassword={openPassword} setOpenPassword={setOpenPassword} />
 
             {/* Change Phone Modal */}
             {/* <ChangePhone openChangePhone={openChangePhone} setOpenChangePhone={setOpenChangePhone} newcountryCode={newcountryCode} setNewCountryCode={setNewCountryCode} newPhoneNumber={newPhoneNumber} setNewPhoneNumber={setNewPhoneNumber} /> */}
             {/* Change Phone Modal */}
 
             {/* Manage settings drawer for mobile */}
-            <ManageSettingsDrawer manageOpen={manageOpen} setManageOpen={setManageOpen} setOpenChangePhone={setOpenChangePhone} setOpenChangeEmail={setOpenChangeEmail} setIsChangeEmail={setIsChangeEmail} />
+            <ManageSettingsDrawer manageOpen={manageOpen} setManageOpen={setManageOpen} setOpenPassword={setOpenPassword} setOpenChangeEmail={setOpenChangeEmail} setIsChangeEmail={setIsChangeEmail} />
         </>
     )
 }

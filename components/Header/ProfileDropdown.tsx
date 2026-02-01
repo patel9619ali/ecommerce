@@ -44,18 +44,18 @@ export default function ProfileDropdown({ user }: ProfileDropdownProps) {
         {/* User Info */}
         <div className="px-3 py-2">
           <p className="text-sm font-medium text-[#000]">{user.name}</p>
-          <p className="text-xs text-muted-foreground text-[#000]">{user.email}</p>
+          <p className="text-[14px] font-semibold text-[#0f0f0fc4]">{user.email}</p>
         </div>
 
-        <DropdownMenuSeparator className="text-[#000]"/>
+        <DropdownMenuSeparator className="bg-[#c9c9c9] -mx-1 my-1 h-px"/>
 
         {/* Links */}
         <DropdownMenuItem asChild>
-          <Link href="/user-profile/my-profile" className="cursor-pointer flex gap-2 text-[#000]">
-            <User size={16} /> My Profile
+          <Link href="/user-profile/my-profile" className="text-[16px] font-semibold uppercase cursor-pointer flex gap-2 text-[#000]">
+            <User size={22} /> My Profile
           </Link>
         </DropdownMenuItem>
-
+<DropdownMenuSeparator className="bg-[#c9c9c9] -mx-1 my-1 h-px"/>
         {/* <DropdownMenuItem asChild>
           <Link href="/bookings" className="flex gap-2 text-[#000]">
             <Car size={16} /> My Bookings
@@ -63,11 +63,11 @@ export default function ProfileDropdown({ user }: ProfileDropdownProps) {
         </DropdownMenuItem> */}
 
         <DropdownMenuItem asChild>
-          <Link href="/wishlist" className="cursor-pointer flex gap-2 text-[#000]">
+          <Link href="/wishlist" className="text-[16px] font-semibold uppercase cursor-pointer flex gap-2 text-[#000]">
             <Heart size={16} /> My Wishlist
           </Link>
         </DropdownMenuItem>
-
+<DropdownMenuSeparator className="bg-[#c9c9c9] -mx-1 my-1 h-px"/>
         <DropdownMenuSeparator />
 
         {/* Logout */}
