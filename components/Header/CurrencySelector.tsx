@@ -43,7 +43,7 @@ export default function CurrencySelector() {
         className="lg:flex hidden cursor-pointer gap-2 items-center z-[1]"
         disabled={isLoading}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" fill="none" width={20} height={20} viewBox="0 0 24 24">
+        <svg stroke='#000' className='text-[#000]' xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" fill="none" width={20} height={20} viewBox="0 0 24 24">
           <path d="m15 18 1-2-2.948-1.981-1.943-.124L10 15l2 3h3Z" stroke="currentColor" vectorEffect="non-scaling-stroke"></path>
           <path d="M12.904 2.04A9.993 9.993 0 0 0 2.039 12.903c.414 4.754 4.303 8.643 9.057 9.057a9.993 9.993 0 0 0 10.865-10.865c-.414-4.753-4.303-8.642-9.057-9.057Z" stroke="currentColor" vectorEffect="non-scaling-stroke"></path>
           <path d="M3 7.46 7.75 11l1.178-2.324 4.686-1.17L15 2" stroke="currentColor" vectorEffect="non-scaling-stroke"></path>

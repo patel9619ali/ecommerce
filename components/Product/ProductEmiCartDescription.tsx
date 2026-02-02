@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Button } from "../ui/button";
+import { BuyNow } from "../Loader/BuyNow";
 type Props = {
   product: Product;
   variant: Variant;
@@ -41,7 +42,9 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
 
     const handleBuyNow = () => {
         handleAddToCart();
-        router.push("/checkout");
+        router.push(
+            `/checkout?name=${product.title}&color=${variant.key}&qty=${quantity}&price=${variant.price}&originalPrice=${4999}`
+          );
     };
       const originalPrice = 4999;
     const discountedPrice = 3499;
@@ -65,7 +68,7 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`h-5 w-5 ${i < 4 ? "fill-[#f59f0a] text-[#f59f0a]" : "fill-[#f3f4f6] text-[#f3f4f6]"}`}
+                      className={`h-5 w-5 ${i < 4 ? "fill-[#f59f0a] text-[#f59f0a]" : "fill-[#8e9dbc] text-[#aab7c4bf]"}`}
                     />
                   ))}
                 </div>
@@ -119,23 +122,25 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3 pt-2">
-              <Button className="cursor-pointer flex-1 h-12 text-[16px] !bg-[#ffffff99] text-[#000] hover:text-[#1e8549] hover:bg-[#eafaf1] border border-[#aeb2bb] rounded-lg" variant="outline" onClick={handleAddToCart} >
+            <div className="pt-2 grid grid-cols-2 gap-3">
+              <Button className="cursor-pointer flex-1 h-12 text-[16px] !bg-[#ffffff99] text-[#000] hover:text-[#254fda] hover:bg-[#eafaf1] border border-[#aeb2bb] rounded-lg" variant="outline" onClick={handleAddToCart} >
                 Add to Cart
               </Button>
-              <Button className="cursor-pointer flex-1 h-12 text-[16px] bg-[#28af60] hover:bg-[#28af60e6] text-[fff] border border-[#aeb2bb] rounded-lg" onClick={handleBuyNow} >
-                Buy Now
-              </Button>
-              <Button variant="outline" size="icon" className="h-12 w-12">
-                <Share2 className="h-5 w-5" />
-              </Button>
+              <BuyNow productId={product.id} slug={product.slug} title={product.title} variant={variant}/>
+              
             </div>
 
-<ProductBenefitsCarousel benefits={variant.benefits} />
-          <p className="text-xs text-black/60 mt-4 flex items-center gap-1">
-            🔒 Secure transaction
-          </p>
+          <ProductBenefitsCarousel benefits={variant.benefits} />
+          <div className="flex justify-between">
+            <p className="text-xs text-black/60 flex items-center gap-1 text-[15px]">
+              🔒 Secure transaction
+            </p>
+            <Button variant="outline" size="icon" className="cursor-pointer h-8 w-8 border-1 !border-[#000]">
+              <Share2 className="h-5 w-5 text-[#000]" />
+            </Button>
+          </div>
         </div>
+
             {/* <div className="mt-6">
                 <h3 className="text-black text-lg font-semibold mb-2">
                     About this item

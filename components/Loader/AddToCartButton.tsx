@@ -44,11 +44,9 @@ export const AddToCartButton = ({
   return (
     <>
       <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} >
-        <button onClick={handleClick} aria-label="Previous slide" className=" group relative w-full flex items-center justify-center overflow-hidden border-[2px] border-black/60 py-3 font-bold text-white transition-colors duration-300 group-hover:text-black cursor-pointer" >
-            <span className=" absolute inset-0 bg-black translate-y-full transition-transform duration-300 ease-out group-hover:translate-y-0 z-10 pointer-events-none " />
-            <span className={`uppercase relative z-20 group-hover:text-white text-black flex items-center gap-2 `}>
+        <button onClick={handleClick} aria-label="Previous slide" className="cursor-pointer flex-1 h-12 text-[16px] !bg-[#ffffff99] text-[#000] hover:text-[#254fda] hover:bg-[#eafaf1] border border-[#aeb2bb] rounded-lg w-full" >
+
               ADD TO CART
-            </span>
         </button>
       </motion.div>
     </>

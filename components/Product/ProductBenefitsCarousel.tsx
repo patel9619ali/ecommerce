@@ -5,7 +5,7 @@ export function ProductBenefitsCarousel({ benefits }: any) {
   const [emblaRef] = useEmblaCarousel({ align: "start", loop: false });
 
   return (
-      <div className="grid grid-cols-3 gap-4 pt-4">
+      <div className="grid grid-cols-3 gap-4 pt-2">
         <div className="flex flex-col items-center text-center p-3 rounded-lg bg-[#f3f4f6] shadow-sm">
           <Truck className="h-6 w-6 text-[#28af60] mb-2" />
           <span className="text-xs font-medium text-[#000]">Free Delivery</span>

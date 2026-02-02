@@ -42,8 +42,8 @@ export default function Footer() {
     }
   }, [loginOpen]);
   return (
-    <section className="bg-[#dbd4d463] text-white rounded-t-[0] lg:pt-10 pt-6 lg:pb-6 pb-4 px-4 lg:px-12">
-      <footer className="container">
+    <section className="bg-[#fff] text-white rounded-t-[0] lg:pt-10 pt-6 lg:pb-6 pb-4 px-4 lg:px-12">
+      <footer className="container !px-0">
         {/* <div className="w-full flex gap-3 mb-5">
           <svg width="97" height="47" viewBox="0 0 97 47" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M6.48239 42.9933H15.6856V46.4332H0.399414C0.956074 45.552 1.46513 44.7409 1.92291 43.9999C2.39167 43.2662 2.90805 42.4329 3.48668 41.5002C4.06165 40.56 4.6586 39.6014 5.26653 38.6207C5.88179 37.64 6.47141 36.6814 7.0537 35.7486C7.62867 34.8084 8.15237 33.9752 8.61016 33.2415C8.89581 32.7806 9.19977 32.3014 9.51839 31.7889H1.05495V28.349H15.7076L6.47873 42.9933H6.48239Z" fill="#fff" />
@@ -118,16 +118,16 @@ export default function Footer() {
           </p>
 
           <div className="flex gap-3">
-            <Link href={``}>
+            <Link className="bg-[#000]" href={``}>
               <Image src={`${process.env.NEXT_PUBLIC_APP_URL}/assets/images/linkedin.svg`} width={27} height={27} alt="Map Icon" />
             </Link>
-            <Link href={``}>
+            <Link className="bg-[#000]" href={``}>
               <Image src={`${process.env.NEXT_PUBLIC_APP_URL}/assets/images/twitter.svg`} width={27} height={27} alt="Map Icon" />
             </Link>
-            <Link href={``}>
+            <Link className="bg-[#000]" href={``}>
               <Image src={`${process.env.NEXT_PUBLIC_APP_URL}/assets/images/instagram.svg`} width={27} height={27} alt="Map Icon" />
             </Link>
-            <Link href={``}>
+            <Link className="bg-[#000]" href={``}>
               <Image src={`${process.env.NEXT_PUBLIC_APP_URL}/assets/images/whatsapp.svg`} width={27} height={27} alt="Map Icon" />
             </Link>
           </div>

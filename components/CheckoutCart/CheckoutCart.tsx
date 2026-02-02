@@ -1,0 +1,390 @@
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import {
+  ChevronLeft,
+  MapPin,
+  CreditCard,
+  Wallet,
+  Building2,
+  ShieldCheck,
+  Lock,
+  CheckCircle2,
+  ChevronDown,
+  Tag,
+  Truck,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import type { StaticImageData } from "next/image";
+import productMain from "@/public/assets/Blender/BlackBlender/black1.jpg";
+
+interface ProductState {
+  name: string;
+  color: string;
+  quantity: number;
+  price: number;
+  originalPrice: number;
+  image: string | StaticImageData;
+}
+
+const CheckoutCart = () => {
+    const router = useRouter();
+    const product: ProductState = {
+        name: "BlendRas Portable Juicer Pro",
+        color: "Black",
+        quantity: 1,
+        price: 3499,
+        originalPrice: 4999,
+        image: productMain,
+    };
+
+  const [paymentMethod, setPaymentMethod] = useState("upi");
+  const [addressOpen, setAddressOpen] = useState(true);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+
+  const subtotal = product.price * product.quantity;
+  const shipping = subtotal > 999 ? 0 : 49;
+  const discount = appliedCoupon ? Math.round(subtotal * 0.1) : 0;
+  const total = subtotal + shipping - discount;
+
+  const handleApplyCoupon = () => {
+    if (couponCode.toLowerCase() === "save10") {
+      setAppliedCoupon(couponCode);
+    }
+  };
+
+  return (
+    <div className="bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] lg:py-10 py-5">
+
+      <main className="container mx-auto px-4">
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Left Column - Forms */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Delivery Address */}
+            <Collapsible open={addressOpen} onOpenChange={setAddressOpen}>
+              <Card className="rounded-2xl shadow-md !pb-0 !pt-0 w-full relative bg-[#fff]">
+                <CollapsibleTrigger asChild className="!py-5">
+                  <CardHeader className="cursor-pointer hover:bg-[#f3f4f680] transition-colors rounded-t-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-[#fff2e5] flex items-center justify-center">
+                          <MapPin className="h-5 w-5 text-[#ff8000]" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg text-[#000]">Delivery Address</CardTitle>
+                          <p className="text-sm text-[#6a7181]">Where should we deliver?</p>
+                        </div>
+                      </div>
+                      <ChevronDown className={`h-5 w-5 text-[#6a7181] transition-transform ${addressOpen ? "rotate-180" : ""}`} />
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="space-y-4 pt-0">
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="firstName">First Name</Label>
+                        <Input id="firstName" placeholder="John" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="lastName">Last Name</Label>
+                        <Input id="lastName" placeholder="Doe" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[#020817] text-sm mb-1 block" htmlFor="phone">Phone Number</Label>
+                      <Input id="phone" placeholder="+91 98765 43210" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[#020817] text-sm mb-1 block" htmlFor="address">Street Address</Label>
+                      <Input id="address" placeholder="123 Main Street, Apartment 4B" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                    </div>
+                    <div className="grid sm:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="city">City</Label>
+                        <Input id="city" placeholder="Mumbai" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="state">State</Label>
+                        <Input id="state" placeholder="Maharashtra" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="pincode">PIN Code</Label>
+                        <Input id="pincode" placeholder="400001" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                      </div>
+                    </div>
+                    <Button className="w-full mt-2 cursor-pointer !border-[#254fda] !bg-[#254fda] hover:!bg-[#254fda] hover:!text-[#fff] mb-5" variant="outline">
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                      Save Address
+                    </Button>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+
+            {/* Payment Method */}
+            <Card className="rounded-2xl shadow-md p-6 w-full relative bg-[#fff]">
+              <CardHeader className="lg:px-6 px-0">
+                <div className="flex items-center gap-3 px-0">
+                  <div className="h-10 w-10 rounded-full bg-[#fff2e5] flex items-center justify-center">
+                    <CreditCard className="h-5 w-5 text-[#ff8000]" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg text-[#000]">Payment Method</CardTitle>
+                    <p className="text-sm text-[#6a7181]">All transactions are secure</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="lg:px-6 px-0">
+                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
+                  <div
+                    className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                      paymentMethod === "upi" ? "border-[#254fda] bg-[#28af600d]" : "border-[#e2e4e9] hover:border-[#254fda]"
+                    }`}
+                    onClick={() => setPaymentMethod("upi")}
+                  >
+                    <div className="flex items-center gap-3">
+                      <RadioGroupItem value="upi" id="upi" className="border-[#254fda] text-[#254fda]"/>
+                      <Label htmlFor="upi" className="cursor-pointer font-medium text-[#000]">UPI</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs text-[#000]">GPay</Badge>
+                      <Badge variant="secondary" className="text-xs text-[#000]">PhonePe</Badge>
+                      <Badge variant="secondary" className="text-xs text-[#000]">Paytm</Badge>
+                    </div>
+                  </div>
+
+                  <div
+                    className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                      paymentMethod === "card" ? "border-[#254fda] bg-[#28af600d]" : "border-[#e2e4e9] hover:border-[#254fda]"
+                    }`}
+                    onClick={() => setPaymentMethod("card")}
+                  >
+                    <div className="flex items-center gap-3">
+                      <RadioGroupItem value="card" id="card" className="border-[#254fda] text-[#254fda]" />
+                      <Label htmlFor="card" className="cursor-pointer font-medium text-[#000]">Credit / Debit Card</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs text-[#000]">Visa</Badge>
+                      <Badge variant="secondary" className="text-xs text-[#000]">MC</Badge>
+                      <Badge variant="secondary" className="text-xs text-[#000]">RuPay</Badge>
+                    </div>
+                  </div>
+
+                  <div
+                    className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                      paymentMethod === "netbanking" ? "border-[#254fda] bg-[#28af600d]" : "border-[#e2e4e9] hover:border-[#254fda]"
+                    }`}
+                    onClick={() => setPaymentMethod("netbanking")}
+                  >
+                    <div className="flex items-center gap-3">
+                      <RadioGroupItem value="netbanking" id="netbanking" className="border-[#254fda] text-[#254fda]" />
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-[#6a7181]" />
+                        <Label htmlFor="netbanking" className="cursor-pointer font-medium text-[#000]">Net Banking</Label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                      paymentMethod === "wallet" ? "border-[#254fda] bg-[#28af600d]" : "border-[#e2e4e9] hover:border-[#254fda]"
+                    }`}
+                    onClick={() => setPaymentMethod("wallet")}
+                  >
+                    <div className="flex items-center gap-3">
+                      <RadioGroupItem value="wallet" id="wallet" className="border-[#254fda] text-[#254fda]" />
+                      <div className="flex items-center gap-2">
+                        <Wallet className="h-4 w-4 text-[#6a7181]" />
+                        <Label htmlFor="wallet" className="cursor-pointer font-medium text-[#000]">Wallets</Label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                      paymentMethod === "cod" ? "border-[#254fda] bg-[#28af600d]" : "border-[#e2e4e9] hover:border-[#254fda]"
+                    }`}
+                    onClick={() => setPaymentMethod("cod")}
+                  >
+                    <div className="flex items-center gap-3">
+                      <RadioGroupItem value="cod" id="cod" className="border-[#254fda] text-[#254fda]" />
+                      <Label htmlFor="cod" className="cursor-pointer font-medium text-[#000]">Cash on Delivery</Label>
+                    </div>
+                    <Badge variant="outline" className="text-xs text-[#000]">+₹30</Badge>
+                  </div>
+                </RadioGroup>
+
+                {paymentMethod === "upi" && (
+                  <div className="mt-4 space-y-2">
+                    <Label htmlFor="upiId" className="text-[#020817] text-sm mb-1 block">Enter UPI ID</Label>
+                    <Input id="upiId" placeholder="yourname@upi" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                  </div>
+                )}
+
+                {paymentMethod === "card" && (
+                  <div className="mt-4 space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="cardNumber" className="text-[#020817] text-sm mb-1 block">Card Number</Label>
+                      <Input id="cardNumber" placeholder="1234 5678 9012 3456" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="expiry" className="text-[#020817] text-sm mb-1 block">Expiry Date</Label>
+                        <Input id="expiry" placeholder="MM/YY" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="cvv" className="text-[#020817] text-sm mb-1 block">CVV</Label>
+                        <Input id="cvv" placeholder="123" type="password" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="cardName" className="text-[#020817] text-sm mb-1 block">Name on Card</Label>
+                      <Input id="cardName" placeholder="JOHN DOE" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]" />
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column - Order Summary */}
+          <div className="space-y-6">
+            <Card className="rounded-2xl shadow-md p-4 w-full relative bg-[#fff] sticky top-24">
+              <CardHeader>
+                <CardTitle className="text-lg text-[#000]">Order Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Product */}
+                <div className="flex gap-4">
+                  <div className="w-20 h-20 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-[#21242c] line-clamp-2">{product.name}</h4>
+                    <p className="text-sm text-[#6a7181]">Color: {product.color}</p>
+                    <p className="text-sm text-[#6a7181]">Qty: {product.quantity}</p>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <span className="font-semibold text-[#000]">₹{product.price.toLocaleString()}</span>
+                      <span className="text-sm text-[#6a7181] line-through">
+                        ₹{product.originalPrice.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Coupon */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-[#000]">
+                    <Tag className="h-4 w-4 text-[#000]" />
+                    Apply Coupon
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value)}
+                      placeholder="Enter code"
+                      disabled={!!appliedCoupon}
+                      className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={handleApplyCoupon}
+                      disabled={!couponCode || !!appliedCoupon}
+                      className="!text-[#fff] cursor-pointer !border-[#254fda] !bg-[#254fda] h-11"
+                    >
+                      Apply
+                    </Button>
+                  </div>
+                  {appliedCoupon && (
+                    <p className="text-sm text-[#28af60] flex items-center gap-1">
+                      <CheckCircle2 className="h-4 w-4" />
+                      Coupon applied! You save ₹{discount}
+                    </p>
+                  )}
+                  <p className="text-xs text-[#6a7181]">Try: SAVE10</p>
+                </div>
+
+                <Separator />
+
+                {/* Price Breakdown */}
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-[#6a7181]">Subtotal</span>
+                    <span className="text-[#000]">₹{subtotal.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#6a7181] flex items-center gap-1">
+                      <Truck className="h-3.5 w-3.5" /> Shipping
+                    </span>
+                    <span className={shipping === 0 ? "text-[#28af60]" : ""}>
+                      {shipping === 0 ? "FREE" : `₹${shipping}`}
+                    </span>
+                  </div>
+                  {discount > 0 && (
+                    <div className="flex justify-between text-[#28af60]">
+                      <span>Coupon Discount</span>
+                      <span>-₹{discount.toLocaleString()}</span>
+                    </div>
+                  )}
+                </div>
+
+                <Separator />
+
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-lg text-[#000]">Total</span>
+                  <span className="font-bold text-2xl text-[#21242c]">₹{total.toLocaleString()}</span>
+                </div>
+
+                <Button className="cursor-pointer border-[#254fda] bg-[#254fda] w-full h-12 text-base font-semibold">
+                  Pay ₹{total.toLocaleString()}
+                </Button>
+
+                {/* Trust Badges */}
+                <div className="flex items-center justify-center gap-4 pt-2 text-xs text-[#6a7181]">
+                  <div className="flex items-center gap-1">
+                    <ShieldCheck className="h-4 w-4 text-[#254fda]" />
+                    <span>Secure Payment</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Lock className="h-4 w-4 text-[#254fda]" />
+                    <span>256-bit SSL</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Delivery Info */}
+            {/* <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3 text-sm">
+                  <Truck className="h-5 w-5 text-[#254fda] border-[#254fda] text-[#254fda]" />
+                  <div>
+                    <p className="font-medium text-[#21242c]">Estimated Delivery</p>
+                    <p className="text-[#6a7181]">3-5 business days</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card> */}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default CheckoutCart;

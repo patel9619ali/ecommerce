@@ -193,7 +193,7 @@ export const ProductGallery = ({ variant }: Props) => {
               <button
                 key={index}
                 onClick={() => onThumbClick(index)}
-                className={`w-[100px] h-[150px] rounded-lg border-2 overflow-hidden ${
+                className={`cursor-pointer w-[100px] h-[150px] rounded-lg border-2 overflow-hidden ${
                   index === selectedIndex
                     ? "border-white"
                     : "border-white/40"

@@ -63,8 +63,8 @@ export const BuyCartSection = ({
       <div className="mt-6">
         <AddToCartButton productId={product.id} slug={product.slug} title={product.title} variant={selectedVariant}/>
       </div>
-      <div className="mt-6">
-        <BuyNow/>
+      <div className="mt-4">
+        <BuyNow productId={product.id} slug={product.slug} title={product.title} variant={selectedVariant}/>
       </div>
       <div className="flex cursor-pointer items-center">
         <Share className="mt-6 w-6 h-6 cursor-pointer dark:text-black/60 hover:text-white/80  transition-colors duration-300 ease-out rotate-90" />

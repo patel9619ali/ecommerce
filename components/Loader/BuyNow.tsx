@@ -3,34 +3,50 @@
 import { useState } from "react";
 import { Loader2, Check } from "lucide-react";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useCartStore } from "@/store/useCartStore";
+import { Button } from "../ui/button";
+import type { Variant } from "@/data/types";
 type CartState = "idle" | "loading" | "success";
-export const BuyNow = () => {
+type Props = {
+  productId: string;
+  slug: string;
+  title: string;
+  variant: Variant;
+};
+export const BuyNow = ({
+  productId,
+  slug,
+  title,
+  variant,
+}: Props) => {
+  const addItem = useCartStore((s) => s.addItem);
   const [state, setState] = useState<CartState>("idle");
-
-  const handleAddToCart = () => {
-    if (state !== "idle") return;
-
-    setState("loading");
-
-    // Simulate API call
-    setTimeout(() => {
-      setState("success");
-
-      setTimeout(() => {
-        setState("idle");
-      }, 1400);
-    }, 1200);
-  };
-
+  const router = useRouter();
+  const handleClick = () => {
+    addItem({
+      id: `${productId}-${variant.key}`,
+      productId,
+      slug,
+      title,
+      variantKey: variant.key,
+      price: variant.price,
+      image: variant.images[0].src,
+      quantity: 1,
+    });
+  }
+    const handleBuyNow = () => {
+        
+        router.push(
+            `/checkout`
+          );
+    };
   return (
     <>
       <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} >
-        <button aria-label="Previous slide" className=" group relative w-full flex items-center justify-center overflow-hidden border-[2px] border-black/60 py-3 font-bold text-white transition-colors duration-300 group-hover:text-black cursor-pointer bg-[#fff]" >
-          <span className=" absolute inset-0 bg-black translate-y-full transition-transform duration-300 ease-out group-hover:translate-y-0 z-10 pointer-events-none " />
-            <span className={`uppercase relative z-20 group-hover:text-white text-black flex items-center gap-2 `}>
-              Buy it now
-            </span>
-        </button>
+        <Button className="w-full flex-1 h-12 text-[16px] cursor-pointer !border-[#254fda] !bg-[#254fda] hover:!bg-[#254fda] hover:!text-[#fff] rounded-lg" onClick={handleBuyNow} >
+            Buy Now
+        </Button>
       </motion.div>
     </>
   );
