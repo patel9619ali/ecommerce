@@ -6,7 +6,6 @@ import { useCartStore } from "@/store/useCartStore";
 import { useEffect, useState } from "react";
 import ProductImage from "@/components/Product/ProductImage";
 import ProductEmiCartDescription from "@/components/Product/ProductEmiCartDescription";
-import ProductCartAndCheckout from "@/components/Product/ProductCartAndCheckout";
 
 export default function ProductPage() {
   const { slug } = useParams();
@@ -44,10 +43,9 @@ export default function ProductPage() {
   return (
     <section className="bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] py-10">
       <div className="px-2">
-        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1.5fr_1fr] gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_2fr] gap-4 lg:gap-8 relative">
           <ProductImage variant={activeVariant} product={product}/>
           <ProductEmiCartDescription  variant={variant} product={product} setVariantKey={setVariantKey} setPreviewVariantKey={setPreviewVariantKey} previewVariantKey={previewVariantKey}/>
-          <ProductCartAndCheckout variant={activeVariant} product={product}/>
         </div>
       </div>
     </section>

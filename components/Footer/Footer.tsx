@@ -57,7 +57,7 @@ export default function Footer() {
             <path d="M95.4747 19.6221H89.3405C88.8974 19.0728 88.3993 18.5455 87.8536 18.0699C80.1776 11.2787 68.8283 11.9829 59.2808 13.229C51.2752 14.1987 42.343 11.9423 36.9229 5.68564C42.9546 10.9985 51.3301 12.2741 58.8707 10.6076L62.7673 9.76703C69.5681 8.35864 76.6618 7.96414 83.4699 9.90345C88.4506 11.3819 93.292 14.689 95.4747 19.6221Z" fill="#fff" />
           </svg>
         </div> */}
-        <div className="lg:text-[40px] text-[30px] font-[400] text-[#053E54]">Logo</div>
+        <h1 className="text-2xl font-bold text-[#28af60]">BlendRas</h1>
         {/* Top Section */}
         {/* <div className="grid grid-cols-2 grid-rows-[auto_auto] lg:grid-cols-[25%_25%_50%] lg:grid-rows-1 pb-8 border-b border-dashed border-[#FFFFFF33]">
           

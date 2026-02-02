@@ -48,7 +48,7 @@ export default function ImageHoverZoom({
 return (
   <div className="relative flex">
     {/* MAIN IMAGE */}
-    <div ref={containerRef} onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)} onMouseMove={handleMouseMove} className="relative overflow-hidden rounded-xl bg-black w-full aspect-square lg:max-w-full lg:mx-auto" >
+    <div ref={containerRef} onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)} onMouseMove={handleMouseMove} className="relative overflow-hidden rounded-lg shadow-sm bg-[#ffffff] w-full aspect-square lg:max-w-full lg:mx-auto" >
       <Image src={src} alt={alt} fill sizes="(max-width: 768px) 100vw, 500px" className="object-cover" />
       {/* LENS */}
       {isHovering && (
@@ -70,7 +70,7 @@ return (
     {/* ZOOM PANEL (ABSOLUTE – NO LAYOUT SHIFT) */}
     {isHovering && (
       <div
-        className="absolute top-0 2xl:left-[600px] xl:left-[500px] lg:left-[200px] hidden lg:block rounded-xl overflow-hidden bg-black"
+        className="absolute top-0 lg:left-full  ml-3 hidden lg:block rounded-xl overflow-hidden bg-black"
         style={{ width: "100%", height: "100%", zIndex: "999" }}
       >
         <div
@@ -78,7 +78,7 @@ return (
           style={{
             backgroundImage: `url(${imageUrl})`,
             backgroundRepeat: "no-repeat",
-            backgroundSize: `${zoomScale * 100}%`,
+            backgroundSize: `${zoomScale * 200}%`,
             backgroundPosition: `${pos.x}% ${pos.y}%`,
           }}
         />

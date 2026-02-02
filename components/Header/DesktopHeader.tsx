@@ -118,7 +118,7 @@ export function DesktopHeader() {
         </div>
 
         {/* Center: Logo */}
-        Logo
+        <h1 className="text-2xl font-bold text-[#28af60]">BlendRas</h1>
 
         {/* Right: Actions */}
         <div className="flex items-center md:gap-2 gap-0">

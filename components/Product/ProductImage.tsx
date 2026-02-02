@@ -30,7 +30,7 @@ export default function ProductImage({ product, variant }: Props) {
   const extraCount = variant.images.length - MOBILE_THUMB_LIMIT;
 
   return (
-    <div className="grid lg:grid-cols-[120px_1fr] gap-4">
+    <div className="grid lg:grid-cols-[90px_1fr] gap-4">
       {/* ================= THUMBNAILS ================= */}
       <div className="flex lg:flex-col flex-row gap-3 lg:order-1 order-2 lg:overflow-x-hidden overflow-x-auto">
         {/* ---------- MOBILE (LIMITED +X) ---------- */}
@@ -73,7 +73,7 @@ export default function ProductImage({ product, variant }: Props) {
               key={`${variant.key}-thumb-${index}`}
               onClick={() => setActiveIndex(index)}
               onMouseEnter={() => setActiveIndex(index)}
-              className={`border rounded-lg overflow-hidden transition-all duration-200
+              className={`border-2 cursor-pointer rounded-lg overflow-hidden transition-all duration-200
                 ${
                   activeIndex === index
                     ? "border-white scale-105"
@@ -83,9 +83,9 @@ export default function ProductImage({ product, variant }: Props) {
               <Image
                 src={img}
                 alt={`${variant.name} thumbnail`}
-                width={140}
-                height={140}
-                className="w-full object-cover"
+                width={60}
+                height={60}
+                className="w-full object-cover h-[60px]"
               />
             </button>
           ))
