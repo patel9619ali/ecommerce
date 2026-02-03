@@ -121,8 +121,8 @@ const CheckoutCart = () => {
                         <Input id="pincode" placeholder="400001" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
                       </div>
                     </div>
-                    <Button className="w-full mt-2 cursor-pointer !border-[#254fda] !bg-[#254fda] hover:!bg-[#254fda] hover:!text-[#fff] mb-5" variant="outline">
-                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                    <Button className="w-full mt-2 cursor-pointer !border-[#254fda] !bg-[#254fda] hover:!bg-[#254fda] hover:!text-[#fff] mb-5 !text-[#fff]" variant="outline">
+                      <CheckCircle2 className="h-4 w-4 mr-2 !text-[#fff]" />
                       Save Address
                     </Button>
                   </CardContent>
@@ -350,7 +350,7 @@ const CheckoutCart = () => {
                   <span className="font-bold text-2xl text-[#21242c]">₹{total.toLocaleString()}</span>
                 </div>
 
-                <Button className="cursor-pointer border-[#254fda] bg-[#254fda] w-full h-12 text-base font-semibold">
+                <Button className="cursor-pointer border-[#254fda] bg-[#254fda] w-full h-12 text-base font-semibold !text-[#fff]">
                   Pay ₹{total.toLocaleString()}
                 </Button>
 

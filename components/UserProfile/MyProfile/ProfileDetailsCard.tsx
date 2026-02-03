@@ -1,6 +1,7 @@
 "use client";
-
+import { useId,useState } from 'react'
 import { Card } from "@/components/ui/card";
+import { Label } from '@/components/ui/label'
 import { signOut } from "next-auth/react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Switch } from "@/components/ui/switch"
@@ -8,6 +9,7 @@ import { updateSetting } from "@/actions/settings";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
+import { CardSwitch } from './CardSwitch';
 
 type ProfileDetailsCardProps = {
     setOpenChangeName: (open: boolean) => void;
@@ -16,6 +18,8 @@ type ProfileDetailsCardProps = {
 };
 
 export default function ProfileDetailsCard({ setOpenChangeName, setOpenChangeEmail, setManageOpen }: ProfileDetailsCardProps) {
+    const id = useId()
+    const [checked, setChecked] = useState(true);
     const user = useCurrentUser();
     const [isPending, startTransition] = useTransition();
     const { update } = useSession();
@@ -62,11 +66,37 @@ export default function ProfileDetailsCard({ setOpenChangeName, setOpenChangeEma
                         <span className="sm:text-md text-[12px] text-[#053E54] font-semibold uppercase">Logout</span>
                     </button>
                     </div>
-                    <div className="flex items-center flex-row space-x-2 shadow-none bg-white rounded-[20px] border border-[#C9C9C9] p-4">
-                        <Switch className=" cursor-pointer" id="two-factor-mfa" checked={user?.isTwoFactorEnabled} disabled={isPending} onCheckedChange={handleTwoFactorToggle} />
-                        <label className="text-[#000] font-[600] text-[14px]" htmlFor="two-factor-mfa">Two Factor Authentification</label>
-                    </div>
-                    
+                    {/* <div className='cursor-pointer border-input has-data-[state=checked]:border-primary/50 relative flex items-start gap-2 rounded-md border p-4 shadow-xs outline-none'>
+                    <Switch id={id} className='cursor-pointer order-1 h-4 w-6 after:absolute after:inset-0 [&_span]:size-3 data-[state=checked]:[&_span]:translate-x-3.5 data-[state=checked]:[&_span]:rtl:-translate-x-2.5' aria-describedby={`${id}-description`} checked={user?.isTwoFactorEnabled} disabled={isPending} onCheckedChange={handleTwoFactorToggle} />
+                        <div className='flex grow gap-3'>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" width={22} height={22} viewBox="0 0 32 32" id="icon" >
+                            <defs>
+                                <style>{"\n      .cls-1 {\n        fill: none;\n      }\n    "}</style>
+                            </defs>
+                            <polygon points="11 23.18 9 21.179 7.589 22.589 11 26 17 20 15.59 18.59 11 23.18" />
+                                <path d="M28,30H24V28h4V16H24V8a4.0045,4.0045,0,0,0-4-4V2a6.0067,6.0067,0,0,1,6,6v6h2a2.0021,2.0021,0,0,1,2,2V28A2.0021,2.0021,0,0,1,28,30Z" transform="translate(0 0)" />
+                                <path d="M20,14H18V8A6,6,0,0,0,6,8v6H4a2,2,0,0,0-2,2V28a2,2,0,0,0,2,2H20a2,2,0,0,0,2-2V16A2,2,0,0,0,20,14ZM8,8a4,4,0,0,1,8,0v6H8ZM20,28H4V16H20Z" transform="translate(0 0)" />
+                                <rect id="_Transparent_Rectangle_" data-name="&lt;Transparent Rectangle&gt;" className="cls-1" width={32} height={32} />
+                        </svg>
+                            <div className='grid grow gap-2'>
+                            <Label htmlFor={id} className='text-[#000] font-[600] text-[14px]'>Two Factor Authentification</Label>
+                            </div>
+                        </div>
+                    </div> */}
+                    <CardSwitch
+                        id={id}
+                        label="Two Factor Authentication"
+                        checked={user?.isTwoFactorEnabled || false}
+                        disabled={isPending}
+                        onChange={handleTwoFactorToggle}
+                        icon={
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" width={22} height={22} viewBox="0 0 32 32">
+                                <polygon points="11 23.18 9 21.179 7.589 22.589 11 26 17 20 15.59 18.59 11 23.18" />
+                                <path d="M28,30H24V28h4V16H24V8a4.0045,4.0045,0,0,0-4-4V2a6.0067,6.0067,0,0,1,6,6v6h2a2.0021,2.0021,0,0,1,2,2V28A2.0021,2.0021,0,0,1,28,30Z" />
+                                <path d="M20,14H18V8A6,6,0,0,0,6,8v6H4a2,2,0,0,0-2,2V28a2,2,0,0,0,2,2H20a2,2,0,0,0,2-2V16A2,2,0,0,0,20,14ZM8,8a4,4,0,0,1,8,0v6H8ZM20,28H4V16H20Z" />
+                            </svg>
+                        }
+                    />
                 </div>
 
                 <div className="flex justify-between items-center">

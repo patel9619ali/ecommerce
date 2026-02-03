@@ -44,7 +44,7 @@ export const BuyNow = ({
   return (
     <>
       <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} >
-        <Button className="w-full flex-1 h-12 text-[16px] cursor-pointer !border-[#254fda] !bg-[#254fda] hover:!bg-[#254fda] hover:!text-[#fff] rounded-lg" onClick={handleBuyNow} >
+        <Button className="w-full flex-1 h-12 text-[16px] cursor-pointer !border-[#254fda] !bg-[#254fda] hover:!bg-[#254fda] hover:!text-[#fff] rounded-lg text-[#fff]" onClick={handleBuyNow} >
             Buy Now
         </Button>
       </motion.div>
