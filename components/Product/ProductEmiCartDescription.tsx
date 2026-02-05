@@ -17,7 +17,7 @@ import { BuyNow } from "../Loader/BuyNow";
 type Props = {
   product: Product;
   variant: Variant;
-  setVariantKey: React.Dispatch<React.SetStateAction<string>>
+  setVariantKey: React.Dispatch<React.SetStateAction<string | null>>
   setPreviewVariantKey: React.Dispatch<React.SetStateAction<string | null>>
   previewVariantKey: string | null
 };

@@ -48,7 +48,7 @@ export default function ProductImage({ product, variant }: Props) {
                   }`}
               >
                 <Image
-                  src={img}
+                  src={img.src}
                   alt={`${variant.name} thumbnail`}
                   width={80}
                   height={80}
@@ -81,7 +81,7 @@ export default function ProductImage({ product, variant }: Props) {
                 }`}
             >
               <Image
-                src={img}
+                src={img.src}
                 alt={`${variant.name} thumbnail`}
                 width={60}
                 height={60}
@@ -96,7 +96,7 @@ export default function ProductImage({ product, variant }: Props) {
       {isMobile ? (
         <div className="order-1">
           <ImageHoverZoom
-            src={variant.images[activeIndex]}
+            src={variant.images[activeIndex].src}
             alt={`${product.title} - ${variant.name}`}
           />
         </div>
@@ -111,7 +111,7 @@ export default function ProductImage({ product, variant }: Props) {
             className="lg:order-2 order-1"
           >
             <ImageHoverZoom
-              src={variant.images[activeIndex]}
+              src={variant.images[activeIndex].src}
               alt={`${product.title} - ${variant.name}`}
             />
           </motion.div>
@@ -144,7 +144,7 @@ className={`relative aspect-square rounded-md overflow-hidden border
   }`}
 >
 <Image
-  src={img}
+  src={img.src}
   alt={`${variant.name} thumbnail`}
   fill
   sizes="25vw"

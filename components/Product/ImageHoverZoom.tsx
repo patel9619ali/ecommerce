@@ -17,12 +17,12 @@ export default function ImageHoverZoom({
   const containerRef = useRef<HTMLDivElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   const [pos, setPos] = useState({ x: 50, y: 50 });
-
+  console.log(src,"srcsrcsrc")
   const isTouch =
     typeof window !== "undefined" &&
     window.matchMedia("(hover: none)").matches;
 
-  const imageUrl = typeof src === "string" ? src : src.src;
+  const imageUrl = typeof src === "string" ? src : src;
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!containerRef.current) return;

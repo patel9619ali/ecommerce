@@ -7,7 +7,6 @@ import { generatePasswordResetToken } from "@/lib/token";
 import { sendPasswordResetEmail } from "@/lib/mail";
 export async function forgotPassword(values: unknown): Promise<AuthResponse> {
   const validatedFields = ResetSchema.safeParse(values);
-  console.log("Validated Fields:", validatedFields);
   if (!validatedFields.success) {
     return {
       error: "Invalid email address",

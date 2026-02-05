@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useCartStore } from "@/store/useCartStore";
+'use client';
+import { useState } from "react";
 import { ProductGallery } from "./ProductGallery";
 import { BuyCartSection } from "./BuyCartSection";
 import { PRODUCTS } from "@/data/products";
