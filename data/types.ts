@@ -27,6 +27,7 @@ export interface MediaImage {
   mime: string;
   size: number;
   url: string;
+  src: string;
   previewUrl: string | null;
   provider: string;
   provider_metadata: any | null;
@@ -40,6 +41,9 @@ export interface ReturnsAndWarranty {
   documentId: string;
   label: string;
   images: MediaImage[];
+}
+export interface Benefits {
+  id: number;
 }
 
 export interface Variant {
@@ -55,6 +59,8 @@ export interface Variant {
   sellingPrice: string;
   stock: number;
   sku: string;
+  key: string;
+  benefits:Benefits[];
 }
 
 export interface Product {
@@ -80,4 +86,5 @@ export interface Product {
   brand: Brand;
   category: Category;
   variant: Variant[];
+  variants: Variant[];
 }

@@ -26,27 +26,26 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
     const router = useRouter();
     const { addItem } = useCartStore();
     const [quantity, setQuantity] = useState(1);
-    console.log(variant,"variant");
-    const handleAddToCart = () => {
-        addItem({
-        id: `${product.slug}-${variant.key}`,
-        productId: product.id,
-        slug: product.slug,
-        title: product.title,
-        price: variant.price,
-        quantity,
-        variantKey: variant.key,
-        image: variant.images[0].src, // ✅ FIX
-        });
-    };
+   const handleAddToCart = () => {
+  if (!product || !variant) return;
 
+  addItem({
+    id: `${product.slug}-${variant.sku}`,
+    productId: product.id?.toString(),
+    slug: product.slug,
+    title: product.title,
+    price: Number(variant.sellingPrice),
+    variantKey: variant.sku,
+    image: `${process.env.NEXT_PUBLIC_CMS_URL}${variant.images[0].url}`,
+    quantity,
+  });
+};
+ 
     const handleBuyNow = () => {
-        handleAddToCart();
-        router.push(
-            `/checkout?name=${product.title}&color=${variant.key}&qty=${quantity}&price=${variant.price}&originalPrice=${4999}`
-          );
+      handleAddToCart();
+      router.push("/checkout");
     };
-      const originalPrice = 4999;
+    const originalPrice = 4999;
     const discountedPrice = 3499;
     const discountPercent = Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
     return(
@@ -90,7 +89,7 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
             </div>
 
             <Separator />
-            <ProductColorSelector product={product} activeKey={variant.key} onHover={setPreviewVariantKey} onLeave={() => setPreviewVariantKey(null)} onSelect={setVariantKey} previewVariantKey={previewVariantKey}/>
+            <ProductColorSelector product={product} activeKey={variant.sku} onHover={setPreviewVariantKey} onLeave={() => setPreviewVariantKey(null)} onSelect={setVariantKey} previewVariantKey={previewVariantKey}/>
             <Separator/>
             
         
@@ -126,11 +125,11 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
               <Button className="cursor-pointer flex-1 h-12 text-[16px] !bg-[#ffffff99] text-[#000] hover:text-[#254fda] hover:bg-[#eafaf1] border border-[#aeb2bb] rounded-lg" variant="outline" onClick={handleAddToCart} >
                 Add to Cart
               </Button>
-              <BuyNow productId={product.id} slug={product.slug} title={product.title} variant={variant}/>
+              <BuyNow productId={product.id?.toString()} slug={product.slug} title={product.title} variant={variant}/>
               
             </div>
 
-          <ProductBenefitsCarousel benefits={variant.benefits} />
+          <ProductBenefitsCarousel benefits={variant?.benefits} />
           <div className="flex justify-between">
             <p className="text-xs text-black/60 flex items-center gap-1 text-[15px]">
               🔒 Secure transaction

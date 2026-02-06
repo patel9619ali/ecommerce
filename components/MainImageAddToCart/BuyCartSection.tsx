@@ -13,7 +13,6 @@ export const BuyCartSection = ({
   onVariantChange,
   selectedVariant,
 }: Props) => {
-  console.log(product,"Product Product");
   return (
     <section className="w-full">
       <h3 className="lg:text-[32px] text-black/80 text-[28px] font-bold">BlendRas Portable Juicer</h3>

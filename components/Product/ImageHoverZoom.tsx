@@ -4,7 +4,7 @@ import Image, { StaticImageData } from "next/image";
 import { useRef, useState } from "react";
 
 type ImageHoverZoomProps = {
-  src: string | StaticImageData;
+  src: string;
   alt: string;
   zoomScale?: number;
 };
@@ -14,15 +14,15 @@ export default function ImageHoverZoom({
   alt,
   zoomScale = 2.5,
 }: ImageHoverZoomProps) {
+  
   const containerRef = useRef<HTMLDivElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   const [pos, setPos] = useState({ x: 50, y: 50 });
-  console.log(src,"srcsrcsrc")
   const isTouch =
     typeof window !== "undefined" &&
     window.matchMedia("(hover: none)").matches;
 
-  const imageUrl = typeof src === "string" ? src : src;
+  const imageUrl = src;
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!containerRef.current) return;

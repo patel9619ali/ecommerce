@@ -28,7 +28,6 @@ if (!hydrated) return null;
   
   const item = items[0]; // single-product store
   if (!item) return null;
-  console.log(items,"itemsitems")
   return (
  <>
 

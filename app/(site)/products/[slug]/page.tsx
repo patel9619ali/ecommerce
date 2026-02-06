@@ -40,7 +40,7 @@ useEffect(() => {
         price: v.sellingPrice,
         originalPrice: v.mrp,
         images: v.images?.map((img: any) => ({
-          src: img.url,
+          url: img.url,
         })) || [],
         benefits: v.ReturnsAndWarranty || [],
       })),
@@ -69,7 +69,6 @@ const activeVariant =
   product?.variants?.find(
     (v: any) => v.key === (previewVariantKey ?? variantKey)
   ) || product?.variants?.[0];
-  console.log(activeVariant,"activeVariant")
 
 const selectedVariant =
   product?.variants?.find((v: any) => v.key === variantKey) ||

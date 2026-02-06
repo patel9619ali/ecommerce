@@ -16,19 +16,21 @@ type Props = {
 const MOBILE_THUMB_LIMIT = 4;
 
 export default function ProductImage({ product, variant }: Props) {
+  if (!variant.images?.length) return null;
   const [activeIndex, setActiveIndex] = useState(0);
   const [thumbDialogOpen, setThumbDialogOpen] = useState(false);
-
   const isMobile =
     typeof window !== "undefined" && window.innerWidth < 1024;
 
   useEffect(() => {
     setActiveIndex(0);
-  }, [variant.key]);
+  }, [variant.sku]);
 
   const mobileThumbs = variant.images.slice(0, MOBILE_THUMB_LIMIT);
   const extraCount = variant.images.length - MOBILE_THUMB_LIMIT;
-
+  const activeImage =
+  variant.images[activeIndex]?.url ||
+  variant.images[0]?.url;
   return (
     <div className="grid lg:grid-cols-[90px_1fr] gap-4">
       {/* ================= THUMBNAILS ================= */}
@@ -38,7 +40,7 @@ export default function ProductImage({ product, variant }: Props) {
           <>
             {mobileThumbs.map((img, index) => (
               <button
-                key={`${variant.key}-thumb-${index}`}
+                key={`${variant.sku}-thumb-${index}`}
                 onClick={() => setActiveIndex(index)}
                 className={`border rounded-lg overflow-hidden transition-all duration-200
                   ${
@@ -48,8 +50,8 @@ export default function ProductImage({ product, variant }: Props) {
                   }`}
               >
                 <Image
-                  src={img.src}
-                  alt={`${variant.name} thumbnail`}
+                  src={`${process.env.NEXT_PUBLIC_CMS_URL}${img.url}`}
+                  alt={`${variant?.id} thumbnail`}
                   width={80}
                   height={80}
                   className="w-[80px] h-[80px] object-cover"
@@ -68,9 +70,12 @@ export default function ProductImage({ product, variant }: Props) {
           </>
         ) : (
           /* ---------- DESKTOP (UNCHANGED) ---------- */
-          variant.images.map((img, index) => (
+          
+          variant.images
+            .filter((img) => img?.url)
+            .map((img, index) => (
             <button
-              key={`${variant.key}-thumb-${index}`}
+              key={`${variant.id}-thumb-${index}`}
               onClick={() => setActiveIndex(index)}
               onMouseEnter={() => setActiveIndex(index)}
               className={`border-2 cursor-pointer rounded-lg overflow-hidden transition-all duration-200
@@ -81,8 +86,8 @@ export default function ProductImage({ product, variant }: Props) {
                 }`}
             >
               <Image
-                src={img.src}
-                alt={`${variant.name} thumbnail`}
+                src={`${process.env.NEXT_PUBLIC_CMS_URL || ""}${img.url}`}
+                alt={`${variant.id} thumbnail`}
                 width={60}
                 height={60}
                 className="w-full object-cover h-[60px]"
@@ -91,19 +96,19 @@ export default function ProductImage({ product, variant }: Props) {
           ))
         )}
       </div>
-
+        
       {/* ================= MAIN IMAGE ================= */}
       {isMobile ? (
         <div className="order-1">
           <ImageHoverZoom
-            src={variant.images[activeIndex].src}
-            alt={`${product.title} - ${variant.name}`}
+            src={`${process.env.NEXT_PUBLIC_CMS_URL}${activeImage}`}
+            alt={`${product.title} - ${variant.id}`}
           />
         </div>
       ) : (
         <AnimatePresence mode="wait">
           <motion.div
-            key={`${variant.key}-${activeIndex}`}
+            key={`${variant.id}-${activeIndex}`}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
@@ -111,8 +116,8 @@ export default function ProductImage({ product, variant }: Props) {
             className="lg:order-2 order-1"
           >
             <ImageHoverZoom
-              src={variant.images[activeIndex].src}
-              alt={`${product.title} - ${variant.name}`}
+              src={`${process.env.NEXT_PUBLIC_CMS_URL}${variant.images[activeIndex].url}`}
+              alt={`${product.title} - ${variant.id}`}
             />
           </motion.div>
         </AnimatePresence>
@@ -129,7 +134,9 @@ export default function ProductImage({ product, variant }: Props) {
           </DialogHeader>
 
 <div className="grid grid-cols-4 gap-3 px-4 py-4 overflow-y-auto">
-{variant.images.map((img, index) => (
+{variant.images
+  .filter((img) => img?.url)
+  .map((img, index) => (
 <button
 key={`dialog-thumb-${index}`}
 onClick={() => {
@@ -144,8 +151,8 @@ className={`relative aspect-square rounded-md overflow-hidden border
   }`}
 >
 <Image
-  src={img.src}
-  alt={`${variant.name} thumbnail`}
+  src={`${process.env.NEXT_PUBLIC_CMS_URL}${img.url}`}
+  alt={`${variant.id} thumbnail`}
   fill
   sizes="25vw"
   className="object-cover"
