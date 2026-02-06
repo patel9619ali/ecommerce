@@ -96,8 +96,8 @@ export const ProductGallery = ({ variant }: Props) => {
                 <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
                   <DialogTrigger asChild>
                     <img
-                      src={image.src}
-                      alt={variant.name}
+                      src={`${process.env.NEXT_PUBLIC_CMS_URL}${image?.url}`}
+                      alt={image.name}
                       className="w-full lg:h-[550px] h-full object-cover select-none cursor-pointer"
                     />
                   </DialogTrigger>
@@ -115,7 +115,7 @@ export const ProductGallery = ({ variant }: Props) => {
                       {variant.images.map((img: any, i: number) => (
                         <img
                           key={i}
-                          src={img.src}
+                          src={`${process.env.NEXT_PUBLIC_CMS_URL}${img?.url}`}
                           alt={variant.name}
                           className="w-full object-cover"
                         />
@@ -168,7 +168,7 @@ export const ProductGallery = ({ variant }: Props) => {
                 }`}
               >
                 <img
-                  src={image.src}
+                  src={`${process.env.NEXT_PUBLIC_CMS_URL}${image?.url}`}
                   alt="Thumb"
                   className="w-full h-full object-cover"
                 />
@@ -200,7 +200,7 @@ export const ProductGallery = ({ variant }: Props) => {
                 }`}
               >
                 <img
-                  src={image.src}
+                  src={`${process.env.NEXT_PUBLIC_CMS_URL}${image?.url}`}
                   alt="Thumb"
                   className="w-full h-full object-cover"
                 />
@@ -250,7 +250,7 @@ export const ProductGallery = ({ variant }: Props) => {
                 }`}
               >
                 <img
-                  src={image.src}
+                  src={`${process.env.NEXT_PUBLIC_CMS_URL}${image?.url}`}
                   alt="Thumb"
                   className="w-full h-full object-cover"
                 />

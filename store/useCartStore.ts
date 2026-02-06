@@ -3,11 +3,11 @@ import { persist, createJSONStorage } from "zustand/middleware";
 
 export type CartProduct = {
   id: string;            // productId-variantKey
-  productId: string;
-  slug: string;
-  title: string;
+  productId: string | undefined;
+  slug: string | undefined;
+  title: string | undefined;
   variantKey: string;
-  price: number;
+  price: number | string;
   image: string;
   quantity: number;
 };

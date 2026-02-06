@@ -2,12 +2,12 @@
 
 import { motion } from "framer-motion";
 import { useCartStore } from "@/store/useCartStore";
-import type { Variant } from "@/data/types";
+import { Variant } from "@/data/types";
 
 type Props = {
-  productId: string;
-  slug: string;
-  title: string;
+  productId: string | undefined;
+  slug: string | undefined;
+  title: string | undefined;
   variant: Variant;
 };
 
@@ -21,22 +21,22 @@ export const AddToCartButton = ({
 
   const handleClick = () => {
     addItem({
-      id: `${productId}-${variant.key}`,
+      id: `${productId}-${variant.sku}`,
       productId,
       slug,
       title,
-      variantKey: variant.key,
-      price: variant.price,
-      image: variant.images[0].src,
+      variantKey: variant.sku,
+      price: variant.sellingPrice,
+      image: variant.images[0].url,
       quantity: 1,
     });
  // 2️⃣ Facebook Pixel tracking (safe)
     if (typeof window !== "undefined" && typeof window.fbq === "function") {
       window.fbq("track", "AddToCart", {
-        content_ids: [`${productId}-${variant.key}`],
+        content_ids: [`${productId}-${variant.sku}`],
         content_name: title,
         content_type: "product",
-        value: variant.price,
+        value: variant.sellingPrice,
         currency: "INR",
       });
     }

@@ -6,12 +6,12 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/useCartStore";
 import { Button } from "../ui/button";
-import type { Variant } from "@/data/types";
+import { Variant } from "@/data/types";
 type CartState = "idle" | "loading" | "success";
 type Props = {
-  productId: string;
-  slug: string;
-  title: string;
+  productId: string | undefined;
+  slug: string | undefined;
+  title: string | undefined;
   variant: Variant;
 };
 export const BuyNow = ({
@@ -25,13 +25,13 @@ export const BuyNow = ({
   const router = useRouter();
   const handleClick = () => {
     addItem({
-      id: `${productId}-${variant.key}`,
+      id: `${productId}-${variant?.sku}`,
       productId,
       slug,
       title,
-      variantKey: variant.key,
-      price: variant.price,
-      image: variant.images[0].src,
+      variantKey: variant?.sku,
+      price: variant?.sellingPrice,
+      image: variant?.images[0]?.url,
       quantity: 1,
     });
   }

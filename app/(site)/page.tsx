@@ -16,7 +16,7 @@ export default async function Home() {
       <BannerSection/>
       <InformativeSlider className={`hidden md:block`} productData={data}/>
       <MobileInformativeSlider className={`block md:hidden`} productData={data}/>
-      <MainImageAddToCart/>
+      <MainImageAddToCart productData={data}/>
       <DualSpecsScroll className={`hidden md:block`}/>
       <MobileSpecs className={`block md:hidden`}/>
       <WhyChooseUsHoverImage className={`hidden md:block`}/>

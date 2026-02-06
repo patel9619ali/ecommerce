@@ -16,7 +16,6 @@ type InformativeSliderProps = {
 };
 
 const InformativeSlider = ({ className,productData }: InformativeSliderProps) => {
-  console.log(productData?.[0],"productDataproductData");
   const productDataType =  productData?.[0];
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: true, ...options },
