@@ -21,22 +21,20 @@ export function ProductColorSelector({
   onSelect,
 }: ProductColorSelectorProps) {
   const displayKey = previewVariantKey ?? activeKey;
-  console.log(product,"productproduct")
   return (
     <div>
       <p className="text-[#000] font-semibold mb-2 text-[#21242c]">
-        Color: <span className="font-medium text-[#6a7181] capitalize">{displayKey}</span>
+        Color: <span className="font-medium text-[#6a7181] capitalize"> {displayKey.replace(/-/g, ' ').toUpperCase()} </span>
       </p>
     <div className="overflow-x-auto overflow-y-hidden scrollbar-hide w-full">
 
-    <div className="flex gap-3 pb-2 w-max">
+    <div className="flex gap-3 pb-2 w-max" onMouseLeave={onLeave}>
       {product?.variants.map((variantItem) => (
         <button
           key={variantItem.key}
           onMouseEnter={() => onHover(variantItem.key)}
-          onMouseLeave={onLeave}
+          
           onClick={() => {
-            console.log("Selecting:", variantItem.key);
             onSelect(variantItem.key);
           }}
           className={`rounded-lg cursor-pointer w-[80px] transition-transform duration-500 ease-out border-2 overflow-hidden

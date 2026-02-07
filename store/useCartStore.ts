@@ -7,7 +7,7 @@ export type CartProduct = {
   slug: string | undefined;
   title: string | undefined;
   variantKey: string;
-  price: number | string;
+  price: number;
   image: string;
   quantity: number;
 };

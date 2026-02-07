@@ -91,9 +91,12 @@ const MobileInformativeSlider = ({ className,productData }: Props) => {
               {`Portable Juicer - ${variants[selectedIndex].colorName}`}
             </h2>
 
-            <p className="text-black/80 text-sm leading-relaxed mb-6">
-              {product?.description}
-            </p>
+              {product?.description && (
+                <p
+                  className="text-black/80 text-sm leading-relaxed mb-6"
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                />
+              )}
 
             <Link href={`${process.env.NEXT_PUBLIC_APP_URL}/products/${product?.slug}?variant=${variants[selectedIndex].sku}`} className="backdrop-blur-md bg-white/90 py-2 mx-auto text-center text-black inline-block w-[150px] px-3 my-3 hover:bg-gray-200 transition-colors duration-300 border-[#000] hover:font-[700] border-[1px] rounded-[4px]" >
               Shop Now

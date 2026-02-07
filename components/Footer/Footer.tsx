@@ -101,7 +101,7 @@ export default function Footer() {
 
 
         {/* Bottom Section */}
-        <div className="flex flex-col-reverse lg:flex-row justify-between items-center gap-4 pt-6">
+        <div className="flex flex-col-reverse lg:flex-row justify-between items-center gap-4 pt-6 lg:mb-0 mb-10">
           <div className="flex flex-wrap justify-center lg:justify-start gap-3">
             <Link href={`/terms-and-conditions`} className="lg:text-[16px] text-[12px] font-[400] text-[#053E54]">Terms & Conditions</Link>
             <span className="lg:text-[16px] text-[12px] font-[400] text-[#053E54]">|</span>

@@ -55,8 +55,8 @@ export interface Variant {
   images: MediaImage[];
   isDefault: boolean;
   discountPercent: number;
-  mrp: string;
-  sellingPrice: string;
+  sellingPrice: number;
+  mrp: number;
   stock: number;
   sku: string;
   key: string;

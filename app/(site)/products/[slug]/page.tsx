@@ -25,20 +25,23 @@ useEffect(() => {
     if (!slug) return;
 
     const res = await getProductBySlug(slug as string);
-    const strapiProduct = res?.data?.[0];
-    if (!strapiProduct) return;
+    const cmsProduct = res?.data?.[0];
+    if (!cmsProduct) return;
 
     const normalized = {
-      id: strapiProduct.id,
-      title: strapiProduct.title,
-      subTitle: strapiProduct.subTitle,
-      slug: strapiProduct.slug,
-      variants: (strapiProduct.variant || []).map((v: any) => ({
+      id: cmsProduct.id,
+      title: cmsProduct.title,
+      subTitle: cmsProduct.subTitle,
+      description: cmsProduct.description,
+      rating: cmsProduct.rating,
+      ratingCount: cmsProduct.ratingCount,
+      slug: cmsProduct.slug,
+      variants: (cmsProduct.variant || []).map((v: any) => ({
         id: v.id,
         key: v.sku,
         color: v.colorName,
-        price: v.sellingPrice,
-        originalPrice: v.mrp,
+        sellingPrice: v.sellingPrice,
+        mrp: v.mrp,
         images: v.images?.map((img: any) => ({
           url: img.url,
         })) || [],
@@ -66,9 +69,9 @@ useEffect(() => {
   /* Active Variant Logic */
   /* -------------------------------------------------- */
 const activeVariant =
-  product?.variants?.find(
-    (v: any) => v.key === (previewVariantKey ?? variantKey)
-  ) || product?.variants?.[0];
+  product?.variants.find(
+    (v:any) => v.key === (previewVariantKey ?? variantKey)
+  ) ?? product?.variants[0];
 
 const selectedVariant =
   product?.variants?.find((v: any) => v.key === variantKey) ||
@@ -80,7 +83,7 @@ useEffect(() => {
 
   router.replace(`?variant=${variantKey}`, { scroll: false });
 }, [variantKey, router]);
-
+console.log(product,"productproduct")
 
 return (
   <section className="bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] lg:py-10 py-5">
@@ -91,18 +94,9 @@ return (
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_2fr] gap-4 lg:gap-8 relative">
 
-          <ProductImage
-            variant={activeVariant}
-            product={product}
-          />
+          <ProductImage variant={activeVariant} product={product} />
 
-          <ProductEmiCartDescription
-            variant={selectedVariant}
-            product={product}
-            setVariantKey={setVariantKey}
-            setPreviewVariantKey={setPreviewVariantKey}
-            previewVariantKey={previewVariantKey}
-          />
+          <ProductEmiCartDescription variant={selectedVariant} product={product} setVariantKey={setVariantKey} setPreviewVariantKey={setPreviewVariantKey} previewVariantKey={previewVariantKey} />
 
         </div>
       )}

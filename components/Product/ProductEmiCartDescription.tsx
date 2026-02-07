@@ -26,17 +26,17 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
     const router = useRouter();
     const { addItem } = useCartStore();
     const [quantity, setQuantity] = useState(1);
-   const handleAddToCart = () => {
-  if (!product || !variant) return;
+    const handleAddToCart = () => {
+     if (!product || !variant) return;
 
   addItem({
-    id: `${product.slug}-${variant.sku}`,
+    id: `${product.slug}-${variant.key}`,
     productId: product.id?.toString(),
     slug: product.slug,
     title: product.title,
     price: Number(variant.sellingPrice),
     variantKey: variant.sku,
-    image: `${process.env.NEXT_PUBLIC_CMS_URL}${variant.images[0].url}`,
+    image: variant.images[0].url,
     quantity,
   });
 };
@@ -45,33 +45,36 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
       handleAddToCart();
       router.push("/checkout");
     };
-    const originalPrice = 4999;
-    const discountedPrice = 3499;
-    const discountPercent = Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
+    const originalPrice = variant?.mrp;
+    const discountedPrice = variant?.sellingPrice;
+    const displayKey = previewVariantKey ?? variant.key;
+    // Calculate only if both prices exist and originalPrice is not zero
+    const discountPercent = (originalPrice && discountedPrice && originalPrice > 0) 
+      ? Math.round(((originalPrice - discountedPrice) / originalPrice) * 100) 
+      : 0;
     return(
         <>
         <div className="space-y-6">
           <div>
               <div className="flex items-center gap-2 mb-2">
                 <Badge variant="secondary" className="bg-[#eafaf1] text-[#1e8549] hover:bg-[#f3f4f6cc]">New Arrival</Badge>
-                <Badge variant="outline" className="text-[#28af60] border-[#28af60]">-{discountPercent}% OFF</Badge>
+                <Badge variant="outline" className="text-[#28af60] border-[#28af60]">{discountPercent}% OFF</Badge>
               </div>
               <h1 className="text-2xl lg:text-3xl font-bold text-[#21242c] mb-2">
-                BlendRas Portable Juicer Pro
+                {product?.title} - {displayKey.replace(/-/g, ' ').toUpperCase()} 
               </h1>
-              <p className="text-[#6a7181] mb-3">
-                Powerful 400ml portable blender with USB-C charging
+              <p className="text-[#6a7181] mb-3" dangerouslySetInnerHTML={{ __html: product?.description }}>
               </p>
               <div className="flex items-center gap-4">
                 <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`h-5 w-5 ${i < 4 ? "fill-[#f59f0a] text-[#f59f0a]" : "fill-[#8e9dbc] text-[#aab7c4bf]"}`}
+                      className={`h-5 w-5 ${i < Math.round(product?.rating) ? "fill-[#f59f0a] text-[#f59f0a]" : "fill-[#8e9dbc] text-[#aab7c4bf]"}`}
                     />
                   ))}
                 </div>
-                <span className="text-sm text-[#6a7181]">4.2 (2,847 reviews)</span>
+                <span className="text-sm text-[#6a7181]">{`${product?.rating} (${product?.ratingCount} reviews)`}</span>
                 <span className="text-sm text-[#28af60] font-medium">500+ bought last month</span>
               </div>
             </div>
@@ -89,7 +92,7 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
             </div>
 
             <Separator />
-            <ProductColorSelector product={product} activeKey={variant.sku} onHover={setPreviewVariantKey} onLeave={() => setPreviewVariantKey(null)} onSelect={setVariantKey} previewVariantKey={previewVariantKey}/>
+            <ProductColorSelector product={product} activeKey={variant.key} onHover={setPreviewVariantKey} onLeave={() => setPreviewVariantKey(null)} onSelect={setVariantKey} previewVariantKey={previewVariantKey}/>
             <Separator/>
             
         
@@ -125,8 +128,7 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
               <Button className="cursor-pointer flex-1 h-12 text-[16px] !bg-[#ffffff99] text-[#000] hover:text-[#254fda] hover:bg-[#eafaf1] border border-[#aeb2bb] rounded-lg" variant="outline" onClick={handleAddToCart} >
                 Add to Cart
               </Button>
-              <BuyNow productId={product.id?.toString()} slug={product.slug} title={product.title} variant={variant}/>
-              
+              <Button className="cursor-pointer flex-1 h-12 text-[16px] bg-[#254fda] text-white" onClick={handleBuyNow} > Buy Now </Button>
             </div>
 
           <ProductBenefitsCarousel benefits={variant?.benefits} />
