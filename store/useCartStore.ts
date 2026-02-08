@@ -6,6 +6,7 @@ export type CartProduct = {
   productId: string;
   slug?: string;
   title?: string;
+  description?: string;
   variantKey: string;
   price: number;
   image: string;
@@ -107,7 +108,7 @@ export const useCartStore = create<CartState>()(
       loadFromDatabase: async () => {
         const res = await fetch("/api/cart/get");
         const { cart } = await res.json();
-
+        console.log(cart,"cartcartcartcart")
         if (cart?.items) {
           set({
             items: cart.items.map((i: any) => ({
@@ -116,6 +117,7 @@ export const useCartStore = create<CartState>()(
               slug: i.slug,              // ✅ FIX
               variantKey: i.variantId,
               title: i.title,
+              description: i.description,
               price: i.price,
               image: i.image,
               quantity: i.quantity,

@@ -90,7 +90,6 @@ export function DesktopHeader() {
       resetCart();          // 🔥 clear cart completely
     }
   }, [user?.id]);
-  console.log(items,"loadFromDatabase")
   return (
     <header className={cn(
       "top-0 left-0 right-0 z-50 bg-white transition-transform duration-300",
@@ -139,9 +138,15 @@ export function DesktopHeader() {
             <Search className="h-5 w-5 dark:text-black" />
             <span className="sr-only">Search</span>
           </Button>
-          <Button className="cursor-pointer" onClick={openCart} variant="ghost" size="icon" disabled={items.length === 0}>
+          <Button className="cursor-pointer relative" onClick={() => router.push('/cart')} variant="ghost" size="icon" disabled={items.length === 0}>
             <ShoppingCart className="h-5 w-5 dark:text-black" />
+            {items.length > 0 && (
+              <span className="absolute -top-2.5 -right-2.5 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold text-white bg-[linear-gradient(135deg,hsl(252,80%,60%),hsl(16,90%,58%))] shadow-[0_4px_12px_-2px_rgba(104,71,235,0.3)]">
+                {items.length}
+              </span>
+            )}
           </Button>
+            
           {user ? (
             <ProfileDropdown user={user} />
           ) : (

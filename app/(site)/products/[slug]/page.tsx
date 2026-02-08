@@ -25,8 +25,6 @@ useEffect(() => {
     if (!slug) return;
 
     const res = await getProductBySlug(slug as string);
-    console.log(res,"res1res1")
-    const res1 = await getProducts();
     const cmsProduct = res?.data?.[0];
     if (!cmsProduct) return;
 
@@ -85,7 +83,6 @@ useEffect(() => {
 
   router.replace(`?variant=${variantKey}`, { scroll: false });
 }, [variantKey, router]);
-console.log(product,"productproduct")
 
 return (
   <section className="bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] lg:py-10 py-5">

@@ -38,7 +38,6 @@ if (!hydrated) return null;
   // Relative path → prepend CMS URL
   return `${process.env.NEXT_PUBLIC_CMS_URL}${image}`;
 };
-console.log(items,"itemsitems")
   return (
  <>
 

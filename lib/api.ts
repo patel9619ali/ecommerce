@@ -8,7 +8,6 @@ export async function getProducts() {
   }
 
   const url = `${baseUrl}/api/products?${productQuery}`;
-  console.log(productQuery,"productQuery")
   const res = await fetch(url, {
     headers: {
       Authorization: `Bearer ${process.env.NEXT_PUBLIC_CMS_TOKEN}`,
