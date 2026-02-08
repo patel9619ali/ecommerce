@@ -29,20 +29,20 @@ const CartItem = ({ item, onUpdateQuantity, onRemove, index }: CartItemProps) =>
 
       <div className="flex gap-3 md:gap-5">
         {/* Image */}
-        <div className="w-20 h-20 md:w-32 md:h-32 rounded-xl overflow-hidden bg-[hsl(240_8%_93%)]">
+        <div className="w-[80px] h-[100px] md:w-32 md:h-32 rounded-xl overflow-hidden bg-[hsl(240_8%_93%)]">
           <img
-            src={item?.image}
-            alt={item?.title}
+            src={`${process.env.NEXT_PUBLIC_CMS_URL}${item?.image}`}
+            alt={`${item?.title}`}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform"
           />
         </div>
 
         {/* Info */}
         <div className="flex-1 flex flex-col justify-between pr-6">
-          <h3 className="font-['Space_Grotesk'] text-sm md:text-lg font-bold truncate text-[#000]">
-            {item.title}
+          <h3 className="text-sm md:text-lg font-bold truncate text-[#000] break-all">
+            {item.title} <span className="capitalize">{item.variantKey.replace(/-/g, ' ')}
+              </span>
           </h3>
-
           <div className="flex justify-between items-center mt-3">
             {/* Quantity */}
             <div className="flex items-center bg-[hsl(240_10%_95%)] rounded-full p-0.5">

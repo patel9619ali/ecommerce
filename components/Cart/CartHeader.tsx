@@ -18,7 +18,7 @@ const CartHeader = ({ itemCount }: CartHeaderProps) => {
           <ShoppingCart className="w-5 h-5 md:w-6 md:h-6 text-[hsl(0_0%_100%)]" />
         </div>
         <div>
-          <h1 className="font-['Space_Grotesk'] text-2xl md:text-4xl font-bold text-[hsl(240_15%_10%)] tracking-tight">
+          <h1 className="text-2xl md:text-4xl font-bold text-[hsl(240_15%_10%)] tracking-tight">
             My Cart
           </h1>
           <p className="text-[hsl(240_8%_45%)] text-xs md:text-sm">

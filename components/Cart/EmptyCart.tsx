@@ -1,8 +1,11 @@
+"use client";
+
 import { motion } from "framer-motion";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+import { useRouter } from "next/navigation";
 const EmptyCart = () => {
+  const router = useRouter();
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -23,7 +26,7 @@ const EmptyCart = () => {
       <p className="text-[#6a6a7c] text-sm mb-8 max-w-xs">
         Discover amazing products and add them to your cart to get started!
       </p>
-      <Button className="bg-[linear-gradient(135deg,#6847eb,#f46734)] text-[#fff] font-display font-bold rounded-xl px-8 h-12 shadow-vibrant hover:[shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.12),0_2px_8px_-2px_hsl(var(--foreground)/0.04)]] transition-all duration-300 hover:scale-[1.02] group">
+      <Button className="bg-[linear-gradient(135deg,#6847eb,#f46734)] text-[#fff] font-display font-bold rounded-xl px-8 h-12 shadow-vibrant hover:[shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.12),0_2px_8px_-2px_hsl(var(--foreground)/0.04)]] transition-all duration-300 hover:scale-[1.02] group cursor-pointer" onClick={() => router.push('/')} >
         Start Shopping
         <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
       </Button>

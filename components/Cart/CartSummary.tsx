@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ShieldCheck, Truck, RotateCcw, ArrowRight, Gift, Tag } from "lucide-react";
 import { useState } from "react";
-
+import { useRouter } from "next/navigation";
 interface CartSummaryProps {
   subtotal: number;
   itemCount: number;
@@ -10,6 +10,7 @@ interface CartSummaryProps {
 const FREE_SHIPPING_THRESHOLD = 500;
 
 const CartSummary = ({ subtotal, itemCount }: CartSummaryProps) => {
+  const router = useRouter();
   const [promoCode, setPromoCode] = useState("");
   const shipping = subtotal > FREE_SHIPPING_THRESHOLD ? 0 : 15.0;
   const tax = subtotal * 0.08;
@@ -24,7 +25,7 @@ const CartSummary = ({ subtotal, itemCount }: CartSummaryProps) => {
       transition={{ duration: 0.5, delay: 0.3 }}
       className="bg-[hsl(0_0%_100%/0.9)] backdrop-blur-xl border border-[hsl(240_10%_90%/0.4)] shadow-sm rounded-2xl p-5 md:p-7 sticky top-24"
     >
-      <h2 className="font-['Space_Grotesk'] text-xl md:text-2xl font-bold text-[hsl(240_15%_10%)] mb-5">
+      <h2 className="text-xl md:text-2xl font-bold text-[hsl(240_15%_10%)] mb-5">
         Order Summary
       </h2>
 
@@ -61,7 +62,7 @@ const CartSummary = ({ subtotal, itemCount }: CartSummaryProps) => {
             placeholder="Promo code"
             value={promoCode}
             onChange={(e) => setPromoCode(e.target.value)}
-            className="w-full h-10 pl-9 pr-3 text-sm rounded-xl bg-[hsl(240_10%_95%)] text-[hsl(240_15%_20%)] placeholder:text-[hsl(240_8%_45%)] border-0 outline-none focus:ring-2 focus:ring-[hsl(252_80%_60%)] transition-shadow font-['DM_Sans']"
+            className="w-full h-10 pl-9 pr-3 text-sm rounded-xl bg-[hsl(240_10%_95%)] text-[hsl(240_15%_20%)] placeholder:text-[hsl(240_8%_45%)] border-0 outline-none focus:ring-2 focus:ring-[hsl(252_80%_60%)] transition-shadow "
           />
         </div>
         <button className="h-10 px-4 text-xs font-bold rounded-xl bg-[hsl(240_15%_10%)] text-[hsl(240_10%_98%)] hover:opacity-90 transition-all duration-200">
@@ -72,14 +73,14 @@ const CartSummary = ({ subtotal, itemCount }: CartSummaryProps) => {
       {/* Line Items */}
       <div className="space-y-2.5 mb-5">
         <div className="flex justify-between text-sm">
-          <span className="text-[hsl(240_8%_45%)] font-['DM_Sans']">
+          <span className="text-[hsl(240_8%_45%)] ">
             Subtotal ({itemCount} {itemCount === 1 ? "item" : "items"})
           </span>
-          <span className="font-semibold text-[hsl(240_15%_10%)] font-['Space_Grotesk']">${subtotal.toFixed(2)}</span>
+          <span className="font-semibold text-[hsl(240_15%_10%)]">₹{subtotal.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-[hsl(240_8%_45%)] font-['DM_Sans']">Shipping</span>
-          <span className="font-semibold text-[hsl(240_15%_10%)] font-['Space_Grotesk']">
+          <span className="text-[hsl(240_8%_45%)] ">Shipping</span>
+          <span className="font-semibold text-[hsl(240_15%_10%)]">
             {shipping === 0 ? (
               <span className="text-[hsl(152_65%_45%)]">Free</span>
             ) : (
@@ -88,8 +89,8 @@ const CartSummary = ({ subtotal, itemCount }: CartSummaryProps) => {
           </span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-[hsl(240_8%_45%)] font-['DM_Sans']">Tax</span>
-          <span className="font-semibold text-[hsl(240_15%_10%)] font-['Space_Grotesk']">₹{tax.toFixed(2)}</span>
+          <span className="text-[hsl(240_8%_45%)] ">Tax</span>
+          <span className="font-semibold text-[hsl(240_15%_10%)]">₹{tax.toFixed(2)}</span>
         </div>
       </div>
 
@@ -98,15 +99,15 @@ const CartSummary = ({ subtotal, itemCount }: CartSummaryProps) => {
 
       {/* Total */}
       <div className="flex justify-between items-center mb-5">
-        <span className="font-['Space_Grotesk'] text-base font-bold text-[hsl(240_15%_10%)]">Total</span>
-        <span className="font-['Space_Grotesk'] text-2xl font-bold text-[hsl(240_15%_10%)]">
+        <span className="text-base font-bold text-[hsl(240_15%_10%)]">Total</span>
+        <span className="text-2xl font-bold text-[hsl(240_15%_10%)]">
           ₹{total.toFixed(2)}
         </span>
       </div>
 
       {/* Checkout Button */}
-      <button
-        className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-['Space_Grotesk'] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer"
+      <button onClick={() => router.push('/checkout')}
+        className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer"
       >
         Checkout
         <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:translate-x-1" />

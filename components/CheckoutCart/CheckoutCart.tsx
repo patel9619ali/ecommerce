@@ -25,6 +25,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CartProduct } from "@/store/useCartStore"; // ✅ Import type
+import MobileCheckoutBar from "../Cart/MobileCheckoutBar";
 
 interface CheckoutCartProps {
   items: CartProduct[];
@@ -53,10 +54,10 @@ const CheckoutCart = ({ items, total: totalProp }: CheckoutCartProps) => {
 
   // ✅ Calculate totals from props (dynamic items)
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shipping = subtotal > 999 ? 0 : 49;
   const discount = appliedCoupon ? Math.round(subtotal * 0.1) : 0;
-  const total = subtotal + shipping - discount;
-
+  const shipping = subtotal > 500 ? 0 : 15;
+  const tax = subtotal * 0.08;
+  const total = subtotal + shipping + tax;
   const handleApplyCoupon = () => {
     if (couponCode.toLowerCase() === "save10") {
       setAppliedCoupon(couponCode);
@@ -473,7 +474,7 @@ const CheckoutCart = ({ items, total: totalProp }: CheckoutCartProps) => {
 
                 <Button
                   onClick={handlePlaceOrder}
-                  className="cursor-pointer border-[#254fda] bg-[#254fda] w-full h-12 text-base font-semibold !text-[#fff]"
+                  className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer"
                 >
                   Pay ₹{total.toLocaleString()}
                 </Button>
@@ -491,6 +492,10 @@ const CheckoutCart = ({ items, total: totalProp }: CheckoutCartProps) => {
                 </div>
               </CardContent>
             </Card>
+            <MobileCheckoutBar
+              total={total}
+              itemCount={1}
+            />
           </div>
         </div>
       </main>
