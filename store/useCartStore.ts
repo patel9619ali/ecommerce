@@ -16,7 +16,9 @@ export type CartProduct = {
 type CartState = {
   items: CartProduct[];
   isCartOpen: boolean;
+
   hydrated: boolean;
+  cartLoading: boolean; // ✅ ADD THIS
 
   addItem: (item: CartProduct) => void;
   removeItem: (productId: string, variantKey: string) => void;
@@ -28,14 +30,16 @@ type CartState = {
   closeCart: () => void;
 };
 
+
 let syncTimeout: NodeJS.Timeout | null = null;
 
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
-      items: [],
-      isCartOpen: false,
-      hydrated: false,
+    items: [],
+    isCartOpen: false,
+    hydrated: false,
+    cartLoading: true,
 
       addItem: (item) => {
         set((state) => {
@@ -105,29 +109,44 @@ export const useCartStore = create<CartState>()(
         }, 400);
       },
 
-      loadFromDatabase: async () => {
-        const res = await fetch("/api/cart/get");
-        const { cart } = await res.json();
-        console.log(cart,"cartcartcartcart")
-        if (cart?.items) {
-          set({
-            items: cart.items.map((i: any) => ({
-              id: crypto.randomUUID(),
-              productId: i.productId,
-              slug: i.slug,              // ✅ FIX
-              variantKey: i.variantId,
-              title: i.title,
-              description: i.description,
-              price: i.price,
-              image: i.image,
-              quantity: i.quantity,
-            })),
-          });
-        }
-      },
+        loadFromDatabase: async () => {
+          try {
+            const res = await fetch("/api/cart/get");
+            const { cart } = await res.json();
+
+            if (cart?.items) {
+              set({
+                items: cart.items.map((i: any) => ({
+                  id: crypto.randomUUID(),
+                  productId: i.productId,
+                  slug: i.slug,
+                  variantKey: i.variantId,
+                  title: i.title,
+                  description: i.description,
+                  price: i.price,
+                  image: i.image,
+                  quantity: i.quantity,
+                })),
+                cartLoading: false, // ✅ DONE
+                hydrated: true,
+              });
+            } else {
+              set({ cartLoading: false, hydrated: true });
+            }
+          } catch (e) {
+            console.error("Cart load failed", e);
+            set({ cartLoading: false, hydrated: true });
+          }
+        },
 
 
-      resetCart: () => set({ items: [], isCartOpen: false }),
+      resetCart: () =>
+        set({
+          items: [],
+          isCartOpen: false,
+          cartLoading: false,
+          hydrated: true,
+        }),
 
       openCart: () => set({ isCartOpen: true }),
       closeCart: () => set({ isCartOpen: false }),
@@ -135,25 +154,27 @@ export const useCartStore = create<CartState>()(
     {
       name: "cart-storage",
       storage: createJSONStorage(() => localStorage),
+
       onRehydrateStorage: () => async (state) => {
-  if (!state) return;
+        if (!state) return;
 
-  state.hydrated = true;
+        try {
+          const res = await fetch("/api/auth/session");
+          const session = await res.json();
 
-  // 🔥 Drop invalid items (no slug)
-  state.items = state.items.filter((i) => !!i.slug);
+          if (session?.user) {
+            await state.loadFromDatabase();
+          } else {
+            state.cartLoading = false;
+            state.hydrated = true;
+          }
+        } catch (e) {
+          console.error("Session check failed", e);
+          state.cartLoading = false;
+          state.hydrated = true;
+        }
+      },
 
-  try {
-    const res = await fetch("/api/auth/session");
-    const session = await res.json();
-
-    if (session?.user) {
-      await state.loadFromDatabase();
-    }
-  } catch (e) {
-    console.error("Session check failed", e);
-  }
-}
     }
   )
 );

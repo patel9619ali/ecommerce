@@ -11,6 +11,7 @@ import CartItem from "@/components/Cart/CartItem";
 import CartSummary from "@/components/Cart/CartSummary";
 import EmptyCart from "@/components/Cart/EmptyCart";
 import MobileCheckoutBar from "@/components/Cart/MobileCheckoutBar";
+import CartSkeleton from "@/components/CartSkeleton";
 
 const CartPage = () => {
   const router = useRouter();
@@ -20,19 +21,24 @@ const CartPage = () => {
     items,
     updateQuantity,
     removeItem,
-    loadFromDatabase,
+    hydrated,
+    cartLoading,
   } = useCartStore();
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/signin?callbackUrl=/cart");
-      return;
     }
+  }, [status, router]);
 
-    if (status === "authenticated") {
-      loadFromDatabase();
-    }
-  }, [status, loadFromDatabase, router]);
+  // ✅ HOLD UI until DB cart decision is FINAL
+  if (!hydrated || cartLoading) {
+    return (
+      <main className="max-w-6xl mx-auto px-4 py-10">
+        <CartSkeleton />
+      </main>
+    );
+  }
 
   const subtotal = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -47,9 +53,8 @@ const CartPage = () => {
     (sum, item) => sum + item.quantity,
     0
   );
-  console.log(items,"itemsitems")
   return (
-    <div className="min-h-screen bg-[hsl(240_10%_98%)]">
+    <div className="min-h-screen bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] lg:py-10 py-5">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5 md:py-10">
         <CartHeader itemCount={totalItems} />
 

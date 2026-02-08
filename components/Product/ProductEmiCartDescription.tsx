@@ -128,7 +128,7 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
               <Button className="cursor-pointer flex-1 h-12 text-[16px] !bg-[#ffffff99] text-[#000] hover:text-[#254fda] hover:bg-[#eafaf1] border border-[#aeb2bb] rounded-lg" variant="outline" onClick={handleAddToCart} >
                 Add to Cart
               </Button>
-              <Button className="cursor-pointer flex-1 h-12 text-[16px] bg-[#254fda] text-white" onClick={handleBuyNow} > Buy Now </Button>
+              <Button className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer" onClick={handleBuyNow} > Buy Now </Button>
             </div>
 
           <ProductBenefitsCarousel benefits={variant?.benefits} />

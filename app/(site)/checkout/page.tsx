@@ -6,35 +6,42 @@ import { useCartStore } from "@/store/useCartStore";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import CheckoutCart from "@/components/CheckoutCart/CheckoutCart";
-
+import { useLoading } from "@/context/LoadingContext";
 export default function CheckoutPage() {
-  const { data: session, status } = useSession();
-  const { items, loadFromDatabase } = useCartStore();
+  const { status } = useSession();
+  const { items } = useCartStore();
+  const { setLoading } = useLoading();
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
+
     if (status === "unauthenticated") {
       router.push("/auth/signin?callbackUrl=/checkout");
       return;
     }
 
     if (status === "authenticated") {
-      loadFromDatabase().finally(() => setLoading(false));
+      setLoading(false);
     }
-  }, [status, loadFromDatabase, router]);
+  }, [status, router, setLoading]);
 
   useEffect(() => {
-    if (!loading && items.length === 0) {
+    if (status === "authenticated" && items.length === 0) {
       router.push("/");
     }
-  }, [items, loading, router]);
+  }, [items, status, router]);
 
-  if (loading || status === "loading") {
-    return <div>Loading checkout...</div>;
-  }
+  if (status === "loading") return null;
 
-  const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const total = items.reduce((s, i) => s + i.price * i.quantity, 0);
+  const totalItems = items.reduce((s, i) => s + i.quantity, 0);
 
-  return <CheckoutCart items={items} total={total} />;
+  return (
+    <CheckoutCart
+      items={items}
+      total={total}
+      itemCount={totalItems}
+    />
+  );
 }

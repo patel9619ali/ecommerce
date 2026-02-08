@@ -30,11 +30,13 @@ import MobileCheckoutBar from "../Cart/MobileCheckoutBar";
 interface CheckoutCartProps {
   items: CartProduct[];
   total: number;
+  itemCount: number;
 }
 
-const CheckoutCart = ({ items, total: totalProp }: CheckoutCartProps) => {
+const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps) => {
   const router = useRouter();
-
+  console.log(totalProp,"totalProp");
+  console.log(items,"items");
   // ✅ Form States
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -384,7 +386,7 @@ const CheckoutCart = ({ items, total: totalProp }: CheckoutCartProps) => {
           <div className="space-y-6">
             <Card className="rounded-2xl shadow-md p-4 w-full relative bg-[#fff] sticky top-24">
               <CardHeader>
-                <CardTitle className="text-lg text-[#000]">Order Summary</CardTitle>
+                <CardTitle className="text-xl md:text-2xl font-bold text-[hsl(240_15%_10%)]">Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* ✅ Dynamic Products from Cart */}
@@ -457,6 +459,10 @@ const CheckoutCart = ({ items, total: totalProp }: CheckoutCartProps) => {
                       {shipping === 0 ? "FREE" : `₹${shipping}`}
                     </span>
                   </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-[hsl(240_8%_45%)] ">Tax</span>
+                    <span className="font-semibold text-[hsl(240_15%_10%)]">₹{tax.toFixed(2)}</span>
+                  </div>
                   {discount > 0 && (
                     <div className="flex justify-between text-[#28af60]">
                       <span>Coupon Discount</span>
@@ -494,7 +500,7 @@ const CheckoutCart = ({ items, total: totalProp }: CheckoutCartProps) => {
             </Card>
             <MobileCheckoutBar
               total={total}
-              itemCount={1}
+              itemCount={itemCount}
             />
           </div>
         </div>

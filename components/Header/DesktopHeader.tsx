@@ -92,10 +92,7 @@ export function DesktopHeader() {
   }, [user?.id]);
   return (
     <header className={cn(
-      "top-0 left-0 right-0 z-50 bg-white transition-transform duration-300",
-      isFixed ? "fixed" : "relative",
-      isFixed && "backdrop-blur-md bg-white/90",
-      isVisible ? "translate-y-0" : "-translate-y-full"
+      "w-full sticky top-0 z-50 bg-[#fff]"
     )}>
       <div className="flex items-center justify-between px-4 py-4">
         {/* Left: Hamburger Menu */}
