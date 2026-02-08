@@ -15,6 +15,7 @@ export async function getProducts() {
     },
     cache: "no-store",
   });
+
   return res.json();
 }
 
@@ -41,6 +42,6 @@ export async function getProductBySlug(slug: string) {
     },
     cache: "no-store",
   });
-
+  console.log(res,"resresres")
   return res.json();
 }

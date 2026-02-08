@@ -2,10 +2,10 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 export type CartProduct = {
-  id: string;            // productId-variantKey
-  productId: string | undefined;
-  slug: string | undefined;
-  title: string | undefined;
+  id: string; // UI only
+  productId: string;
+  slug?: string;
+  title?: string;
   variantKey: string;
   price: number;
   image: string;
@@ -18,31 +18,37 @@ type CartState = {
   hydrated: boolean;
 
   addItem: (item: CartProduct) => void;
-  removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
-
+  removeItem: (productId: string, variantKey: string) => void;
+  updateQuantity: (productId: string, variantKey: string, qty: number) => void;
+  syncWithDatabase: () => void;
+  loadFromDatabase: () => Promise<void>;
+  resetCart: () => void;
   openCart: () => void;
   closeCart: () => void;
-  clearCart: () => void;
 };
+
+let syncTimeout: NodeJS.Timeout | null = null;
 
 export const useCartStore = create<CartState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       items: [],
       isCartOpen: false,
       hydrated: false,
 
-      addItem: (item) =>
+      addItem: (item) => {
         set((state) => {
-          const exists = state.items.find(
-            (i) => i.id === item.id && i.variantKey === item.variantKey
+          const existing = state.items.find(
+            (i) =>
+              i.productId === item.productId &&
+              i.variantKey === item.variantKey
           );
 
-          if (exists) {
+          if (existing) {
             return {
               items: state.items.map((i) =>
-                i.id === item.id && i.variantKey === item.variantKey
+                i.productId === item.productId &&
+                i.variantKey === item.variantKey
                   ? { ...i, quantity: i.quantity + item.quantity }
                   : i
               ),
@@ -54,22 +60,72 @@ export const useCartStore = create<CartState>()(
             items: [...state.items, item],
             isCartOpen: true,
           };
-        }),
+        });
 
-      updateQuantity: (id, quantity) =>
+        get().syncWithDatabase();
+      },
+
+      updateQuantity: (productId, variantKey, qty) => {
         set((state) => ({
           items: state.items.map((i) =>
-            i.id === id ? { ...i, quantity } : i
+            i.productId === productId && i.variantKey === variantKey
+              ? { ...i, quantity: qty }
+              : i
           ),
-        })),
+        }));
 
-      removeItem: (id) =>
+        get().syncWithDatabase();
+      },
+
+      removeItem: (productId, variantKey) => {
         set((state) => ({
-          items: state.items.filter((i) => i.id !== id),
-          isCartOpen: state.items.length > 1,
-        })),
+          items: state.items.filter(
+            (i) =>
+              !(i.productId === productId && i.variantKey === variantKey)
+          ),
+        }));
 
-      clearCart: () => set({ items: [], isCartOpen: false }),
+        get().syncWithDatabase();
+      },
+
+      syncWithDatabase: () => {
+        if (syncTimeout) clearTimeout(syncTimeout);
+
+        syncTimeout = setTimeout(async () => {
+          try {
+            await fetch("/api/cart/sync", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ items: get().items }),
+            });
+          } catch (err) {
+            console.error(err);
+          }
+        }, 400);
+      },
+
+      loadFromDatabase: async () => {
+        const res = await fetch("/api/cart/get");
+        const { cart } = await res.json();
+
+        if (cart?.items) {
+          set({
+            items: cart.items.map((i: any) => ({
+              id: crypto.randomUUID(),
+              productId: i.productId,
+              slug: i.slug,              // ✅ FIX
+              variantKey: i.variantId,
+              title: i.title,
+              price: i.price,
+              image: i.image,
+              quantity: i.quantity,
+            })),
+          });
+        }
+      },
+
+
+      resetCart: () => set({ items: [], isCartOpen: false }),
 
       openCart: () => set({ isCartOpen: true }),
       closeCart: () => set({ isCartOpen: false }),
@@ -77,10 +133,25 @@ export const useCartStore = create<CartState>()(
     {
       name: "cart-storage",
       storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: () => async (state) => {
+  if (!state) return;
 
-      onRehydrateStorage: () => (state) => {
-        if (state) state.hydrated = true;
-      },
+  state.hydrated = true;
+
+  // 🔥 Drop invalid items (no slug)
+  state.items = state.items.filter((i) => !!i.slug);
+
+  try {
+    const res = await fetch("/api/auth/session");
+    const session = await res.json();
+
+    if (session?.user) {
+      await state.loadFromDatabase();
+    }
+  } catch (e) {
+    console.error("Session check failed", e);
+  }
+}
     }
   )
 );

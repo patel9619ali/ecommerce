@@ -25,7 +25,6 @@ export function AddToCart() {
   const hydrated = useHydrated();
 
 if (!hydrated) return null;
-  
   const item = items[0]; // single-product store
   if (!item) return null;
   const getImageSrc = (image?: string) => {
@@ -39,6 +38,7 @@ if (!hydrated) return null;
   // Relative path → prepend CMS URL
   return `${process.env.NEXT_PUBLIC_CMS_URL}${image}`;
 };
+console.log(items,"itemsitems")
   return (
  <>
 
@@ -79,7 +79,7 @@ if (!hydrated) return null;
                                 <button onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    updateQuantity(item.id, Math.max(1, item.quantity - 1));
+                                    updateQuantity( item.productId, item.variantKey, Math.max(1, item.quantity - 1) );
                                 }}  className='px-2 cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed lg:h-[30px] h-[25px]'>
                                     <Minus size={10} />
                                 </button>
@@ -89,7 +89,7 @@ if (!hydrated) return null;
                                 <button onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    updateQuantity(item.id, item.quantity + 1);
+                                    updateQuantity( item.productId, item.variantKey, item.quantity + 1 );
                                 }}  className='px-2 transition-colors cursor-pointer lg:h-[30px] h-[25px]' aria-label="Increase quantity">
                                     <Plus size={10} />
                                 </button>
@@ -98,7 +98,7 @@ if (!hydrated) return null;
                             <button onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                removeItem(item.id);
+                                removeItem(item.productId, item.variantKey);
                             }} className='cursor-pointer opacity-70 hover:opacity-100 transition-opacity' aria-label="Remove item">
                             {TrashSVG}
                             </button>

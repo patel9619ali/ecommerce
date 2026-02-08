@@ -19,13 +19,13 @@ export default function CartPage() {
       </div>
     );
   }
-
+  console.log(items,"New items")
   return (
 <>
 {items.map(item => (
   <Link
     key={item.id}
-    href={`/products/${item.slug}?variant=${item.variantKey}&editCart=true`}
+    href={`/products/${item.slug}?variant=${item.variantKey}`}
   >
     <h3>{item.title}</h3>
     <p>{item.variantKey}</p>

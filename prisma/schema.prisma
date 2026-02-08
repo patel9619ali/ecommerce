@@ -1,3 +1,4 @@
+// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -22,6 +23,7 @@ model User {
   role          UserRole  @default(USER)
   accounts      Account[]
   carts         Cart[]
+  addresses     Address[]  // ✅ Added this line
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -86,11 +88,12 @@ model TwoFactorConfirmation {
 }
 
 model Cart {
-  id     String     @id
+  id     String     @id @default(cuid())   // ✅ THIS LINE FIXES EVERYTHING
   userId String     @map("user_id")
   items  CartItem[]
   user   User       @relation(fields: [userId], references: [id])
 
+  @@unique([userId])
   @@map("carts")
 }
 
@@ -99,6 +102,7 @@ model CartItem {
   cartId    String @map("cart_id")
   productId String @map("product_id")
   variantId String @map("variant_id")
+  slug      String?   // ✅ OPTIONAL
   title     String
   price     Int
   quantity  Int
@@ -106,6 +110,7 @@ model CartItem {
 
   cart Cart @relation(fields: [cartId], references: [id])
 
+  @@unique([cartId, productId, variantId])
   @@map("cart_items")
 }
 
@@ -132,4 +137,25 @@ model OrderItem {
   order Order @relation(fields: [orderId], references: [id])
 
   @@map("order_items")
+}
+
+// ✅ NEW: Address Model
+model Address {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  firstName  String   @map("first_name")
+  lastName   String   @map("last_name")
+  phone      String
+  address    String
+  building   String?
+  apartment  String?
+  landmark   String?
+  city       String
+  state      String
+  pincode    String
+  createdAt  DateTime @default(now()) @map("created_at")
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("addresses")
 }

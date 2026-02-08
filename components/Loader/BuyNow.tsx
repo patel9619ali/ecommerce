@@ -9,9 +9,9 @@ import { Button } from "../ui/button";
 import { Variant } from "@/data/types";
 type CartState = "idle" | "loading" | "success";
 type Props = {
-  productId: string | undefined;
-  slug: string | undefined;
-  title: string | undefined;
+  productId: string;
+  slug: string;
+  title: string;
   variant: Variant;
 };
 export const BuyNow = ({

@@ -5,9 +5,9 @@ import { useCartStore } from "@/store/useCartStore";
 import { Variant } from "@/data/types";
 
 type Props = {
-  productId: string | undefined;
-  slug: string | undefined;
-  title: string | undefined;
+  productId: string;
+  slug: string;
+  title: string;
   variant: Variant;
 };
 

@@ -2,6 +2,7 @@
 
 import { useCartStore } from "@/store/useCartStore";
 import { useState, useEffect } from "react"
+
 import { Search, ShoppingCart, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
@@ -32,6 +33,8 @@ const HamBurger = (
 export function DesktopHeader() {
   const items = useCartStore((state) => state.items);
   const { openCart } = useCartStore();
+  const resetCart = useCartStore((s) => s.resetCart);
+  const loadFromDatabase = useCartStore((s) => s.loadFromDatabase);
   const [sheetOpen, setSheetOpen] = useState(false);
   const router = useRouter();
   const pathName = usePathname();
@@ -77,7 +80,17 @@ export function DesktopHeader() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
-
+  useEffect(() => {
+    if (user?.id) {
+      // ✅ User logged in / switched user
+      resetCart();          // 🔥 clear previous user's cart
+      loadFromDatabase();   // 🔄 load THIS user's cart from DB
+    } else {
+      // ✅ User logged out
+      resetCart();          // 🔥 clear cart completely
+    }
+  }, [user?.id]);
+  console.log(items,"loadFromDatabase")
   return (
     <header className={cn(
       "top-0 left-0 right-0 z-50 bg-white transition-transform duration-300",

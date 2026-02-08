@@ -25,6 +25,8 @@ useEffect(() => {
     if (!slug) return;
 
     const res = await getProductBySlug(slug as string);
+    console.log(res,"res1res1")
+    const res1 = await getProducts();
     const cmsProduct = res?.data?.[0];
     if (!cmsProduct) return;
 

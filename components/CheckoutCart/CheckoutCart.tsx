@@ -1,8 +1,10 @@
+// components/CheckoutCart/CheckoutCart.tsx
+"use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
-  ChevronLeft,
   MapPin,
   CreditCard,
   Wallet,
@@ -22,35 +24,35 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import type { StaticImageData } from "next/image";
-import productMain from "@/public/assets/Blender/BlackBlender/black1.jpg";
+import { CartProduct } from "@/store/useCartStore"; // ✅ Import type
 
-interface ProductState {
-  name: string;
-  color: string;
-  quantity: number;
-  price: number;
-  originalPrice: number;
-  image: string | StaticImageData;
+interface CheckoutCartProps {
+  items: CartProduct[];
+  total: number;
 }
 
-const CheckoutCart = () => {
-    const router = useRouter();
-    const product: ProductState = {
-        name: "BlendRas Portable Juicer Pro",
-        color: "Black",
-        quantity: 1,
-        price: 3499,
-        originalPrice: 4999,
-        image: productMain,
-    };
+const CheckoutCart = ({ items, total: totalProp }: CheckoutCartProps) => {
+  const router = useRouter();
+
+  // ✅ Form States
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [building, setBuilding] = useState("");
+  const [apartment, setApartment] = useState("");
+  const [landmark, setLandmark] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [pincode, setPincode] = useState("");
 
   const [paymentMethod, setPaymentMethod] = useState("upi");
   const [addressOpen, setAddressOpen] = useState(true);
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
 
-  const subtotal = product.price * product.quantity;
+  // ✅ Calculate totals from props (dynamic items)
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = subtotal > 999 ? 0 : 49;
   const discount = appliedCoupon ? Math.round(subtotal * 0.1) : 0;
   const total = subtotal + shipping - discount;
@@ -61,9 +63,53 @@ const CheckoutCart = () => {
     }
   };
 
-  return (
-    <div className="bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] lg:py-10 py-5">
+  const handlePlaceOrder = async () => {
+    try {
+      // Save address
+      const addressRes = await fetch("/api/address", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          phone,
+          address,
+          building,
+          apartment,
+          landmark,
+          city,
+          state,
+          pincode,
+        }),
+      });
 
+      if (!addressRes.ok) throw new Error("Address save failed");
+
+      // Create order
+      const orderRes = await fetch("/api/orders/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items,
+          total,
+          paymentMethod,
+        }),
+      });
+
+      if (!orderRes.ok) throw new Error("Order creation failed");
+
+      const { order } = await orderRes.json();
+
+      // Redirect to payment or confirmation
+      router.push(`/order-confirmation/${order.id}`);
+    } catch (error) {
+      console.error("Order creation failed:", error);
+      alert("Failed to place order. Please try again.");
+    }
+  };
+
+  return (
+    <div className="bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] lg:py-10 py-5">
       <main className="container mx-auto px-4">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Forms */}
@@ -92,33 +138,110 @@ const CheckoutCart = () => {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label className="text-[#020817] text-sm mb-1 block" htmlFor="firstName">First Name</Label>
-                        <Input id="firstName" placeholder="John" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                        <Input
+                          id="firstName"
+                          value={firstName}
+                          onChange={(e) => setFirstName(e.target.value)}
+                          placeholder="John"
+                          className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-[#020817] text-sm mb-1 block" htmlFor="lastName">Last Name</Label>
-                        <Input id="lastName" placeholder="Doe" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                        <Input
+                          id="lastName"
+                          value={lastName}
+                          onChange={(e) => setLastName(e.target.value)}
+                          placeholder="Doe"
+                          className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                        />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[#020817] text-sm mb-1 block" htmlFor="phone">Phone Number</Label>
-                      <Input id="phone" placeholder="+91 98765 43210" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                      <Input
+                        id="phone"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="+91 98765 43210"
+                        className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[#020817] text-sm mb-1 block" htmlFor="address">Street Address</Label>
-                      <Input id="address" placeholder="123 Main Street, Apartment 4B" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                      <Input
+                        id="address"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        placeholder="123 Main Street"
+                        className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                      />
                     </div>
+                    
+                    {/* ✅ NEW FIELDS */}
+                    <div className="grid sm:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="building">Building (Optional)</Label>
+                        <Input
+                          id="building"
+                          value={building}
+                          onChange={(e) => setBuilding(e.target.value)}
+                          placeholder="Tower A"
+                          className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="apartment">Apartment (Optional)</Label>
+                        <Input
+                          id="apartment"
+                          value={apartment}
+                          onChange={(e) => setApartment(e.target.value)}
+                          placeholder="4B"
+                          className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="landmark">Landmark (Optional)</Label>
+                        <Input
+                          id="landmark"
+                          value={landmark}
+                          onChange={(e) => setLandmark(e.target.value)}
+                          placeholder="Near XYZ Mall"
+                          className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                        />
+                      </div>
+                    </div>
+
                     <div className="grid sm:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label className="text-[#020817] text-sm mb-1 block" htmlFor="city">City</Label>
-                        <Input id="city" placeholder="Mumbai" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                        <Input
+                          id="city"
+                          value={city}
+                          onChange={(e) => setCity(e.target.value)}
+                          placeholder="Mumbai"
+                          className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-[#020817] text-sm mb-1 block" htmlFor="state">State</Label>
-                        <Input id="state" placeholder="Maharashtra" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                        <Input
+                          id="state"
+                          value={state}
+                          onChange={(e) => setState(e.target.value)}
+                          placeholder="Maharashtra"
+                          className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-[#020817] text-sm mb-1 block" htmlFor="pincode">PIN Code</Label>
-                        <Input id="pincode" placeholder="400001" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                        <Input
+                          id="pincode"
+                          value={pincode}
+                          onChange={(e) => setPincode(e.target.value)}
+                          placeholder="400001"
+                          className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                        />
                       </div>
                     </div>
                     <Button className="w-full mt-2 cursor-pointer !border-[#254fda] !bg-[#254fda] hover:!bg-[#254fda] hover:!text-[#fff] mb-5 !text-[#fff]" variant="outline">
@@ -152,7 +275,7 @@ const CheckoutCart = () => {
                     onClick={() => setPaymentMethod("upi")}
                   >
                     <div className="flex items-center gap-3">
-                      <RadioGroupItem value="upi" id="upi" className="border-[#254fda] text-[#254fda]"/>
+                      <RadioGroupItem value="upi" id="upi" className="border-[#254fda] text-[#254fda]" />
                       <Label htmlFor="upi" className="cursor-pointer font-medium text-[#000]">UPI</Label>
                     </div>
                     <div className="flex items-center gap-2">
@@ -226,7 +349,7 @@ const CheckoutCart = () => {
                 {paymentMethod === "upi" && (
                   <div className="mt-4 space-y-2">
                     <Label htmlFor="upiId" className="text-[#020817] text-sm mb-1 block">Enter UPI ID</Label>
-                    <Input id="upiId" placeholder="yourname@upi" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                    <Input id="upiId" placeholder="yourname@upi" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]" />
                   </div>
                 )}
 
@@ -263,27 +386,25 @@ const CheckoutCart = () => {
                 <CardTitle className="text-lg text-[#000]">Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Product */}
-                <div className="flex gap-4">
-                  <div className="w-20 h-20 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-[#21242c] line-clamp-2">{product.name}</h4>
-                    <p className="text-sm text-[#6a7181]">Color: {product.color}</p>
-                    <p className="text-sm text-[#6a7181]">Qty: {product.quantity}</p>
-                    <div className="flex items-baseline gap-2 mt-1">
-                      <span className="font-semibold text-[#000]">₹{product.price.toLocaleString()}</span>
-                      <span className="text-sm text-[#6a7181] line-through">
-                        ₹{product.originalPrice.toLocaleString()}
-                      </span>
+                {/* ✅ Dynamic Products from Cart */}
+                {items.map((item) => (
+                  <div key={item.id} className="flex gap-4">
+                    <div className="w-20 h-20 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
+                      <img
+                        src={`${process.env.NEXT_PUBLIC_CMS_URL}${item.image}`}
+                        alt={item.title || "Product"}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-[#21242c] line-clamp-2">{item.title}</h4>
+                      <p className="text-sm text-[#6a7181]">Qty: {item.quantity}</p>
+                      <div className="flex items-baseline gap-2 mt-1">
+                        <span className="font-semibold text-[#000]">₹{item.price.toLocaleString()}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                ))}
 
                 <Separator />
 
@@ -350,7 +471,10 @@ const CheckoutCart = () => {
                   <span className="font-bold text-2xl text-[#21242c]">₹{total.toLocaleString()}</span>
                 </div>
 
-                <Button className="cursor-pointer border-[#254fda] bg-[#254fda] w-full h-12 text-base font-semibold !text-[#fff]">
+                <Button
+                  onClick={handlePlaceOrder}
+                  className="cursor-pointer border-[#254fda] bg-[#254fda] w-full h-12 text-base font-semibold !text-[#fff]"
+                >
                   Pay ₹{total.toLocaleString()}
                 </Button>
 
@@ -367,19 +491,6 @@ const CheckoutCart = () => {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Delivery Info */}
-            {/* <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3 text-sm">
-                  <Truck className="h-5 w-5 text-[#254fda] border-[#254fda] text-[#254fda]" />
-                  <div>
-                    <p className="font-medium text-[#21242c]">Estimated Delivery</p>
-                    <p className="text-[#6a7181]">3-5 business days</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card> */}
           </div>
         </div>
       </main>
