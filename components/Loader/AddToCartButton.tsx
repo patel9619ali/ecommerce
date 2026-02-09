@@ -27,6 +27,7 @@ export const AddToCartButton = ({
       title,
       variantKey: variant.sku,
       price: Number(variant.sellingPrice),
+      mrp: Number(variant.mrp),
       image: variant.images[0].url,
       quantity: 1,
     });

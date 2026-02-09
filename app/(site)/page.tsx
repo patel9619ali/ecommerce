@@ -8,19 +8,28 @@ import WhyChooseUsHoverImage from "@/components/WhyChooseUsHoverImage/WhyChooseU
 import WhyChooseUsMobileHoverImage from "@/components/WhyChooseUsHoverImage/WhyChooseUsMobileHoverImage";
 import FAQ from "@/components/FAQ/FAQ";
 import { getProducts } from "@/lib/api";
+import ProductSpecs from "@/components/ProductSpecs/ProductSpecs";
+import Features from "@/components/Features/Features";
+import HowItWorks from "@/components/HowItWorks/HowItWorks";
+import Reviews from "@/components/Reviews/Reviews";
 export default async function Home() {
   const products = await getProducts();
   const {data} = products;
+  console.log(data,"productDataproductDataproductDataproductData")
   return (
     <>
-      <BannerSection/>
-      <InformativeSlider className={`hidden md:block`} productData={data}/>
+      <BannerSection productData={data}/>
+      {/* <InformativeSlider className={`hidden md:block`} productData={data}/> */}
       <MobileInformativeSlider className={`block md:hidden`} productData={data}/>
       <MainImageAddToCart productData={data}/>
-      <DualSpecsScroll className={`hidden md:block`}/>
-      <MobileSpecs className={`block md:hidden`}/>
+      {/* <DualSpecsScroll className={`hidden md:block`}/>
+      <MobileSpecs className={`block md:hidden`}/> */}
+      <Features/>
+      <HowItWorks/>
+      <ProductSpecs/>
       <WhyChooseUsHoverImage className={`hidden md:block`}/>
       <WhyChooseUsMobileHoverImage className={`block md:hidden`}/>
+      <Reviews/>
       <FAQ className={{ wrapper: "block", alignMent: "start",widthHeading: "3xl",searchFunctionalityVisiblity:"block", modal:false }}/>
     </>
   );

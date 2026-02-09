@@ -9,6 +9,7 @@ export type CartProduct = {
   description?: string;
   variantKey: string;
   price: number;
+  mrp: number;
   image: string;
   quantity: number;
 };
@@ -124,6 +125,7 @@ export const useCartStore = create<CartState>()(
                   title: i.title,
                   description: i.description,
                   price: i.price,
+                  mrp: i.mrp,
                   image: i.image,
                   quantity: i.quantity,
                 })),

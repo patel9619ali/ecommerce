@@ -21,7 +21,7 @@ export const MainImageAddToCart = ({productData}:Props) => {
 
   if (!product || !selectedVariant) return null;
   return (
-    <section className="w-full bg-[#fff] py-5">
+    <section className="w-full bg-[#fff] py-14">
         <div className="container mx-auto">
             <div className="grid lg:grid-cols-[2.5fr_1.5fr]">
                 <ProductGallery variant={selectedVariant} />

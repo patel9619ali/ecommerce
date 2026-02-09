@@ -8,11 +8,15 @@ type Props = {
   selectedVariant: Variant;
   onVariantChange: (key: string) => void;
 };
+
 export const BuyCartSection = ({
   product,
   onVariantChange,
   selectedVariant,
 }: Props) => {
+  if (!product || !selectedVariant) {
+    return null;
+  }
   return (
     <section className="w-full">
       <h3 className="lg:text-[32px] text-black/80 text-[28px] font-bold">BlendRas Portable Juicer</h3>
@@ -60,6 +64,7 @@ export const BuyCartSection = ({
       </div> */}
       <p className="mt-6 text-[14px] text-black/80">Hurry, only 7 items left in stock!</p>
       <div className="mt-6">
+        
         <AddToCartButton productId={product?.id?.toString()} slug={product?.slug} title={product?.title} variant={selectedVariant} />
       </div>
       <div className="mt-4">

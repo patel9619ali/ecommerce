@@ -35,6 +35,7 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
     slug: product.slug,
     title: product.title,
     price: Number(variant.sellingPrice),
+    mrp: Number(variant.mrp),
     variantKey: variant.sku,
     image: variant.images[0].url,
     quantity,

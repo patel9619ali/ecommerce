@@ -190,7 +190,7 @@ export function CartFooter({ onCheckout }: { onCheckout: () => void }) {
                     </div>
 
                     <p className='text-[13px] text-left font-[500] text-[#fff]'>Taxes, discounts and shipping calculated at checkout.</p>
-                    <Button onClick={onCheckout} className='uppercase bg-[#fff] px-4 font-[700] w-[250px] text-[#000000f0] text-[14px]'>Check out - ₹ {total}</Button>
+                    <Button onClick={onCheckout} className='cursor-pointer uppercase bg-[#fff] px-4 font-[700] w-[250px] text-[#000000f0] text-[14px]'>Check out - ₹ {total}</Button>
                 </div>
             </div>
         </>

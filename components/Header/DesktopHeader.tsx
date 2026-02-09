@@ -127,8 +127,11 @@ export function DesktopHeader() {
         </div>
 
         {/* Center: Logo */}
-        <h3 className="text-2xl font-bold text-[#28af60]"><Link href={`/`}>BlendRas</Link></h3>
-
+        <h3 className="text-2xl lg:text-3xl font-bold tracking-tight">
+          <Link href={`/`}><span className="text-gradient">Blend</span>
+            <span className="text-foreground">Ras</span>
+          </Link>
+        </h3>
         {/* Right: Actions */}
         <div className="flex items-center md:gap-2 gap-0">
           <Button variant="ghost" size="icon" className="cursor-pointer transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:bg-transparent">

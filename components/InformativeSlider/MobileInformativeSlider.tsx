@@ -73,7 +73,7 @@ const MobileInformativeSlider = ({ className,productData }: Props) => {
       </div>
 
       {/* ================= TEXT CONTENT (STATIC) ================= */}
-      <div className="px-5 py-8 dark:bg-[#fffffff0]">
+      <div className="px-5 py-8 bg-[linear-gradient(180deg,#f9f8fc_0%,#f1eef6_100%)]">
         <AnimatePresence mode="wait">
           {variants[selectedIndex] && (
             <motion.div
@@ -98,7 +98,7 @@ const MobileInformativeSlider = ({ className,productData }: Props) => {
                 />
               )}
 
-            <Link href={`${process.env.NEXT_PUBLIC_APP_URL}/products/${product?.slug}?variant=${variants[selectedIndex].sku}`} className="backdrop-blur-md bg-white/90 py-2 mx-auto text-center text-black inline-block w-[150px] px-3 my-3 hover:bg-gray-200 transition-colors duration-300 border-[#000] hover:font-[700] border-[1px] rounded-[4px]" >
+            <Link href={`${process.env.NEXT_PUBLIC_APP_URL}/products/${product?.slug}?variant=${variants[selectedIndex].sku}`} className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer" >
               Shop Now
             </Link>
           </motion.div>

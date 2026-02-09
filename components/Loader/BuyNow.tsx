@@ -31,6 +31,7 @@ export const BuyNow = ({
       title,
       variantKey: variant?.sku,
       price: variant?.sellingPrice,
+      mrp: variant?.mrp,
       image: variant?.images[0]?.url,
       quantity: 1,
     });
