@@ -6,21 +6,25 @@ import { NextResponse } from "next/server";
 export async function GET() {
   try {
     const session = await auth();
+    
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ cart: null }, { status: 200 });
     }
 
     const cart = await db.cart.findUnique({
       where: { userId: session.user.id },
-      include: { items: true },
+      include: {
+        items: true,
+      },
     });
+
+    if (!cart) {
+      return NextResponse.json({ cart: null }, { status: 200 });
+    }
 
     return NextResponse.json({ cart });
   } catch (error) {
-    console.error("Failed to fetch cart:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch cart" },
-      { status: 500 }
-    );
+    console.error("Cart get error:", error);
+    return NextResponse.json({ error: "Failed to fetch cart" }, { status: 500 });
   }
 }

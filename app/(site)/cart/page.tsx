@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect } from "react";
 import { useCartStore } from "@/store/useCartStore";
@@ -13,17 +13,11 @@ import EmptyCart from "@/components/Cart/EmptyCart";
 import MobileCheckoutBar from "@/components/Cart/MobileCheckoutBar";
 import CartSkeleton from "@/components/CartSkeleton";
 
-const CartPage = () => {
+export default function CartPage() {
   const router = useRouter();
   const { status } = useSession();
 
-  const {
-    items,
-    updateQuantity,
-    removeItem,
-    hydrated,
-    cartLoading,
-  } = useCartStore();
+  const { items, updateQuantity, removeItem, hydrated } = useCartStore();
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -31,8 +25,7 @@ const CartPage = () => {
     }
   }, [status, router]);
 
-  // ✅ HOLD UI until DB cart decision is FINAL
-  if (!hydrated || cartLoading) {
+  if (!hydrated) {
     return (
       <main className="max-w-6xl mx-auto px-4 py-10">
         <CartSkeleton />
@@ -45,15 +38,11 @@ const CartPage = () => {
     0
   );
 
+  const totalItems = items.reduce((s, i) => s + i.quantity, 0);
   const shipping = subtotal > 500 ? 0 : 15;
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
 
-  const totalItems = items.reduce(
-    (sum, item) => sum + item.quantity,
-    0
-  );
-  console.log(items,"Items page")
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] lg:py-10 py-5">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5 md:py-10">
@@ -93,12 +82,7 @@ const CartPage = () => {
         )}
       </main>
 
-      <MobileCheckoutBar
-        total={total}
-        itemCount={totalItems}
-      />
+      <MobileCheckoutBar total={total} itemCount={totalItems} />
     </div>
   );
-};
-
-export default CartPage;
+}

@@ -10,13 +10,22 @@ interface CartItemProps {
 }
 
 const CartItem = ({ item, onUpdateQuantity, onRemove, index }: CartItemProps) => {
-  console.log(item,"itemitem");
   return (
     <motion.div
+      layout // ✅ Smooth repositioning when items are removed
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, x: -120, scale: 0.95 }}
-      transition={{ duration: 0.35, delay: index * 0.08 }}
+      exit={{ 
+        opacity: 0, 
+        x: -120, 
+        scale: 0.95,
+        transition: { duration: 0.3 } // ✅ Give enough time for animation
+      }}
+      transition={{ 
+        duration: 0.35, 
+        delay: index * 0.08,
+        layout: { duration: 0.3 } // ✅ Smooth layout transitions
+      }}
       className="group bg-[hsl(0_0%_100%/0.9)] backdrop-blur-xl border border-[hsl(240_10%_90%/0.4)] shadow-sm rounded-2xl p-3 md:p-5 transition-all duration-300 hover:shadow-[0_4px_20px_-4px_hsl(252_80%_60%/0.12),0_2px_8px_-2px_hsl(240_15%_10%/0.04)] relative"
     >
       {/* Remove */}
@@ -32,7 +41,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemove, index }: CartItemProps) =>
         <div className="w-[80px] h-[100px] md:w-32 md:h-32 rounded-xl overflow-hidden bg-[hsl(240_8%_93%)]">
           <img
             src={`${process.env.NEXT_PUBLIC_CMS_URL}${item?.image}`}
-            alt={`${item?.title}`}
+            alt={item?.title || "Product"}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform"
           />
         </div>
@@ -40,17 +49,19 @@ const CartItem = ({ item, onUpdateQuantity, onRemove, index }: CartItemProps) =>
         {/* Info */}
         <div className="flex-1 flex flex-col justify-between pr-6">
           <h3 className="text-sm md:text-lg font-bold truncate text-[#000] break-all">
-            {item.title} <span className="capitalize">{item.variantKey.replace(/-/g, ' ')}
-              </span>
+            {item.title}{" "}
+            <span className="capitalize">
+              {item.variantKey.replace(/-/g, " ")}
+            </span>
           </h3>
           <div className="flex justify-between items-center mt-3">
             {/* Quantity */}
             <div className="flex items-center bg-[hsl(240_10%_95%)] rounded-full p-0.5">
               <button
                 onClick={() => onUpdateQuantity(Math.max(1, item.quantity - 1))}
-                className="w-7 h-7 rounded-full hover:bg-[hsl(252_80%_60%)] hover:text-white text-[#000] cursor-pointer group2"
+                className="w-7 h-7 rounded-full hover:bg-[hsl(252_80%_60%)] hover:text-white text-[#000] cursor-pointer group/btn"
               >
-                <Minus className="w-3 h-3 mx-auto text-[#000] group2-hover:text-[#fff]" />
+                <Minus className="w-3 h-3 mx-auto text-[#000] group-hover/btn:text-[#fff]" />
               </button>
 
               <span className="w-8 text-center font-bold text-sm text-[#000]">
@@ -59,9 +70,9 @@ const CartItem = ({ item, onUpdateQuantity, onRemove, index }: CartItemProps) =>
 
               <button
                 onClick={() => onUpdateQuantity(item.quantity + 1)}
-                className="w-7 h-7 rounded-full hover:bg-[hsl(252_80%_60%)] group2 text-[#000] cursor-pointer"
+                className="w-7 h-7 rounded-full hover:bg-[hsl(252_80%_60%)] group/btn text-[#000] cursor-pointer"
               >
-                <Plus className="w-3 h-3 mx-auto text-[#000] group2-hover:text-[#fff]" />
+                <Plus className="w-3 h-3 mx-auto text-[#000] group-hover/btn:text-[#fff]" />
               </button>
             </div>
 
