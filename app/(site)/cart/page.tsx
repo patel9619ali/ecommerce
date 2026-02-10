@@ -53,6 +53,7 @@ const CartPage = () => {
     (sum, item) => sum + item.quantity,
     0
   );
+  console.log(items,"Items page")
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] lg:py-10 py-5">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5 md:py-10">

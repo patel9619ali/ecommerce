@@ -10,7 +10,7 @@ interface CartItemProps {
 }
 
 const CartItem = ({ item, onUpdateQuantity, onRemove, index }: CartItemProps) => {
-  console.log(item,"itemitem")
+  console.log(item,"itemitem");
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}

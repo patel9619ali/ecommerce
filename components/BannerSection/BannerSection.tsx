@@ -172,7 +172,7 @@ const discountPercent = (activeVariant.mrp && activeVariant.sellingPrice && acti
             className="absolute -right-4 top-1/3 glass rounded-2xl px-4 py-3 shadow-lg"
           >
             <p className="text-xs text-muted-foreground">Battery Life</p>
-            <p className="text-lg font-bold text-foreground">15+ Blends</p>
+            <p className="text-lg font-bold text-foreground text-sm">15+ Blends</p>
           </motion.div>
           
           <motion.div
@@ -182,7 +182,7 @@ const discountPercent = (activeVariant.mrp && activeVariant.sellingPrice && acti
             className="absolute -left-4 bottom-1/3 glass rounded-2xl px-4 py-3 shadow-lg"
           >
             <p className="text-xs text-muted-foreground">Blend Time</p>
-            <p className="text-lg font-bold text-foreground">30 Seconds</p>
+            <p className="text-lg text-sm font-bold text-foreground">30 Seconds</p>
           </motion.div>
         </motion.div>
       </div>
