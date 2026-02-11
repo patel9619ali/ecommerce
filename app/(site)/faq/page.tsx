@@ -1,7 +1,7 @@
 import FAQ from "@/components/FAQ/FAQ";
 import { BreadcrumbType } from "@/types/breadcrumbType";
 import { BreadcrumbWithCustomSeparator } from "@/components/Breadcrumb/Breadcrumb";
-
+export const revalidate = 3600;
 const breadcrumbItems: BreadcrumbType[] = [
   { label: 'Home', href: '/' },
   { label: 'FAQ' },

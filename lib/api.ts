@@ -1,5 +1,6 @@
 import { productQuery } from "./queries/product";
 import qs from "qs";
+import { CacheConstant } from "./constants/constants";
 export async function getProducts() {
   const baseUrl = process.env.NEXT_PUBLIC_CMS_URL;
 
@@ -12,7 +13,10 @@ export async function getProducts() {
     headers: {
       Authorization: `Bearer ${process.env.NEXT_PUBLIC_CMS_TOKEN}`,
     },
-    cache: "no-store",
+    next: {
+      revalidate: parseInt(process.env.NEXT_PUBLIC_CACHE_DURATION || "0"),
+      tags: [CacheConstant.revalidateTag]
+    }
   });
 
   return res.json();
@@ -39,8 +43,10 @@ export async function getProductBySlug(slug: string) {
     headers: {
       Authorization: `Bearer ${process.env.NEXT_PUBLIC_CMS_TOKEN}`,
     },
-    cache: "no-store",
+    next: {
+      revalidate: parseInt(process.env.NEXT_PUBLIC_CACHE_DURATION || "0"),
+      tags: [CacheConstant.revalidateTag]
+    }
   });
-  console.log(res,"resresres")
   return res.json();
 }

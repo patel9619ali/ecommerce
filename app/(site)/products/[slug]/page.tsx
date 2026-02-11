@@ -7,7 +7,7 @@ import { useLoading } from "@/context/LoadingContext";
 import ProductImage from "@/components/Product/ProductImage";
 import ProductEmiCartDescription from "@/components/Product/ProductEmiCartDescription";
 import { SpinnerCustom } from "@/components/Loader/SpinningLoader";
-
+export const revalidate = 3600;
 export default function ProductPage() {
   const { slug } = useParams();
   const searchParams = useSearchParams();

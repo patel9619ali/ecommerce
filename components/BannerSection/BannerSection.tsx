@@ -31,7 +31,6 @@ const BannerSection = ({ productData }: BannerSectionProps) => {
       productId: String(product.id), // ✅ string
       slug: product.slug,
       title: product.title,
-      description: product.description,
       variantKey: String(activeVariant.id), // ✅ string
       price: Number(activeVariant.sellingPrice), // ✅ number
       mrp: Number(activeVariant.mrp), // ✅ number

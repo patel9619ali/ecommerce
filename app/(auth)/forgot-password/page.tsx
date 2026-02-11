@@ -1,7 +1,10 @@
+import { Suspense } from "react";
 import { ForgotPasswordForm } from "@/components/ForgotPasswordForm/ForgotPasswordForm";
 
-const ForgotPassword = () => {
-  return <ForgotPasswordForm />;
-};
-
-export default ForgotPassword;
+export default function ForgotPassword() {
+  return (
+    <Suspense fallback={null}>
+      <ForgotPasswordForm />
+    </Suspense>
+  );
+}
