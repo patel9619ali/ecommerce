@@ -15,30 +15,18 @@ export default function ProductPageClient({
   product, 
   initialVariant 
 }: ProductPageClientProps) {
-  const router = useRouter();
+ const router = useRouter();
   const searchParams = useSearchParams();
+  const urlVariant = searchParams.get("variant");
   
-  // ✅ Initialize with initialVariant from server
-  const [variantKey, setVariantKey] = useState<string | null>(null);;
+  // ✅ Use URL as source of truth, fallback to initialVariant
+  const variantKey = urlVariant || initialVariant || product.variants[0]?.key;
   const [previewVariantKey, setPreviewVariantKey] = useState<string | null>(null);
 
-  // Sync variant with URL changes
-  useEffect(() => {
-    const urlVariant = searchParams.get("variant");
-    if (urlVariant && urlVariant !== variantKey) {
-      setVariantKey(urlVariant);
-    }
-  }, [searchParams, variantKey]);
-
-  // Update URL when variant changes (client-side navigation)
-  useEffect(() => {
-    if (!variantKey) return;
-
-    const currentVariant = searchParams.get("variant");
-    if (currentVariant !== variantKey) {
-      router.replace(`?variant=${variantKey}`, { scroll: false });
-    }
-  }, [variantKey, router, searchParams]);
+  // ✅ Handle variant changes - only update URL
+  const handleVariantChange = (newVariant: string) => {
+    router.replace(`?variant=${newVariant}`, { scroll: false });
+  };
 
   // Active variant logic
   const activeVariant =
@@ -59,7 +47,7 @@ export default function ProductPageClient({
           <ProductEmiCartDescription 
             variant={selectedVariant} 
             product={product} 
-            setVariantKey={setVariantKey} 
+            setVariantKey={handleVariantChange} 
             setPreviewVariantKey={setPreviewVariantKey} 
             previewVariantKey={previewVariantKey} 
           />

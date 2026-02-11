@@ -27,11 +27,11 @@ const BannerSection = ({ productData }: BannerSectionProps) => {
     if (!imageUrl) return;
 
     addItem({
-      id: crypto.randomUUID(), // UI only
+      id: `${product.id}-${activeVariant.sku}`, // UI only
       productId: String(product.id), // ✅ string
       slug: product.slug,
       title: product.title,
-      variantKey: String(activeVariant.id), // ✅ string
+      variantKey: String(activeVariant.sku), // ✅ string
       price: Number(activeVariant.sellingPrice), // ✅ number
       mrp: Number(activeVariant.mrp), // ✅ number
       image: imageUrl, // ✅ string URL

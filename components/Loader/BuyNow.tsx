@@ -1,53 +1,63 @@
 "use client";
 
-import { useState } from "react";
-import { Loader2, Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/useCartStore";
 import { Button } from "../ui/button";
 import { Variant } from "@/data/types";
 import { useLoading } from "@/context/LoadingContext";
+
 type Props = {
   productId: string;
   slug: string;
   title: string;
   variant: Variant;
 };
+
 export const BuyNow = ({
   productId,
   slug,
   title,
   variant,
 }: Props) => {
-  const addItem = useCartStore((s) => s.addItem);
-  const { setLoading } = useLoading(); // 🔥 global loader
+  const { items, addItem } = useCartStore();
+  const { setLoading } = useLoading();
   const router = useRouter();
+
   const handleBuyNow = () => {
     if (!variant) return;
 
-    // 🔥 Start global loader
     setLoading(true);
 
-    // ✅ Add item WITHOUT opening cart sheet
-    addItem(
-      {
-        id: `${productId}-${variant.sku}`,
-        productId,
-        slug,
-        title,
-        variantKey: variant.sku,
-        price: Number(variant.sellingPrice),
-        mrp: Number(variant.mrp),
-        image: variant.images[0]?.url,
-        quantity: 1,
-      },
-      false // 👈 DO NOT open cart sheet
+    // 🔎 Check if this variant already exists in cart
+    const exists = items.some(
+      (i) =>
+        i.productId === productId &&
+        i.variantKey === variant.sku
     );
 
-    // ✅ Go directly to checkout
+    // ➕ Only add if it doesn't already exist
+    if (!exists) {
+      addItem(
+        {
+          id: `${productId}-${variant.sku}`,
+          productId,
+          slug,
+          title,
+          variantKey: variant.sku,
+          price: Number(variant.sellingPrice),
+          mrp: Number(variant.mrp),
+          image: variant.images[0]?.url,
+          quantity: 1,
+        },
+        false // don't open sheet
+      );
+    }
+
+    // 🚀 Go to checkout
     router.push("/checkout");
   };
+
   return (
     <>
       <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} >

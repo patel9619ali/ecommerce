@@ -46,7 +46,6 @@ export const AddToCartButton = ({
     <>
       <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} >
         <button onClick={handleClick} aria-label="Previous slide" className="cursor-pointer flex-1 h-12 text-[16px] !bg-[#ffffff99] text-[#000] hover:text-[#254fda] hover:bg-[#eafaf1] border border-[#aeb2bb] rounded-lg w-full" >
-
               ADD TO CART
         </button>
       </motion.div>

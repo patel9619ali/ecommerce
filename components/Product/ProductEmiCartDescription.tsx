@@ -2,8 +2,7 @@
 
 
 import type { Product, Variant } from "@/data/types";
-import Link from "next/link";
-import { Star, Heart, Share2, ShieldCheck, Truck, RotateCcw, Minus, Plus, ChevronRight } from "lucide-react";
+import { Star, Share2, Minus, Plus } from "lucide-react";
 import { ProductBenefitsCarousel } from "./ProductBenefitsCarousel";
 import { ProductColorSelector } from "./ProductColorSelector";
 import { useRouter } from "next/navigation";
@@ -11,50 +10,94 @@ import { useCartStore } from "@/store/useCartStore";
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { motion } from "framer-motion";
 import { Button } from "../ui/button";
-import { BuyNow } from "../Loader/BuyNow";
 import { useLoading } from "@/context/LoadingContext";
 type Props = {
   product: Product;
   variant: Variant;
-  setVariantKey: React.Dispatch<React.SetStateAction<string | null>>
+  setVariantKey: (key: string) => void;
   setPreviewVariantKey: React.Dispatch<React.SetStateAction<string | null>>
   previewVariantKey: string | null
 };
 
 export default function ProductEmiCartDescription({ product, variant,setVariantKey,setPreviewVariantKey,previewVariantKey }: Props) {
-    const router = useRouter();
-    const { addItem } = useCartStore();
-    const { setLoading } = useLoading();
-    const [quantity, setQuantity] = useState(1);
-    const handleAddToCart = () => {
-     if (!product || !variant) return;
-     setLoading(true); // 🔥 Start global loader
-      addItem({
-        id: `${product.slug}-${variant.key}`,
-        productId: product.id?.toString(),
-        slug: product.slug,
-        title: product.title,
-        price: Number(variant.sellingPrice),
-        mrp: Number(variant.mrp),
-        variantKey: variant.sku,
-        image: variant.images[0].url,
-        quantity,
+ const router = useRouter();
+  const { items, addItem } = useCartStore();
+  const { setLoading } = useLoading();
+  const [quantity, setQuantity] = useState(1);
+  // ✅ Add to Cart - opens cart sheet
+  const handleAddToCart = () => {
+    if (!product || !variant) return;
+
+      addItem(
+    {
+      id: `${product.slug}-${variant.key}`,
+      productId: product.id?.toString(),
+      slug: product.slug,
+      title: product.title,
+      price: Number(variant.sellingPrice),
+      mrp: Number(variant.mrp),
+      variantKey: variant.key, // ✅ SINGLE SOURCE OF TRUTH
+      image: variant.images[0].url,
+      quantity: quantity,
+    },
+    true
+  );
+
+    // 🔔 Facebook Pixel tracking (optional)
+    if (typeof window !== "undefined" && typeof window.fbq === "function") {
+      window.fbq("track", "AddToCart", {
+        content_ids: [`${product.id}-${variant.sku}`],
+        content_name: product.title,
+        content_type: "product",
+        value: variant.sellingPrice,
+        currency: "INR",
       });
-};
- 
-    const handleBuyNow = () => {
-      handleAddToCart();
-      router.push("/checkout");
-    };
-    const originalPrice = variant?.mrp;
-    const discountedPrice = variant?.sellingPrice;
-    const displayKey = previewVariantKey ?? variant.key;
-    // Calculate only if both prices exist and originalPrice is not zero
-    const discountPercent = (originalPrice && discountedPrice && originalPrice > 0) 
-      ? Math.round(((originalPrice - discountedPrice) / originalPrice) * 100) 
-      : 0;
+    }
+  };
+
+  // ✅ Buy Now - goes to checkout WITHOUT opening cart
+  
+  const handleBuyNow = () => {
+    if (!product || !variant) return;
+    setLoading(true);
+    // 🔎 Check if this variant already exists in cart
+    const exists = items.some(
+      (i) =>
+        i.productId === product.id?.toString() &&
+      i.variantKey === variant.sku
+    ); 
+
+    // ➕ Only add if it doesn't already exist
+    if (!exists) {
+      addItem(
+        {
+          id: `${product.slug}-${variant.key}`,
+          productId: product.id?.toString(),
+          slug: product.slug,
+          title: product.title,
+          price: Number(variant.sellingPrice),
+          mrp: Number(variant.mrp),
+          variantKey: variant.key, // ✅ Use variant.sku
+          image: variant.images[0].url,
+          quantity: 1, // ✅ Always 1 for Buy Now
+        },
+        false // ❌ DON'T open cart sheet
+      );
+    }
+
+    // 🚀 Navigate to checkout
+    router.push("/checkout");
+  };
+
+  const originalPrice = variant?.mrp;
+  const discountedPrice = variant?.sellingPrice;
+  const displayKey = previewVariantKey ?? variant.sku;
+  
+  // Calculate discount percentage
+  const discountPercent = (originalPrice && discountedPrice && originalPrice > 0) 
+    ? Math.round(((originalPrice - discountedPrice) / originalPrice) * 100) 
+    : 0;
     return(
         <>
         <div className="space-y-6">
@@ -64,7 +107,7 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
                 <Badge variant="outline" className="text-[#28af60] border-[#28af60]">{discountPercent}% OFF</Badge>
               </div>
               <h1 className="text-2xl lg:text-3xl font-bold text-[#21242c] mb-2">
-                {product?.title} - {displayKey.replace(/-/g, ' ').toUpperCase()} 
+                {product?.title} - {displayKey?.replace(/-/g, ' ').toUpperCase()} 
               </h1>
               <p className="text-[#6a7181] mb-3" dangerouslySetInnerHTML={{ __html: product?.description }}>
               </p>
