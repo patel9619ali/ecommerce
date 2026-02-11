@@ -3,61 +3,73 @@
 import { getProducts,getProductBySlug } from "@/lib/api";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-
+import { useLoading } from "@/context/LoadingContext";
 import ProductImage from "@/components/Product/ProductImage";
 import ProductEmiCartDescription from "@/components/Product/ProductEmiCartDescription";
+import { SpinnerCustom } from "@/components/Loader/SpinningLoader";
 
 export default function ProductPage() {
   const { slug } = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { setLoading } = useLoading();
   const variantFromUrl = searchParams.get("variant");
 
   const [product, setProduct] = useState<any>(null);
   const [variantKey, setVariantKey] = useState<string | null>(null);
   const [previewVariantKey, setPreviewVariantKey] = useState<string | null>(null);
-
+  const [isLoadingProduct, setIsLoadingProduct] = useState(true);
   /* -------------------------------------------------- */
   /* Fetch Product From Strapi */
   /* -------------------------------------------------- */
 useEffect(() => {
   async function load() {
     if (!slug) return;
+    setIsLoadingProduct(true);
+    setLoading(true); // Show global loader
+    try {
+        const res = await getProductBySlug(slug as string);
+        const cmsProduct = res?.data?.[0];
+        
+        if (!cmsProduct) {
+          setIsLoadingProduct(false);
+          setLoading(false);
+          return;
+        }
 
-    const res = await getProductBySlug(slug as string);
-    const cmsProduct = res?.data?.[0];
-    if (!cmsProduct) return;
+        const normalized = {
+          id: cmsProduct.id,
+          title: cmsProduct.title,
+          subTitle: cmsProduct.subTitle,
+          description: cmsProduct.description,
+          rating: cmsProduct.rating,
+          ratingCount: cmsProduct.ratingCount,
+          slug: cmsProduct.slug,
+          variants: (cmsProduct.variant || []).map((v: any) => ({
+            id: v.id,
+            key: v.sku,
+            color: v.colorName,
+            sellingPrice: v.sellingPrice,
+            mrp: v.mrp,
+            images: v.images?.map((img: any) => ({
+              url: img.url,
+            })) || [],
+            benefits: v.ReturnsAndWarranty || [],
+          })),
+        };
 
-    const normalized = {
-      id: cmsProduct.id,
-      title: cmsProduct.title,
-      subTitle: cmsProduct.subTitle,
-      description: cmsProduct.description,
-      rating: cmsProduct.rating,
-      ratingCount: cmsProduct.ratingCount,
-      slug: cmsProduct.slug,
-      variants: (cmsProduct.variant || []).map((v: any) => ({
-        id: v.id,
-        key: v.sku,
-        color: v.colorName,
-        sellingPrice: v.sellingPrice,
-        mrp: v.mrp,
-        images: v.images?.map((img: any) => ({
-          url: img.url,
-        })) || [],
-        benefits: v.ReturnsAndWarranty || [],
-      })),
-    };
+        setProduct(normalized);
 
-    setProduct(normalized);
-
-    if (!variantKey) {
-      const initialVariant =
-        variantFromUrl ||
-        normalized.variants[0]?.key;
-
-      setVariantKey(initialVariant);
-    }
+        if (!variantKey) {
+          const initialVariant = variantFromUrl || normalized.variants[0]?.key;
+          setVariantKey(initialVariant);
+        }
+      } catch (error) {
+        console.error("Error loading product:", error);
+      } finally {
+        setIsLoadingProduct(false);
+        setLoading(false); // Hide global loader
+      }
   }
 
   load();
@@ -87,10 +99,13 @@ useEffect(() => {
 return (
   <section className="bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] lg:py-10 py-5">
     <div className="px-2">
-
-      {!product || !variantKey ? (
-        <div>Loading...</div>
-      ) : (
+        {isLoadingProduct || !product || !variantKey ? (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+              <div className="relative">
+                <SpinnerCustom/>
+              </div>
+            </div>
+        ) : (
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_2fr] gap-4 lg:gap-8 relative">
 
           <ProductImage variant={activeVariant} product={product} />

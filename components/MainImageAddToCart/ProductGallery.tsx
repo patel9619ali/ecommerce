@@ -211,13 +211,13 @@ export const ProductGallery = ({ variant }: Props) => {
           <div className="flex justify-center gap-3 mt-3">
             <button
               onClick={scrollPrev}
-              className="w-8 h-8 bg-black/60 flex items-center justify-center"
+              className="cursor-pointer w-8 h-8 bg-black/60 flex items-center justify-center"
             >
               <ChevronsUp className="text-white" />
             </button>
             <button
               onClick={scrollNext}
-              className="w-8 h-8 bg-black/60 flex items-center justify-center"
+              className="cursor-pointer w-8 h-8 bg-black/60 flex items-center justify-center"
             >
               <ChevronsDown className="text-white" />
             </button>

@@ -27,7 +27,7 @@ export default function CartPage() {
 
   if (!hydrated) {
     return (
-      <main className="max-w-6xl mx-auto px-4 py-10">
+      <main className="min-h-screen bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] lg:py-10 py-5">
         <CartSkeleton />
       </main>
     );

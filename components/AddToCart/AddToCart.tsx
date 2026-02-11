@@ -3,6 +3,7 @@ import { useRouter} from "next/navigation";
 import { useCartStore } from "@/store/useCartStore";
 import Image from "next/image";
 import Link from "next/link";
+import LoadingLink from "@/components/Loader/LoadingLink"
 import {
   Sheet,
   SheetClose,
@@ -59,7 +60,7 @@ if (!hydrated) return null;
             <div className='mt-6 overflow-y-auto'>
 
                 {items.map((item,index) => (
-                    <Link href={`/products/${item?.slug}?variant=${item?.variantKey}&editCart=true`} key={`${item.title}-${index}`} onClick={() => closeCart()} className='grid grid-cols-[1fr_3fr] gap-2 mx-4 first:pt-0 pt-5 pb-5 last:pb-0 last:border-0 border-b border-[#ffffff4f]'>
+                    <LoadingLink href={`/products/${item?.slug}?variant=${item?.variantKey}`} key={`${item.title}-${index}`} onClick={() => closeCart()} className='grid grid-cols-[1fr_3fr] gap-2 mx-4 first:pt-0 pt-5 pb-5 last:pb-0 last:border-0 border-b border-[#ffffff4f]'>
                         <div className="lg:w-[120px] xs:w-[120px] w-[100px]">
                         <Image src={getImageSrc(item.image)} alt={item?.title || "Product image"} width={120} height={120} className="object-cover rounded-md" />
 
@@ -103,7 +104,7 @@ if (!hydrated) return null;
                             </button>
                         </div>
                     </div>
-                </Link >
+                    </LoadingLink >
             ))}
             </div>
           

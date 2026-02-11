@@ -9,6 +9,8 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import LoadingLink from "@/components/Loader/LoadingLink";
+import { useLoadingRouter } from "@/components/Loader/UseLoadingRouter";
 import {
   Sheet,
   SheetClose,
@@ -36,7 +38,7 @@ export function DesktopHeader() {
   const resetCart = useCartStore((s) => s.resetCart);
   const loadFromDatabase = useCartStore((s) => s.loadFromDatabase);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const router = useRouter();
+  const router = useLoadingRouter();
   const pathName = usePathname();
   const user = useCurrentUser();
 
@@ -84,7 +86,7 @@ export function DesktopHeader() {
     if (user?.id) {
       // ✅ User logged in / switched user
       resetCart();          // 🔥 clear previous user's cart
-      loadFromDatabase();   // 🔄 load THIS user's cart from DB
+      loadFromDatabase(user.id);  // 🔄 load THIS user's cart from DB
     } else {
       // ✅ User logged out
       resetCart();          // 🔥 clear cart completely
@@ -114,11 +116,11 @@ export function DesktopHeader() {
               </SheetClose>
               <div className="h-full flex flex-col justify-between border-t-[1px] border-b-[1px] border-[#C9C9C950] py-0">
                 <div className="flex flex-col shrink-0 gap-0">
-                  <Link className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/">Home</Link>
+                  <LoadingLink className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/" onClick={() => setSheetOpen(false)}>Home</LoadingLink>
                   {/* <Link className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/more-products">Headphones</Link> */}
                   {/* <Link className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/our-story">Our story</Link> */}
-                  <Link className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/about-us">About Us</Link>
-                  <Link className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/contact-us">Contact Us</Link>
+                  <LoadingLink className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/about-us" onClick={() => setSheetOpen(false)}>About Us</LoadingLink>
+                  <LoadingLink className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/contact-us" onClick={() => setSheetOpen(false)}>Contact Us</LoadingLink>
                 </div>
               </div>
             </SheetContent>
@@ -128,9 +130,9 @@ export function DesktopHeader() {
 
         {/* Center: Logo */}
         <h3 className="text-2xl lg:text-3xl font-bold tracking-tight">
-          <Link href={`/`}><span className="text-gradient">Blend</span>
+          <LoadingLink href={`/`}><span className="text-gradient">Blend</span>
             <span className="text-foreground">Ras</span>
-          </Link>
+          </LoadingLink>
         </h3>
         {/* Right: Actions */}
         <div className="flex items-center md:gap-2 gap-0">
