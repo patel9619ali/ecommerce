@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useLoading } from "@/context/LoadingContext";
 interface MobileCheckoutBarProps {
   total: number;
   itemCount: number;
@@ -9,6 +10,11 @@ interface MobileCheckoutBarProps {
 const MobileCheckoutBar = ({ total, itemCount }: MobileCheckoutBarProps) => {
   if (itemCount === 0) return null;
   const router = useRouter();
+  const { setLoading } = useLoading();
+  const handleCheckout = () => {
+    setLoading(true); // 🔥 start global loader
+    router.push("/checkout");
+  };
   return (
     <motion.div
       initial={{ y: 100 }}
@@ -26,7 +32,7 @@ const MobileCheckoutBar = ({ total, itemCount }: MobileCheckoutBarProps) => {
               ₹{total.toFixed(2)}
             </p>
           </div>
-          <button onClick={() => router.push('/checkout')} 
+          <button onClick={handleCheckout}
             className="bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm rounded-xl px-6 h-12 shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex-shrink-0 flex items-center gap-1.5"
           >
             <Lock className="w-3.5 h-3.5" />

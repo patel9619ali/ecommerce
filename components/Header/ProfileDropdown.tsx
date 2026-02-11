@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import LoadingLink from "@/components/Loader/LoadingLink";
 import { Heart, User, Car } from "lucide-react";
 import LogoutButton from "../LogOutButton/LogoutButton";
 import Link from "next/link";
@@ -26,7 +26,7 @@ export default function ProfileDropdown({ user }: ProfileDropdownProps) {
           variant="ghost"
           className="flex items-center md:gap-2 gap-0 !cursor-pointer !pointer-events-auto pl-0"
         >
-          <div className="bg-[#053E54] text-white p-2 rounded-full !cursor-pointer !pointer-events-auto">
+          <div className="text-white bg-[linear-gradient(135deg,hsl(252,80%,60%),hsl(16,90%,58%))] shadow-[0_4px_12px_-2px_rgba(104,71,235,0.3)] p-2 rounded-full !cursor-pointer !pointer-events-auto">
             <User size={18} />
           </div>
 
@@ -51,9 +51,9 @@ export default function ProfileDropdown({ user }: ProfileDropdownProps) {
 
         {/* Links */}
         <DropdownMenuItem asChild>
-          <Link href="/user-profile/my-profile" className="text-[16px] font-semibold uppercase cursor-pointer flex gap-2 text-[#000]">
+          <LoadingLink href="/user-profile/my-profile" className="text-[16px] font-semibold uppercase cursor-pointer flex gap-2 text-[#000]">
             <User size={22} /> My Profile
-          </Link>
+          </LoadingLink>
         </DropdownMenuItem>
 <DropdownMenuSeparator className="bg-[#c9c9c9] -mx-1 my-1 h-px"/>
         {/* <DropdownMenuItem asChild>
@@ -63,9 +63,9 @@ export default function ProfileDropdown({ user }: ProfileDropdownProps) {
         </DropdownMenuItem> */}
 
         <DropdownMenuItem asChild>
-          <Link href="/wishlist" className="text-[16px] font-semibold uppercase cursor-pointer flex gap-2 text-[#000]">
+          <LoadingLink href="/wishlist" className="text-[16px] font-semibold uppercase cursor-pointer flex gap-2 text-[#000]">
             <Heart size={16} /> My Wishlist
-          </Link>
+          </LoadingLink>
         </DropdownMenuItem>
 <DropdownMenuSeparator className="bg-[#c9c9c9] -mx-1 my-1 h-px"/>
         <DropdownMenuSeparator />

@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { EmblaDots } from "./EmblaDots";
 import { Product } from '@/data/types'
-
+import LoadingLink from "../Loader/LoadingLink";
 const options: EmblaOptionsType = {
   loop: true,
 };
@@ -98,9 +98,9 @@ const MobileInformativeSlider = ({ className,productData }: Props) => {
                 />
               )}
 
-            <Link href={`${process.env.NEXT_PUBLIC_APP_URL}/products/${product?.slug}?variant=${variants[selectedIndex].sku}`} className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer" >
+            <LoadingLink href={`${process.env.NEXT_PUBLIC_APP_URL}/products/${product?.slug}?variant=${variants[selectedIndex].sku}`} className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer" >
               Shop Now
-            </Link>
+            </LoadingLink>
           </motion.div>
           )};
         </AnimatePresence>

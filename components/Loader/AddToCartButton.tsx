@@ -30,7 +30,7 @@ export const AddToCartButton = ({
       mrp: Number(variant.mrp),
       image: variant.images[0].url,
       quantity: 1,
-    });
+    }, true);
  // 2️⃣ Facebook Pixel tracking (safe)
     if (typeof window !== "undefined" && typeof window.fbq === "function") {
       window.fbq("track", "AddToCart", {

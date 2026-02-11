@@ -36,7 +36,7 @@ const BannerSection = ({ productData }: BannerSectionProps) => {
       mrp: Number(activeVariant.mrp), // ✅ number
       image: imageUrl, // ✅ string URL
       quantity: 1,
-    });
+    },true);
   };
 const discountPercent = (activeVariant.mrp && activeVariant.sellingPrice && activeVariant.mrp > 0) 
       ? Math.round(((activeVariant.mrp - activeVariant.sellingPrice) / activeVariant.mrp) * 100) 

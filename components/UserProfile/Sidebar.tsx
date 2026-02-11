@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { usePathname } from "next/navigation";
-
+import LoadingLink from "@/components/Loader/LoadingLink";
 export default function Sidebar() {
     const pathname = usePathname();
     return (
@@ -12,7 +12,7 @@ export default function Sidebar() {
                 {/* Profile Section */}
                 <h2 className="text-[#053E54] text-[19px] font-bold mb-2">Profile</h2>
 
-                <Link
+                <LoadingLink
                     href={`${process.env.NEXT_PUBLIC_APP_BASE_URL}user-profile/my-profile`}
                     className={`flex items-center gap-3 ${pathname === "/user-profile/my-profile" ? "bg-[#053E54] text-white border-[#053E54]" : "text-[#053e54] border-[#C9C9C9]"} px-4 py-3 rounded-[20px] mb-6 border`}
                 >
@@ -23,12 +23,12 @@ export default function Sidebar() {
                         </svg>
                     </div>
                     <span className="text-[16px] font-semibold uppercase whitespace-nowrap">My Profile</span>
-                </Link>
+                </LoadingLink>
 
                 <Card className="rounded-[20px] py-0 shadow-none border-[#C9C9C9]">
                     <CardContent className="p-0">
 
-                        <Link
+                        <LoadingLink
                             href={`${process.env.NEXT_PUBLIC_APP_BASE_URL}user-profile/my-wishlist`}
                             className={`flex items-center gap-3 ${pathname === "/user-profile/my-wishlist" ? "bg-[#053E54] text-white border-[#053E54] rounded-b-[20px]" : "text-[#053e54] border-[#C9C9C9]"} px-4 py-3 border-b last:border-none`}
                         >
@@ -38,7 +38,7 @@ export default function Sidebar() {
                                 </svg>
                             </div>
                             <span className="text-[16px] font-semibold uppercase whitespace-nowrap">My Wishlist</span>
-                        </Link>
+                        </LoadingLink>
                     </CardContent>
                 </Card>
             </aside>
@@ -98,7 +98,7 @@ export default function Sidebar() {
                             <span className="text-[14px] font-semibold uppercase whitespace-nowrap">My Bookings</span>
                         </Link> */}
 
-                        <Link
+                        <LoadingLink
                             href={`${process.env.NEXT_PUBLIC_APP_BASE_URL}user-profile/my-wishlist`}
                             className={`flex items-center gap-3 pt-3 first:pt-0 pb-3 last:pb-0 border-b last:border-none text-[#053e54]`}
                         >
@@ -108,7 +108,7 @@ export default function Sidebar() {
                                 </svg>
                             </div>
                             <span className="text-[14px] font-semibold uppercase whitespace-nowrap">My Wishlist</span>
-                        </Link>
+                        </LoadingLink>
                     </CardContent>
                 </Card>
             </div>

@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Button } from "../ui/button";
 import { BuyNow } from "../Loader/BuyNow";
+import { useLoading } from "@/context/LoadingContext";
 type Props = {
   product: Product;
   variant: Variant;
@@ -25,21 +26,22 @@ type Props = {
 export default function ProductEmiCartDescription({ product, variant,setVariantKey,setPreviewVariantKey,previewVariantKey }: Props) {
     const router = useRouter();
     const { addItem } = useCartStore();
+    const { setLoading } = useLoading();
     const [quantity, setQuantity] = useState(1);
     const handleAddToCart = () => {
      if (!product || !variant) return;
-
-  addItem({
-    id: `${product.slug}-${variant.key}`,
-    productId: product.id?.toString(),
-    slug: product.slug,
-    title: product.title,
-    price: Number(variant.sellingPrice),
-    mrp: Number(variant.mrp),
-    variantKey: variant.sku,
-    image: variant.images[0].url,
-    quantity,
-  });
+     setLoading(true); // 🔥 Start global loader
+      addItem({
+        id: `${product.slug}-${variant.key}`,
+        productId: product.id?.toString(),
+        slug: product.slug,
+        title: product.title,
+        price: Number(variant.sellingPrice),
+        mrp: Number(variant.mrp),
+        variantKey: variant.sku,
+        image: variant.images[0].url,
+        quantity,
+      });
 };
  
     const handleBuyNow = () => {

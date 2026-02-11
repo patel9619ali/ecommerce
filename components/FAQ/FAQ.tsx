@@ -170,7 +170,7 @@ export default function FAQ({ className = {}, count }: FAQProps) {
         <section className="bg-[#fff] py-10">
             <div className="container mx-auto">
                 <div className={`flex flex-col items-${className.alignMent} lg:gap-2 gap-2 flex-wrap lg:mb-4 mb-4`}>
-                    <h2 className={`text-center block w-full mb-1 text-[19px] sm:text-[37px] font-bold relative z-[2] font-bold lg:text-${className.alignMent} text-gradient`}>FAQs.</h2>
+                    <h2 className={`text-center block w-full mb-1 text-[19px] sm:text-[37px] font-bold relative z-[2] font-bold lg:text-center text-gradient`}>FAQs.</h2>
                       <p className="text-muted-foreground text-lg max-w-lg mx-auto">
                         Check out the common questions or doubts
                       </p>

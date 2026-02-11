@@ -15,7 +15,6 @@ import Reviews from "@/components/Reviews/Reviews";
 export default async function Home() {
   const products = await getProducts();
   const {data} = products;
-  console.log(data,"productDataproductDataproductDataproductData")
   return (
     <>
       <BannerSection productData={data}/>

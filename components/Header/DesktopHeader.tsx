@@ -117,8 +117,6 @@ export function DesktopHeader() {
               <div className="h-full flex flex-col justify-between border-t-[1px] border-b-[1px] border-[#C9C9C950] py-0">
                 <div className="flex flex-col shrink-0 gap-0">
                   <LoadingLink className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/" onClick={() => setSheetOpen(false)}>Home</LoadingLink>
-                  {/* <Link className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/more-products">Headphones</Link> */}
-                  {/* <Link className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/our-story">Our story</Link> */}
                   <LoadingLink className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/about-us" onClick={() => setSheetOpen(false)}>About Us</LoadingLink>
                   <LoadingLink className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/contact-us" onClick={() => setSheetOpen(false)}>Contact Us</LoadingLink>
                 </div>

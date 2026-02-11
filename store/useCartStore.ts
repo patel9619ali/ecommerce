@@ -25,7 +25,7 @@ type CartState = {
   openCart: () => void;
   closeCart: () => void;
 
-  addItem: (item: CartProduct) => void;
+  addItem: (item: CartProduct, openCart?: boolean) => void;
   removeItem: (productId: string, variantKey: string) => void;
   updateQuantity: (productId: string, variantKey: string, qty: number) => void;
 
@@ -50,7 +50,7 @@ export const useCartStore = create<CartState>()(
       openCart: () => set({ isCartOpen: true }),
       closeCart: () => set({ isCartOpen: false }),
 
-      addItem: (item) => {
+      addItem: (item, openCart = true) => {
         set((state) => {
           const existing = state.items.find(
             (i) =>
@@ -66,13 +66,13 @@ export const useCartStore = create<CartState>()(
                   ? { ...i, quantity: i.quantity + item.quantity }
                   : i
               ),
-              isCartOpen: true, // ✅ open sheet
+              isCartOpen: openCart, // ✅ open sheet
             };
           }
 
           return {
             items: [...state.items, { ...item, id: crypto.randomUUID() }],
-            isCartOpen: true, // ✅ open sheet
+            isCartOpen: openCart, // ✅ open sheet
           };
         });
 

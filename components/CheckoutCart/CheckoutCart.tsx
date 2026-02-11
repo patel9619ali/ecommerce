@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CartProduct } from "@/store/useCartStore"; // ✅ Import type
 import MobileCheckoutBar from "../Cart/MobileCheckoutBar";
-
+import { useLoading } from "@/context/LoadingContext";
 interface CheckoutCartProps {
   items: CartProduct[];
   total: number;
@@ -34,6 +34,7 @@ interface CheckoutCartProps {
 }
 
 const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps) => {
+  const { setLoading } = useLoading();
   const router = useRouter();
   console.log(totalProp,"totalProp");
   console.log(items,"items");
@@ -68,6 +69,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
 
   const handlePlaceOrder = async () => {
     try {
+      setLoading(true); // 🔥 START GLOBAL LOADER
       // Save address
       const addressRes = await fetch("/api/address", {
         method: "POST",
@@ -106,6 +108,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
       // Redirect to payment or confirmation
       router.push(`/order-confirmation/${order.id}`);
     } catch (error) {
+      setLoading(false); // ❗ stop loader if error
       console.error("Order creation failed:", error);
       alert("Failed to place order. Please try again.");
     }
@@ -478,10 +481,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
                   <span className="font-bold text-2xl text-[#21242c]">₹{total.toLocaleString()}</span>
                 </div>
 
-                <Button
-                  onClick={handlePlaceOrder}
-                  className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer"
-                >
+                <Button onClick={handlePlaceOrder} className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer" >
                   Pay ₹{total.toLocaleString()}
                 </Button>
 

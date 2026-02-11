@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { ShieldCheck, Truck, RotateCcw, ArrowRight, Gift, Tag } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import LoadingLink from "../Loader/LoadingLink";
+import { useLoading } from "@/context/LoadingContext";
 interface CartSummaryProps {
   subtotal: number;
   itemCount: number;
@@ -11,13 +13,17 @@ const FREE_SHIPPING_THRESHOLD = 500;
 
 const CartSummary = ({ subtotal, itemCount }: CartSummaryProps) => {
   const router = useRouter();
+  const { setLoading } = useLoading();
   const [promoCode, setPromoCode] = useState("");
   const shipping = subtotal > FREE_SHIPPING_THRESHOLD ? 0 : 15.0;
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
   const shippingProgress = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
   const amountToFreeShipping = FREE_SHIPPING_THRESHOLD - subtotal;
-
+  const handleCheckout = () => {
+    setLoading(true); // 🔥 start global loader
+    router.push("/checkout");
+  };
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -106,9 +112,7 @@ const CartSummary = ({ subtotal, itemCount }: CartSummaryProps) => {
       </div>
 
       {/* Checkout Button */}
-      <button onClick={() => router.push('/checkout')}
-        className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer"
-      >
+      <button onClick={handleCheckout} className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer">
         Checkout
         <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:translate-x-1" />
       </button>

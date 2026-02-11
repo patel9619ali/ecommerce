@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/useCartStore";
 import { Button } from "../ui/button";
 import { Variant } from "@/data/types";
-type CartState = "idle" | "loading" | "success";
+import { useLoading } from "@/context/LoadingContext";
 type Props = {
   productId: string;
   slug: string;
@@ -21,27 +21,33 @@ export const BuyNow = ({
   variant,
 }: Props) => {
   const addItem = useCartStore((s) => s.addItem);
-  const [state, setState] = useState<CartState>("idle");
+  const { setLoading } = useLoading(); // 🔥 global loader
   const router = useRouter();
-  const handleClick = () => {
-    addItem({
-      id: `${productId}-${variant?.sku}`,
-      productId,
-      slug,
-      title,
-      variantKey: variant?.sku,
-      price: variant?.sellingPrice,
-      mrp: variant?.mrp,
-      image: variant?.images[0]?.url,
-      quantity: 1,
-    });
-  }
-    const handleBuyNow = () => {
-        
-        router.push(
-            `/checkout`
-          );
-    };
+  const handleBuyNow = () => {
+    if (!variant) return;
+
+    // 🔥 Start global loader
+    setLoading(true);
+
+    // ✅ Add item WITHOUT opening cart sheet
+    addItem(
+      {
+        id: `${productId}-${variant.sku}`,
+        productId,
+        slug,
+        title,
+        variantKey: variant.sku,
+        price: Number(variant.sellingPrice),
+        mrp: Number(variant.mrp),
+        image: variant.images[0]?.url,
+        quantity: 1,
+      },
+      false // 👈 DO NOT open cart sheet
+    );
+
+    // ✅ Go directly to checkout
+    router.push("/checkout");
+  };
   return (
     <>
       <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} >
