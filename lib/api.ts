@@ -14,7 +14,7 @@ export async function getProducts() {
       Authorization: `Bearer ${process.env.NEXT_PUBLIC_CMS_TOKEN}`,
     },
     next: {
-      revalidate: parseInt(process.env.NEXT_PUBLIC_CACHE_DURATION || "0"),
+      revalidate: 3600,  // ✅ This works in Server Components
       tags: [CacheConstant.revalidateTag]
     }
   });
@@ -44,7 +44,7 @@ export async function getProductBySlug(slug: string) {
       Authorization: `Bearer ${process.env.NEXT_PUBLIC_CMS_TOKEN}`,
     },
     next: {
-      revalidate: parseInt(process.env.NEXT_PUBLIC_CACHE_DURATION || "0"),
+      revalidate: 3600,  // ✅ This works in Server Components
       tags: [CacheConstant.revalidateTag]
     }
   });
