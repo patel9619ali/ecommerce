@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import LoadingLink from "@/components/Loader/LoadingLink";
 import { useLoadingRouter } from "@/components/Loader/UseLoadingRouter";
+import { useWishlistStore } from "@/store/useWishListStore";
 import {
   Sheet,
   SheetClose,
@@ -55,7 +56,7 @@ export function DesktopHeader() {
   const router = useLoadingRouter();
   const pathName = usePathname();
   const user = useCurrentUser();
-
+  const loadWishlist = useWishlistStore((s) => s.loadFromDatabase);
   const isHomePage = pathName === '/';
   const [isMobile, setIsMobile] = useState(false);
   const [isFixed, setIsFixed] = useState(false);
@@ -106,6 +107,11 @@ export function DesktopHeader() {
       resetCart();          // 🔥 clear cart completely
     }
   }, [user?.id]);
+useEffect(() => {
+  if (user?.id) {
+    loadWishlist(user.id); // Load wishlist when user logs in
+  }
+}, [user?.id, loadWishlist]);
   return (
     <header className={cn(
       "w-full sticky top-0 z-50 bg-[#fff]"
@@ -196,7 +202,7 @@ export function DesktopHeader() {
             <Search className="h-5 w-5 dark:text-black" />
             <span className="sr-only">Search</span>
           </Button> */}
-          <LoadingLink href="/wishlist" className="rounded-lg hover:bg-[#f1f5f9] transition-colors relative" aria-label="Wishlist">
+          <LoadingLink href="/user-profile/wishlist" className="rounded-lg hover:bg-[#f1f5f9] transition-colors relative" aria-label="Wishlist">
             <Heart className="h-5 w-5" />
           </LoadingLink>
           <Button className="cursor-pointer relative" onClick={() => router.push('/cart')} variant="ghost" size="icon" disabled={items.length === 0}>

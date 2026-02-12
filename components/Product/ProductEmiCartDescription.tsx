@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "../ui/button";
 import { useLoading } from "@/context/LoadingContext";
+import { WishlistButton } from "../WishList/WishlistButton";
 type Props = {
   product: Product;
   variant: Variant;
@@ -182,9 +183,24 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
             <p className="text-xs text-black/60 flex items-center gap-1 text-[15px]">
               🔒 Secure transaction
             </p>
-            <Button variant="outline" size="icon" className="cursor-pointer h-8 w-8 border-1 !border-[#000]">
-              <Share2 className="h-5 w-5 text-[#000]" />
-            </Button>
+            <div className="flex justify-between">
+            <div className="flex gap-2">
+              <WishlistButton
+                productId={product.id?.toString()}
+                variantId={variant.sku}
+                slug={product.slug}
+                title={product.title}
+                price={variant.sellingPrice}
+                mrp={variant.mrp}
+                image={variant.images[0].url}
+                colorName={variant.colorName}
+                colorHex={variant.colorHex}
+              />
+              <Button variant="outline" size="icon" className="cursor-pointer h-8 w-8 border-1 !border-[#000]">
+                <Share2 className="h-5 w-5 text-[#000]" />
+              </Button>
+            </div>
+          </div>
           </div>
         </div>
 

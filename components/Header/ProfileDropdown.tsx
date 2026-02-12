@@ -75,7 +75,7 @@ export default function ProfileDropdown({ user }: ProfileDropdownProps) {
         {/* <DropdownMenuSeparator className="bg-[#c9c9c9] -mx-1 my-0 h-px"/> */}
 
         <DropdownMenuItem asChild className="py-3 cursor-pointer hover:bg-gray-100 ">
-          <LoadingLink href="/wishlist" className="flex items-center gap-3">
+          <LoadingLink href="/user-profile/wishlist" className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-[#f1f5f9] flex items-center justify-center">
                 <Heart className="h-4 w-4" style={{ color: 'hsl(330 80% 55%)' }} />
               </div>

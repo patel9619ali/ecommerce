@@ -26,9 +26,39 @@ model User {
   addresses     Address[]  // ✅ Added this line
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-
+  wishlists Wishlist[]
   isTwoFactorEnabled    Boolean                @default(false)
   twoFactorConfirmation TwoFactorConfirmation?
+}
+
+model Wishlist {
+  id        String         @id @default(cuid())
+  userId    String         @map("user_id")
+  items     WishlistItem[]
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+  @@map("wishlists")
+}
+
+model WishlistItem {
+  id         String   @id @default(cuid())
+  wishlistId String   @map("wishlist_id")
+  productId  String   @map("product_id")
+  variantId  String   @map("variant_id")
+  slug       String
+  title      String
+  price      Int
+  mrp        Int
+  image      String
+  colorName  String?  @map("color_name")
+  colorHex   String?  @map("color_hex")
+  addedAt    DateTime @default(now()) @map("added_at")
+
+  wishlist Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+
+  @@unique([wishlistId, productId, variantId])
+  @@map("wishlist_items")
 }
 
 model Account {

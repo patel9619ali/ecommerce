@@ -24,12 +24,9 @@ export function CardSwitch({
   return (
     <div
       className={`
-        relative flex items-start gap-3 rounded-md border p-4 shadow-sm transition-all duration-200
-        ${checked 
-          ? 'border-[#057C72] bg-[#C8FFFA]/30' 
-          : 'border-[#C9C9C9] bg-white'
-        }
-        ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:shadow-md'}
+        relative flex items-start gap-1 transition-all duration-200
+        
+        ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
       `}
       onClick={() => !disabled && onChange(!checked)}
     >
@@ -41,7 +38,7 @@ export function CardSwitch({
       )}
 
       {/* Content */}
-      <div className="flex grow items-center justify-between gap-4">
+      <div className="flex grow items-center justify-between gap-2">
         <div className="grid gap-1">
           <Label
             htmlFor={id}
@@ -69,7 +66,7 @@ export function CardSwitch({
             className={`
               pointer-events-none inline-block h-5 w-5 transform rounded-full
               bg-white shadow-lg ring-0 transition-transform duration-200 ease-in-out
-              ${checked ? '!translate-x-[calc(100%-10px)]' : 'translate-x-1'}
+              
             `}
           />
         </Switch>
