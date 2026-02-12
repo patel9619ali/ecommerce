@@ -230,7 +230,7 @@ body {
 }
 
 .custom-scroll::-webkit-scrollbar-thumb {
-  background-image: linear-gradient(325deg, #049cff 0%, #35ee7a 100%);
+  background-image: linear-gradient(135deg, rgb(104, 71, 235), rgb(244, 103, 52));
   border-radius: 20px;
 }
 

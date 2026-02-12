@@ -86,7 +86,7 @@ export default function NavSheetDrawer({
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 h-[90vh] overflow-y-scroll">
+          <nav className="flex-1 p-4 h-[90vh] overflow-y-scroll custom-scroll">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-3">Navigation</p>
             <ul className="space-y-0">
               {menuItems.map((item) => (
