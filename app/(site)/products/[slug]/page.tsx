@@ -10,7 +10,6 @@ type Props = {
 };
 
 export default async function ProductPage(props: Props) {
-  console.log(props,"propspropsprops")
   // ✅ Await params and searchParams
   const params = await props.params;
   const searchParams = await props.searchParams;
@@ -20,7 +19,6 @@ export default async function ProductPage(props: Props) {
 
   // ✅ Fetch on server with ISR caching
   const res = await getProductBySlug(slug);
-  console.log(res,"resres")
   const cmsProduct = res?.data?.[0];
 
   if (!cmsProduct) {
@@ -38,8 +36,9 @@ export default async function ProductPage(props: Props) {
     slug: cmsProduct.slug,
     variants: (cmsProduct.variant || []).map((v: any) => ({
       id: v.id,
-      key: v.sku,
+      key: v.sku, // ✅ Use sku consistently
       color: v.colorName,
+      colorHex: v.colorHex,
       sellingPrice: v.sellingPrice,
       mrp: v.mrp,
       images: v.images?.map((img: any) => ({
@@ -49,15 +48,26 @@ export default async function ProductPage(props: Props) {
     })),
   };
 
-  // Determine initial variant
-  const initialVariant = variantFromUrl || product.variants[0]?.key;
+  // ✅ Determine initial variant - use URL variant if valid, otherwise first variant
+  let initialVariant = product.variants[0]?.key;
+
+  if (variantFromUrl) {
+    const variantExists = product.variants.some((v: any) => v.key === variantFromUrl);
+    if (variantExists) {
+      initialVariant = variantFromUrl;
+    }
+    // If variant in URL doesn't exist, just use first variant (don't throw 404)
+  }
 
   return (
-    <ProductPageClient product={product}  initialVariant={initialVariant} />
+    <ProductPageClient 
+      product={product}  
+      initialVariant={initialVariant} 
+    />
   );
 }
 
-// ✅ Generate static params for popular products
+// ✅ Generate static params for popular products (optional)
 export async function generateStaticParams() {
   return [
     { slug: 'blend-ras-portable-juicer' },

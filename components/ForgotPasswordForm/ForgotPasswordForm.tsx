@@ -10,6 +10,7 @@ import { FormError } from "../auth/FormError";
 import { FormSuccess } from "../auth/FormSuccess";
 import { forgotPassword } from "@/actions/forgot-password";
 import { useForm } from "react-hook-form";
+import LoadingLink from "../Loader/LoadingLink";
 
 type FormValues = {
   email: string;
@@ -90,7 +91,7 @@ export const ForgotPasswordForm = () => {
                     setSuccess(undefined);
                     setEmail("");
                   }}
-                  className="cursor-pointer font-medium text-[#000000] hover:text-[#000000] hover:underline"
+                  className={`cursor-pointer font-medium text-[#000000] hover:text-[#000000] hover:underline`}
                 >
                   Try again
                 </button>
@@ -102,13 +103,14 @@ export const ForgotPasswordForm = () => {
             <Button
               type="button"
               variant="ghost"
-              className="w-full text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#020817]"
+              className={`${isPending ?"opacity-50 pointer-events-none":"" } w-full text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#020817]`}
               asChild
+              disabled={isPending}
             >
-              <a href="/sign-in">
+              <LoadingLink href="/sign-in">
                 
                 Back to Login
-              </a>
+              </LoadingLink>
             </Button>
           </div>
         </form>

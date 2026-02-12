@@ -13,6 +13,7 @@ import { FormError } from "@/components/auth/FormError";
 import { Eye, EyeOff,UserPlus } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator/PasswordStrengthIndicator";
+import LoadingLink from "@/components/Loader/LoadingLink";
 
 type SignUpFormValues = {
   name: string;
@@ -171,9 +172,9 @@ export default function SignUpPage() {
 
         <p className="text-sm text-center text-[#64748b] mt-4">
           Already have account?{" "}
-          <a href="/sign-in" className="text-[#254fda] hover:underline font-medium">
+          <LoadingLink href="/sign-in" className={`${isPending ?"opacity-50 pointer-events-none":"" } text-[#254fda] hover:underline font-medium`}>
             Login
-          </a>
+          </LoadingLink>
         </p>
       </div>
     </div>

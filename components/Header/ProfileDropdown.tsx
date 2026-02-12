@@ -23,9 +23,9 @@ export default function ProfileDropdown({ user }: ProfileDropdownProps) {
     <DropdownMenu>
       {/* Trigger */}
       <DropdownMenuTrigger asChild className="!cursor-pointer">
-        <Button variant="ghost" className="flex items-center md:gap-2 gap-0 !cursor-pointer !pointer-events-auto pl-0" >
-          <div className="text-white bg-[linear-gradient(135deg,hsl(252,80%,60%),hsl(16,90%,58%))] shadow-[0_4px_12px_-2px_rgba(104,71,235,0.3)] p-2 rounded-full !cursor-pointer !pointer-events-auto">
-            <User size={18} />
+        <Button variant="ghost" className="flex items-center md:gap-1 gap-0 !cursor-pointer !pointer-events-auto pl-0" >
+          <div className="text-white bg-[linear-gradient(135deg,hsl(252,80%,60%),hsl(16,90%,58%))] shadow-[0_4px_12px_-2px_rgba(104,71,235,0.3)] p-2 rounded-full !cursor-pointer !pointer-events-auto mb-1">
+            <User size={10} />
           </div>
 
           <span className="pl-1 font-semibold text-sm text-[#000] !cursor-pointer !pointer-events-auto">

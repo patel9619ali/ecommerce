@@ -3,7 +3,7 @@
 import { useCartStore } from "@/store/useCartStore";
 import { useState, useEffect } from "react"
 
-import { ChevronRight, Globe, Search, ShoppingCart, User, X } from "lucide-react";
+import { ChevronRight, Globe, Heart, Search, ShoppingCart, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -192,14 +192,17 @@ export function DesktopHeader() {
         </h3>
         {/* Right: Actions */}
         <div className="flex items-center md:gap-2 gap-0">
-          <Button variant="ghost" size="icon" className="cursor-pointer transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:bg-transparent">
+          {/* <Button variant="ghost" size="icon" className="cursor-pointer transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:bg-transparent">
             <Search className="h-5 w-5 dark:text-black" />
             <span className="sr-only">Search</span>
-          </Button>
+          </Button> */}
+          <LoadingLink href="/wishlist" className="rounded-lg hover:bg-[#f1f5f9] transition-colors relative" aria-label="Wishlist">
+            <Heart className="h-5 w-5" />
+          </LoadingLink>
           <Button className="cursor-pointer relative" onClick={() => router.push('/cart')} variant="ghost" size="icon" disabled={items.length === 0}>
             <ShoppingCart className="h-5 w-5 dark:text-black" />
             {items.length > 0 && (
-              <span className="absolute -top-2.5 -right-2.5 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold text-white bg-[linear-gradient(135deg,hsl(252,80%,60%),hsl(16,90%,58%))] shadow-[0_4px_12px_-2px_rgba(104,71,235,0.3)]">
+              <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full p-0 flex items-center justify-center rounded-full text-[10px] font-bold text-white bg-[linear-gradient(135deg,hsl(252,80%,60%),hsl(16,90%,58%))] shadow-[0_4px_12px_-2px_rgba(104,71,235,0.3)]">
                 {items.length}
               </span>
             )}

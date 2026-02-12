@@ -16,6 +16,7 @@ import { Eye, EyeOff, User } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Checkbox } from "../ui/checkbox";
 import { useLoading } from "@/context/LoadingContext";
+import LoadingLink from "../Loader/LoadingLink";
 type FormValues = {
   email: string;
   password: string;
@@ -226,9 +227,9 @@ export default function SignIn() {
                   </label>
                 </div>
                 {!showTwoFactor && (
-                  <a href="/forgot-password" className="text-sm text-[#254fda] hover:underline" >
+                  <LoadingLink href="/forgot-password" className="text-sm text-[#254fda] hover:underline" >
                     Forgot password?
-                  </a>
+                  </LoadingLink>
                 )}
               </div>
               
@@ -273,9 +274,9 @@ export default function SignIn() {
             </div>
             <p className="text-sm text-center text-[#64748b] mt-6">
               Don't have account?{" "}
-              <a href="/sign-up" className={`${isPending ?"opacity-50 pointer-events-none":"" } text-[#254fda] hover:underline font-medium`}>
+              <LoadingLink href="/sign-up" className={`${isPending ?"opacity-50 pointer-events-none":"" } text-[#254fda] hover:underline font-medium`}>
                 Sign up
-              </a>
+              </LoadingLink>
             </p>
           </>
         )}
