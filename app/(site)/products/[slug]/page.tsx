@@ -10,6 +10,7 @@ type Props = {
 };
 
 export default async function ProductPage(props: Props) {
+  console.log(props,"propspropsprops")
   // ✅ Await params and searchParams
   const params = await props.params;
   const searchParams = await props.searchParams;
@@ -19,6 +20,7 @@ export default async function ProductPage(props: Props) {
 
   // ✅ Fetch on server with ISR caching
   const res = await getProductBySlug(slug);
+  console.log(res,"resres")
   const cmsProduct = res?.data?.[0];
 
   if (!cmsProduct) {
@@ -51,10 +53,7 @@ export default async function ProductPage(props: Props) {
   const initialVariant = variantFromUrl || product.variants[0]?.key;
 
   return (
-    <ProductPageClient
-      product={product} 
-      initialVariant={initialVariant}
-    />
+    <ProductPageClient product={product}  initialVariant={initialVariant} />
   );
 }
 

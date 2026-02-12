@@ -33,7 +33,7 @@ const HamBurger = (
 );
 const menuItems = [
   { label: "Home", href: "/", icon: "🏠" },
-  { label: "Shop", href: "/product/blendras-portable-juicer", icon: "🛍️" },
+  { label: "Shop", href: "/product/blend-ras-portable-juicer", icon: "🛍️" },
   { label: "About Us", href: "#", icon: "ℹ️" },
   { label: "How It Works", href: "#", icon: "⚡" },
   { label: "FAQs", href: "#", icon: "❓" },

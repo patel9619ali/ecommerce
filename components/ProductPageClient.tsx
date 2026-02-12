@@ -44,13 +44,7 @@ export default function ProductPageClient({
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_2fr] gap-4 lg:gap-8 relative">
           <ProductImage variant={activeVariant} product={product} />
 
-          <ProductEmiCartDescription 
-            variant={selectedVariant} 
-            product={product} 
-            setVariantKey={handleVariantChange} 
-            setPreviewVariantKey={setPreviewVariantKey} 
-            previewVariantKey={previewVariantKey} 
-          />
+          <ProductEmiCartDescription variant={selectedVariant} product={product} setVariantKey={handleVariantChange} setPreviewVariantKey={setPreviewVariantKey} previewVariantKey={previewVariantKey} />
         </div>
       </div>
     </section>
