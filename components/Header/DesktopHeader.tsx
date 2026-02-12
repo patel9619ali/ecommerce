@@ -3,7 +3,7 @@
 import { useCartStore } from "@/store/useCartStore";
 import { useState, useEffect } from "react"
 
-import { Search, ShoppingCart, User, X } from "lucide-react";
+import { ChevronRight, Globe, Search, ShoppingCart, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -31,7 +31,21 @@ const HamBurger = (
     <path d="M1.25 14.4492H15.0134" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
+const menuItems = [
+  { label: "Home", href: "/", icon: "🏠" },
+  { label: "Shop", href: "/product/blendras-portable-juicer", icon: "🛍️" },
+  { label: "About Us", href: "#", icon: "ℹ️" },
+  { label: "How It Works", href: "#", icon: "⚡" },
+  { label: "FAQs", href: "#", icon: "❓" },
+  { label: "Contact Us", href: "#", icon: "📧" },
+];
 
+const quickLinks = [
+  { label: "Track Order", icon: "📦" },
+  { label: "Warranty & Support", icon: "🛡️" },
+  { label: "Shipping Policy", icon: "🚚" },
+  { label: "Return Policy", icon: "↩️" },
+];
 export function DesktopHeader() {
   const items = useCartStore((state) => state.items);
   const { openCart } = useCartStore();
@@ -108,17 +122,61 @@ export function DesktopHeader() {
             </SheetTrigger>
             <SheetTitle className="hidden">Menu</SheetTitle>
             
-            <SheetContent side="left" className="menu-sheet-hide-close w-[300px] bg-[#fff] text-[#000] border-white/10 duration-500 ease-out">
-              <SheetClose asChild>
-                <button className="cursor-pointer relative text-[#000] opacity-70 hover:opacity-100">
-                  <X fill="#fff40" size={30} className="bg-[#fff] rounded-full p-1"/>
-                </button>
-              </SheetClose>
+            <SheetContent side="left" className="menu-sheet-hide-close w-[300px] h-[100vh] bg-[#fff] text-[#000] border-white/10 duration-500 ease-out px-0 pt-0">
               <div className="h-full flex flex-col justify-between border-t-[1px] border-b-[1px] border-[#C9C9C950] py-0">
-                <div className="flex flex-col shrink-0 gap-0">
-                  <LoadingLink className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/" onClick={() => setSheetOpen(false)}>Home</LoadingLink>
-                  <LoadingLink className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/about-us" onClick={() => setSheetOpen(false)}>About Us</LoadingLink>
-                  <LoadingLink className="text-[18px] font-[600] last:pb-0 pb-4 border-b-[1px] border-[#C9C9C950] last:border-0 pt-4 pb-0" href="/contact-us" onClick={() => setSheetOpen(false)}>Contact Us</LoadingLink>
+                <div className="flex flex-col h-full">
+                    {/* Menu Header */}
+                    <div className="p-6 bg-[linear-gradient(135deg,hsl(252,80%,60%),hsl(16,90%,58%))]">
+                    <SheetClose asChild>
+                      <button className="px-3 cursor-pointer text-[#000] opacity-70 hover:opacity-100 !absolute right-[0]">
+                        <X fill="#fff40" size={30} className="bg-[#fff] rounded-full p-1"/>
+                      </button>
+                    </SheetClose>
+                      <h2 className="text-xl font-bold text-white">Blend<span className="opacity-80">Ras</span></h2>
+                      <p className="text-white/70 text-sm mt-1">Blend Fresh, Live Healthy</p>
+                    </div>
+
+                    {/* Navigation */}
+                    <nav className="flex-1 p-4 h-[90vh] overflow-y-scroll">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-3">Navigation</p>
+                      <ul className="space-y-0">
+                        {menuItems.map((item) => (
+                          <li key={item.label}>
+                            <LoadingLink
+                              href={item.href}
+                              onClick={() => setSheetOpen(false)}
+                              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted transition-colors group"
+                            >
+                              <span className="text-lg">{item.icon}</span>
+                              <span className="font-medium">{item.label}</span>
+                              <ChevronRight className="h-4 w-4 ml-auto text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </LoadingLink>
+                          </li>
+                        ))}
+                      </ul>
+
+                      <div className="my-4 border-t" />
+
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-3">Quick Links</p>
+                      <ul className="space-y-1">
+                        {quickLinks.map((item) => (
+                          <li key={item.label}>
+                            <button className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors w-full text-left">
+                              <span className="text-base">{item.icon}</span>
+                              <span className="text-sm text-muted-foreground">{item.label}</span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>             
+                    </nav>
+
+                    {/* Menu Footer */}
+                    {/* <div className="p-4 border-t">
+                      <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted">
+                        <Globe className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">Indian (INR ₹)</span>
+                    </div>
+                  </div> */}
                 </div>
               </div>
             </SheetContent>

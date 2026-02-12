@@ -12,6 +12,7 @@ import ProductSpecs from "@/components/ProductSpecs/ProductSpecs";
 import Features from "@/components/Features/Features";
 import HowItWorks from "@/components/HowItWorks/HowItWorks";
 import Reviews from "@/components/Reviews/Reviews";
+import DirectProductPageLinking from "@/components/DirectProductPageLinking";
 export default async function Home() {
   const products = await getProducts();
   const {data} = products;
@@ -26,6 +27,7 @@ export default async function Home() {
       <Features/>
       <HowItWorks/>
       <ProductSpecs/>
+      <DirectProductPageLinking/>
       <WhyChooseUsHoverImage className={`hidden md:block`}/>
       <WhyChooseUsMobileHoverImage className={`block md:hidden`}/>
       <Reviews/>
