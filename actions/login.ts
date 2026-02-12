@@ -28,10 +28,16 @@ export async function login(values: unknown): Promise<AuthResponse> {
     return { error: "Invalid email or password" };
   }
   
+  // ✅ Check if email is verified
   if (!existingUser.emailVerified) {
+    // ✅ Resend OTP and ask them to verify
     const otp = await generateEmailVerificationOtp(existingUser.email);
     await sendEmailVerificationOtp(otp.email, otp.token);
-    return { verifyEmailOtp: true };
+    
+    return { 
+      error: "Email not verified. Please check your email for verification code.",
+      verifyEmailOtp: true 
+    };
   }
   
   if (existingUser.isTwoFactorEnabled && existingUser.email) {
