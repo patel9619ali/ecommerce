@@ -15,7 +15,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Eye, EyeOff, User } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Checkbox } from "../ui/checkbox";
-
+import { useLoading } from "@/context/LoadingContext";
 type FormValues = {
   email: string;
   password: string;
@@ -25,18 +25,19 @@ type FormValues = {
 export default function SignIn() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { setLoading } = useLoading();
 
   useEffect(() => {
     const oauthError = searchParams.get("error");
-
     if (oauthError === "OAuthAccountNotLinked") {
       setError(
         "You have already signed in using a different provider. Please use the same sign-in method as before."
       );
     }
   }, [searchParams]);
-
+  
   const onClick = (provider: "google") => {
+    setLoading(true);
     signIn(provider, { 
       callbackUrl: DEFAULT_REDIRECT_PAGE 
     });
@@ -66,13 +67,11 @@ export default function SignIn() {
             setError(res.error);
           }
           if (res?.success) {
+            setLoading(true);
             reset();
             setSuccess(res.success);
-            
             // Redirect and force a full page refresh to update session
-            setTimeout(() => {
-              window.location.href = DEFAULT_REDIRECT_PAGE;
-            }, 1000);
+            window.location.href = DEFAULT_REDIRECT_PAGE;
           }
           if (res?.twoFactor) {
             setShowTwoFactor(true);
@@ -97,11 +96,9 @@ export default function SignIn() {
         }
 
         if (res?.success) {
+          setLoading(true);
           setSuccess(res.success);
-
-          setTimeout(() => {
-            window.location.href = DEFAULT_REDIRECT_PAGE;
-          }, 1000);
+          window.location.href = DEFAULT_REDIRECT_PAGE;
         }
       })
       .catch(() => setError("Something went wrong"));
@@ -252,11 +249,7 @@ export default function SignIn() {
               <div className="flex-1 h-px bg-gray-300" />
             </div>
             <div className="space-y-3">
-              <Button
-                variant="outline"
-                className="cursor-pointer text-[#020817] w-full h-11"
-                onClick={() => onClick("google")}
-              >
+              <Button disabled={isPending} variant="outline" className="cursor-pointer text-[#020817] w-full h-11" onClick={() => onClick("google")} >
                 <svg className="h-5 w-5 mr-1" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
@@ -280,7 +273,7 @@ export default function SignIn() {
             </div>
             <p className="text-sm text-center text-[#64748b] mt-6">
               Don't have account?{" "}
-              <a href="/sign-up" className="text-[#254fda] hover:underline font-medium">
+              <a href="/sign-up" className={`${isPending ?"opacity-50 pointer-events-none":"" } text-[#254fda] hover:underline font-medium`}>
                 Sign up
               </a>
             </p>
