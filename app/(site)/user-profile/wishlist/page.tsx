@@ -12,12 +12,16 @@ import { useCartStore } from "@/store/useCartStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/UserProfile/Sidebar";
+import { BreadcrumbWithCustomSeparator } from "@/components/Breadcrumb/Breadcrumb";
 
 const sidebarItems = [
   { label: "My Profile", icon: User, href: "/user-profile/profile", active: false },
   { label: "My Wishlist", icon: Heart, href: "/user-profile/wishlist", active: true },
 ];
-
+const breadcrumbItems: any[] = [
+    { label: 'Home', href: '/' },
+    { label: 'My WishList' },
+]
 export default function WishlistPage() {
   const router = useRouter();
   const user = useCurrentUser();
@@ -53,18 +57,13 @@ export default function WishlistPage() {
   };
 
   if (!user) return null;
-
+  console.log(items,"items")
   return (
     <section className="bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] min-h-screen">
       <div className="container px-4 py-6">
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <LoadingLink href="/" className="hover:text-foreground transition-colors flex items-center gap-1">
-            <ChevronLeft className="h-4 w-4" /> HOME
-          </LoadingLink>
-          <span className="text-foreground font-medium">MY WISHLIST</span>
-        </nav>
+        <BreadcrumbWithCustomSeparator items={breadcrumbItems} />
 
-        <div className="grid md:grid-cols-[1fr_3fr] grid-cols-1 xl:gap-6 lg:gap-4 md:gap-5">
+        <div className="grid md:grid-cols-[1fr_3fr] grid-cols-1 xl:gap-6 lg:gap-4 md:gap-5 sm:order-1 order-2">
             <Sidebar/>
           {/* Wishlist Content */}
           <div>

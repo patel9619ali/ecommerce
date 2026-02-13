@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { CardSwitch } from './CardSwitch';
 import { AvatarFallback,Avatar } from "@/components/ui/avatar";
-import { Pencil, Shield } from 'lucide-react';
+import { LogOut, Pencil, Shield } from 'lucide-react';
 type ProfileDetailsCardProps = {
     setOpenChangeName: (open: boolean) => void;
     setOpenChangeEmail: (open: boolean) => void;
@@ -52,7 +52,7 @@ export default function ProfileDetailsCard({ setOpenChangeName, setOpenChangeEma
                 <div className="flex items-center justify-between flex-col sm:flex-row  gap-4">
                     <div className="flex items-center justify-between text-[#053E54] sm:w-auto w-full">
                         <div>
-                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mr-5">
+                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mr-5 sm:mb-0 mb-4">
                                 <div className="flex items-center gap-4">
                                     <Avatar className="h-16 w-16 border-2" style={{ borderColor: '#8c3cdd' }}>
                                         <AvatarFallback className="bg-[linear-gradient(135deg,hsl(252,80%,60%),hsl(16,90%,58%))] shadow-[0_4px_12px_-2px_rgba(104,71,235,0.3)] text-white text-xl font-bold">{user?.name?.slice(0,1)}</AvatarFallback>
@@ -60,25 +60,24 @@ export default function ProfileDetailsCard({ setOpenChangeName, setOpenChangeEma
                                 </div>
                             </div>
 
-                            <button onClick={handleLogout} className="sm:hidden flex items-center sm:gap-4 gap-2 cursor-pointer ring-0 focus-visible:outline-none">
-                                <div className="flex items-center justify-center text-[#053E54] w-8 h-8 rounded-[10px] bg-[#C8FFFA]">
-                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M2.8 0C1.2536 0 0 1.2536 0 2.8V6.3H7.41006L5.80503 4.69498C5.53168 4.42161 5.53168 3.97839 5.80503 3.70502C6.07838 3.43166 6.52162 3.43166 6.79497 3.70502L9.59448 6.50454L9.59952 6.50965C9.66441 6.57566 9.71348 6.6514 9.74687 6.73204C9.78089 6.81401 9.79972 6.90375 9.8 6.9979V7V7.0021C9.79944 7.19222 9.72307 7.36456 9.59952 7.49035L9.59448 7.49546L6.79497 10.295C6.52162 10.5683 6.07838 10.5683 5.80503 10.295C5.53168 10.0216 5.53168 9.57838 5.80503 9.30503L7.41006 7.7H0V11.2C0 12.7464 1.2536 14 2.8 14H11.2C12.7464 14 14 12.7464 14 11.2V2.8C14 1.2536 12.7464 0 11.2 0H2.8Z" fill="#053E54" />
-                                    </svg>
-                                </div>
-                                <span className="sm:text-md text-[12px] text-[#053E54] font-semibold uppercase">Logout</span>
+                          
+                            <button onClick={handleLogout} className="flex items-center sm:hidden  cursor-pointer ring-0 focus-visible:outline-none rounded-[8px] gap-1 border-0 shadow-sm border-[#ef4444] bg-[#ef4444] px-3 py-2 hover:bg-[#ef4444e6]">
+                                <LogOut className="h-4 w-4 text-[#f8fafc]" />
+                                <span className="text-[10px] text-[#f8fafc] font-semibold uppercase">Logout</span>
                             </button>
+
+
                         </div>
                             <div>
-                                <h2 className="sm:text-[23px] text-[14px] font-bold text-[#000] capitalize"> {user?.name} </h2>
-                                <p className="sm:text-[16px] text-[12px] font-medium text-[#64748b] capitalize">Individual Account</p>
-                                <div className='flex gap-2 items-center mt-2'>
+                                <h2 className="sm:text-[23px] text-[16px] font-bold text-[#000] capitalize"> {user?.name} </h2>
+                                <p className="sm:text-[16px] text-[16px] font-medium text-[#64748b] capitalize">Individual Account</p>
+                                <div className='flex gap-2 items-center sm:mt-2 mt-5'>
                                     <Shield className="h-4 w-4 text-[#64748b]" />
                                     <CardSwitch id={id} label="2FA" checked={user?.isTwoFactorEnabled || false} disabled={isPending} onChange={handleTwoFactorToggle} />
                                 </div>
                             </div>
                         </div>
-                        <button onClick={() => setOpenChangeName(true)} className="flex items-center gap-2 sm:border sm:px-3 sm:py-2 p-0 text-[#000] cursor-pointer ring-0 focus-visible:outline-none ring-offset-[#fafafa] text-[12px] hover:bg-[#e8308c] hover:text-[#fff] transition-colors md:border-[#e2e8f0] rounded-[12px]">
+                        <button onClick={() => setOpenChangeName(true)} className="flex items-center gap-2 sm:border sm:px-3 sm:py-2 text-[#000] cursor-pointer ring-0 focus-visible:outline-none ring-offset-[#fafafa] text-[12px] hover:bg-[#e8308c] hover:text-[#fff] transition-colors md:border-[#e2e8f0] rounded-[12px] bg-[#fafafa] border-[#e2e8f0] sm:w-[150px] w-full p-3 justify-center">
                             <Pencil className="h-4 w-4 hover:text-[#fff]" /> 
                             <span className="sm:text-[12px] text-[12px] font-semibold uppercase  hover:text-[#fff]">Edit Profile</span>
                         </button>

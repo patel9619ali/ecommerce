@@ -185,17 +185,7 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
             </p>
             <div className="flex justify-between">
             <div className="flex gap-2">
-              <WishlistButton
-                productId={product.id?.toString()}
-                variantId={variant.sku}
-                slug={product.slug}
-                title={product.title}
-                price={variant.sellingPrice}
-                mrp={variant.mrp}
-                image={variant.images[0].url}
-                colorName={variant.colorName}
-                colorHex={variant.colorHex}
-              />
+              <WishlistButton productId={product.id?.toString()} variantId={variant.sku} slug={product.slug} title={product.title} price={variant.sellingPrice} mrp={variant.mrp} image={variant.images[0].url} colorName={variant.colorName} colorHex={variant.colorHex} />
               <Button variant="outline" size="icon" className="cursor-pointer h-8 w-8 border-1 !border-[#000]">
                 <Share2 className="h-5 w-5 text-[#000]" />
               </Button>

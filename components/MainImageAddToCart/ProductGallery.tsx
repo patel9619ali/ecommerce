@@ -19,6 +19,7 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
+import { WishlistButton } from "../WishList/WishlistButton";
 
 type Props = {
   variant: any;
@@ -141,6 +142,9 @@ export const ProductGallery = ({ variant }: Props) => {
           >
             <ChevronRight className="text-white" />
           </div>
+        </div>
+        <div className="absolute top-0 right-0">
+          <WishlistButton productId={variant.id?.toString()} variantId={variant.sku} slug={variant.slug} title={variant.title} price={variant.sellingPrice} mrp={variant.mrp} image={variant.images[0].url} colorName={variant.colorName} colorHex={variant.colorHex} />
         </div>
 
         {/* MOBILE ZOOM ICON */}
