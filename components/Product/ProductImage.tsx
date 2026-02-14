@@ -100,10 +100,7 @@ export default function ProductImage({ product, variant }: Props) {
       {/* ================= MAIN IMAGE ================= */}
       {isMobile ? (
         <div className="order-1">
-          <ImageHoverZoom
-            src={`${process.env.NEXT_PUBLIC_CMS_URL}${activeImage}`}
-            alt={`${product.title} - ${variant.id}`}
-          />
+          <ImageHoverZoom product={product} variant={variant} src={`${process.env.NEXT_PUBLIC_CMS_URL}${activeImage}`} alt={`${product.title} - ${variant.id}`} />
         </div>
       ) : (
         <AnimatePresence mode="wait">
@@ -115,10 +112,7 @@ export default function ProductImage({ product, variant }: Props) {
             transition={{ duration: 0.25 }}
             className="lg:order-2 order-1"
           >
-            <ImageHoverZoom
-              src={`${process.env.NEXT_PUBLIC_CMS_URL}${variant.images[activeIndex].url}`}
-              alt={`${product.title} - ${variant.id}`}
-            />
+            <ImageHoverZoom product={product} variant={variant} src={`${process.env.NEXT_PUBLIC_CMS_URL}${variant.images[activeIndex].url}`} alt={`${product.title} - ${variant.id}`} />
           </motion.div>
         </AnimatePresence>
       )}
@@ -133,34 +127,34 @@ export default function ProductImage({ product, variant }: Props) {
                   </DialogClose>
           </DialogHeader>
 
-<div className="grid grid-cols-4 gap-3 px-4 py-4 overflow-y-auto">
-{variant.images
-  .filter((img) => img?.url)
-  .map((img, index) => (
-<button
-key={`dialog-thumb-${index}`}
-onClick={() => {
-  setActiveIndex(index);
-  setThumbDialogOpen(false);
-}}
-className={`relative aspect-square rounded-md overflow-hidden border
-  ${
-    activeIndex === index
-      ? "border-white"
-      : "border-white/30"
-  }`}
->
-<Image
-  src={`${process.env.NEXT_PUBLIC_CMS_URL}${img.url}`}
-  alt={`${variant.id} thumbnail`}
-  fill
-  sizes="25vw"
-  className="object-cover"
-/>
-</button>
-))}
-</div>
-</DialogContent>
+          <div className="grid grid-cols-4 gap-3 px-4 py-4 overflow-y-auto">
+          {variant.images
+            .filter((img) => img?.url)
+            .map((img, index) => (
+          <button
+          key={`dialog-thumb-${index}`}
+          onClick={() => {
+            setActiveIndex(index);
+            setThumbDialogOpen(false);
+          }}
+          className={`relative aspect-square rounded-md overflow-hidden border
+            ${
+              activeIndex === index
+                ? "border-white"
+                : "border-white/30"
+            }`}
+          >
+          <Image
+            src={`${process.env.NEXT_PUBLIC_CMS_URL}${img.url}`}
+            alt={`${variant.id} thumbnail`}
+            fill
+            sizes="25vw"
+            className="object-cover"
+          />
+          </button>
+          ))}
+          </div>
+        </DialogContent>
       </Dialog>
 
     </div>

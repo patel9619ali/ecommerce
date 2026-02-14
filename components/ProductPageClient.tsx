@@ -33,7 +33,7 @@ export default function ProductPageClient({
   const urlVariant = searchParams.get("variant");
   
   // ✅ Use URL as source of truth, fallback to initialVariant
-  const variantKey = urlVariant || initialVariant || product.variants[0]?.key;
+  const variantKey = urlVariant || initialVariant || product.variants[0]?.sku;
   const [previewVariantKey, setPreviewVariantKey] = useState<string | null>(null);
 
   // ✅ Handle variant changes - only update URL
@@ -44,11 +44,11 @@ export default function ProductPageClient({
   // Active variant logic
   const activeVariant =
     product.variants.find(
-      (v: any) => v.key === (previewVariantKey ?? variantKey)
+      (v: any) => v.sku === (previewVariantKey ?? variantKey)
     ) ?? product.variants[0];
 
   const selectedVariant =
-    product.variants?.find((v: any) => v.key === variantKey) ||
+    product.variants?.find((v: any) => v.sku === variantKey) ||
     product.variants?.[0];
 
   return (

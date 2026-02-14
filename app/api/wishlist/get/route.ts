@@ -10,8 +10,11 @@ export async function GET() {
       return NextResponse.json({ wishlist: null });
     }
 
+    // ✅ TypeScript now knows userId is a string
+    const userId = session.user.id;
+
     const wishlist = await db.wishlist.findUnique({
-      where: { userId: session.user.id },
+      where: { userId },
       include: {
         items: true,
       },

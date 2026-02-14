@@ -36,11 +36,12 @@ export default async function ProductPage(props: Props) {
     slug: cmsProduct.slug,
     variants: (cmsProduct.variant || []).map((v: any) => ({
       id: v.id,
-      key: v.sku, // ✅ Use sku consistently
-      color: v.colorName,
+      sku: v.sku,           // ✅ Changed from "key"
+      color: v.colorName,   // ✅ Normalize to "color"
       colorHex: v.colorHex,
       sellingPrice: v.sellingPrice,
       mrp: v.mrp,
+      stock: v.stock,       // ✅ Added stock
       images: v.images?.map((img: any) => ({
         url: img.url,
       })) || [],
@@ -48,11 +49,11 @@ export default async function ProductPage(props: Props) {
     })),
   };
 
-  // ✅ Determine initial variant - use URL variant if valid, otherwise first variant
-  let initialVariant = product.variants[0]?.key;
+  // Initial variant
+  let initialVariant = product?.variants[0]?.sku;  // ✅ Changed from .key
 
   if (variantFromUrl) {
-    const variantExists = product.variants.some((v: any) => v.key === variantFromUrl);
+    const variantExists = product.variants.some((v: any) => v.sku === variantFromUrl);
     if (variantExists) {
       initialVariant = variantFromUrl;
     }

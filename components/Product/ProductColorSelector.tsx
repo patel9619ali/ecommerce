@@ -31,15 +31,15 @@ export function ProductColorSelector({
     <div className="flex gap-3 pb-2 w-max" onMouseLeave={onLeave}>
       {product?.variants.map((variantItem) => (
         <button
-          key={variantItem.key}
-          onMouseEnter={() => onHover(variantItem.key)}
+          key={variantItem.sku}
+          onMouseEnter={() => onHover(variantItem.sku)}
           
           onClick={() => {
-            onSelect(variantItem.key);
+            onSelect(variantItem.sku);
           }}
           className={`rounded-lg cursor-pointer w-[80px] transition-transform duration-500 ease-out border-2 overflow-hidden
             ${
-              variantItem.key === activeKey
+              variantItem.sku === activeKey
                 ? "border-[#28af60]"
                 : "border-[#28af6040] hover:border-white"
             }`}
@@ -47,7 +47,7 @@ export function ProductColorSelector({
           <div className="w-full aspect-square rounded-lg duration-500 ease-out hover:scale-110">
             <Image
               src={`${process.env.NEXT_PUBLIC_CMS_URL}${variantItem.images[0].url}`}
-              alt={variantItem.key}
+              alt={variantItem.sku}
               width={80}
               height={80}
               className="w-full h-full object-cover"

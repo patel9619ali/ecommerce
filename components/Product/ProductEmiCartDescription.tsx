@@ -32,13 +32,13 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
 
       addItem(
     {
-      id: `${product.slug}-${variant.key}`,
+      id: `${product.slug}-${variant.sku}`,
       productId: product.id?.toString(),
       slug: product.slug,
       title: product.title,
       price: Number(variant.sellingPrice),
       mrp: Number(variant.mrp),
-      variantKey: variant.key, // ✅ SINGLE SOURCE OF TRUTH
+      variantKey: variant.sku, // ✅ SINGLE SOURCE OF TRUTH
       image: variant.images[0].url,
       quantity: quantity,
     },
@@ -73,13 +73,13 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
     if (!exists) {
       addItem(
         {
-          id: `${product.slug}-${variant.key}`,
+          id: `${product.slug}-${variant.sku}`,
           productId: product.id?.toString(),
           slug: product.slug,
           title: product.title,
           price: Number(variant.sellingPrice),
           mrp: Number(variant.mrp),
-          variantKey: variant.key, // ✅ Use variant.sku
+          variantKey: variant.sku, // ✅ Use variant.sku
           image: variant.images[0].url,
           quantity: 1, // ✅ Always 1 for Buy Now
         },
@@ -139,7 +139,7 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
             </div>
 
             <Separator />
-            <ProductColorSelector product={product} activeKey={variant.key} onHover={setPreviewVariantKey} onLeave={() => setPreviewVariantKey(null)} onSelect={setVariantKey} previewVariantKey={previewVariantKey}/>
+            <ProductColorSelector product={product} activeKey={variant.sku} onHover={setPreviewVariantKey} onLeave={() => setPreviewVariantKey(null)} onSelect={setVariantKey} previewVariantKey={previewVariantKey}/>
             <Separator/>
             
         
@@ -184,11 +184,10 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
               🔒 Secure transaction
             </p>
             <div className="flex justify-between">
-            <div className="flex gap-2">
-              <WishlistButton productId={product.id?.toString()} variantId={variant.sku} slug={product.slug} title={product.title} price={variant.sellingPrice} mrp={variant.mrp} image={variant.images[0].url} colorName={variant.colorName} colorHex={variant.colorHex} />
-              <Button variant="outline" size="icon" className="cursor-pointer h-8 w-8 border-1 !border-[#000]">
-                <Share2 className="h-5 w-5 text-[#000]" />
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="icon" className="cursor-pointer h-8 w-8 border-1 !border-[#000]">
+                  <Share2 className="h-5 w-5 text-[#000]" />
+                </Button>
             </div>
           </div>
           </div>

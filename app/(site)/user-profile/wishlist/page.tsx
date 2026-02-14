@@ -14,20 +14,16 @@ import { useRouter } from "next/navigation";
 import Sidebar from "@/components/UserProfile/Sidebar";
 import { BreadcrumbWithCustomSeparator } from "@/components/Breadcrumb/Breadcrumb";
 
-const sidebarItems = [
-  { label: "My Profile", icon: User, href: "/user-profile/profile", active: false },
-  { label: "My Wishlist", icon: Heart, href: "/user-profile/wishlist", active: true },
-];
 const breadcrumbItems: any[] = [
-    { label: 'Home', href: '/' },
-    { label: 'My WishList' },
-]
+  { label: 'Home', href: '/' },
+  { label: 'My WishList' },
+];
 export default function WishlistPage() {
   const router = useRouter();
   const user = useCurrentUser();
   const { items, removeItem, loadFromDatabase, hydrated } = useWishlistStore();
   const { addItem: addToCart } = useCartStore();
-
+  console.log(items,"itemsitems");
   // Load wishlist when user logs in
   useEffect(() => {
     if (user?.id) {
@@ -44,16 +40,16 @@ export default function WishlistPage() {
 
   const handleAddToCart = (item: any) => {
     addToCart({
-      id: `${item.productId}-${item.variantId}`,
-      productId: item.productId,
-      slug: item.slug,
-      title: item.title,
-      price: item.price,
-      mrp: item.mrp,
-      variantKey: item.variantId,
-      image: item.image,
-      quantity: 1,
-    }, true);
+        id: `${item.productId}-${item.variantId}`,
+        productId: item.productId,
+        slug: item.slug,
+        title: item.title,
+        price: Number(item.price), // ✅ Convert to number
+        mrp: Number(item.mrp),     // ✅ Convert to number
+        variantKey: item.variantId, // ✅ Use variantId (not sku)
+        image: item.image,
+        quantity: 1,
+      }, true);
   };
 
   if (!user) return null;
@@ -111,9 +107,9 @@ export default function WishlistPage() {
                             />
                             <button
                               onClick={() => removeItem(item.productId, item.variantId)}
-                              className="cursor-pointer absolute top-3 right-3 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#ff0000] hover:text-white"
+                              className="cursor-pointer absolute top-3 right-3 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow md:opacity-0 md:group-hover:opacity-100 transition-opacity md:hover:bg-[#ff0000] md:hover:text-white !bg-[#ff0000]"
                             >
-                              <Trash2 className="h-4 w-4 group-hover:text-[#fff]" />
+                              <Trash2 className="h-4 w-4 md:group-hover:text-[#fff] text-[#fff]" />
                             </button>
                             {item.colorHex && (
                               <div 

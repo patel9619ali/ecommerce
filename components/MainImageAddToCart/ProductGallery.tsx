@@ -20,14 +20,17 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { WishlistButton } from "../WishList/WishlistButton";
-
+import { Product,Variant } from "@/data/types";
 type Props = {
   variant: any;
+  product: any;
 };
 
 const MOBILE_THUMB_LIMIT = 4;
 
-export const ProductGallery = ({ variant }: Props) => {
+export const ProductGallery = ({ variant,product }: Props) => {
+  console.log(variant,"variantvariantvariant");
+  console.log(product,"variantvariantvariantvariantvariantvariant");
   /* ================= EMBLA ================= */
   const [mainRef, mainApi] = useEmblaCarousel({ loop: true });
 
@@ -144,7 +147,17 @@ export const ProductGallery = ({ variant }: Props) => {
           </div>
         </div>
         <div className="absolute top-0 right-0">
-          <WishlistButton productId={variant.id?.toString()} variantId={variant.sku} slug={variant.slug} title={variant.title} price={variant.sellingPrice} mrp={variant.mrp} image={variant.images[0].url} colorName={variant.colorName} colorHex={variant.colorHex} />
+            <WishlistButton
+                productId={product?.id?.toString()}  // ✅ From product
+                variantId={variant.sku}             // ✅ From variant
+                slug={product.slug}                 // ✅ From product
+                title={`${product.title} - ${variant.colorName}`} // ✅ Both
+                price={Number(variant.sellingPrice)} // ✅ From variant
+                mrp={Number(variant.mrp)}           // ✅ From variant
+                image={variant.images[0]?.url}      // ✅ From variant
+                colorName={variant.colorName}       // ✅ From variant
+                colorHex={variant.colorHex}         // ✅ From variant
+              />
         </div>
 
         {/* MOBILE ZOOM ICON */}

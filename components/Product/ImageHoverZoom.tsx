@@ -2,19 +2,24 @@
 
 import Image, { StaticImageData } from "next/image";
 import { useRef, useState } from "react";
+import { WishlistButton } from "../WishList/WishlistButton";
 
 type ImageHoverZoomProps = {
   src: string;
   alt: string;
   zoomScale?: number;
+  product: any;
+  variant: any;  // ✅ Add this
 };
 
 export default function ImageHoverZoom({
   src,
   alt,
   zoomScale = 2.5,
+  product,
+  variant,  // ✅ Destructure
 }: ImageHoverZoomProps) {
-  
+  console.log(product,"Product Id")
   const containerRef = useRef<HTMLDivElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   const [pos, setPos] = useState({ x: 50, y: 50 });
@@ -63,8 +68,9 @@ return (
         />
       )}
     </div>
-
-
+    <div className="absolute top-0 right-0">
+      <WishlistButton productId={product?.id?.toString()} variantId={variant.sku} slug={product.slug} title={`${product.title} - ${variant.color}`} price={Number(variant.sellingPrice)} mrp={Number(variant.mrp)} image={variant.images[0]?.url || ""} colorName={variant.color} colorHex={variant.colorHex} />
+    </div>
 
 
     {/* ZOOM PANEL (ABSOLUTE – NO LAYOUT SHIFT) */}

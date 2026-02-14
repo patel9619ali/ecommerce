@@ -24,7 +24,7 @@ export const MainImageAddToCart = ({productData}:Props) => {
     <section className="w-full bg-[#fff] py-14">
         <div className="container mx-auto">
             <div className="grid lg:grid-cols-[2.5fr_1.5fr]">
-                <ProductGallery variant={selectedVariant} />
+                <ProductGallery variant={selectedVariant} product={product}/>
                 <BuyCartSection
                   product={product}
                   selectedVariant={selectedVariant}
