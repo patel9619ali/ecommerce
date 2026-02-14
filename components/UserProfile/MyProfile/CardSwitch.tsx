@@ -66,7 +66,7 @@ export function CardSwitch({
             className={`
               pointer-events-none inline-block h-5 w-5 transform rounded-full
               bg-white shadow-lg ring-0 transition-transform duration-200 ease-in-out
-              
+              ${checked ? 'translate-x-6' : 'translate-x-0.5'}
             `}
           />
         </Switch>

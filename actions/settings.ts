@@ -26,7 +26,6 @@ export async function updateSetting(
     values.email = undefined
     values.password = undefined
     values.newPassword = undefined
-    values.isTwoFactorEnabled = undefined
   }
 if (values.email) {
 
