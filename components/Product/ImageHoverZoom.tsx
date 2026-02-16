@@ -19,7 +19,6 @@ export default function ImageHoverZoom({
   product,
   variant,  // ✅ Destructure
 }: ImageHoverZoomProps) {
-  console.log(product,"Product Id")
   const containerRef = useRef<HTMLDivElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   const [pos, setPos] = useState({ x: 50, y: 50 });

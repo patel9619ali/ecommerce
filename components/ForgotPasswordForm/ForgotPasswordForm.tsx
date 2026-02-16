@@ -35,7 +35,6 @@ export const ForgotPasswordForm = () => {
   
       startTransition(() => {
         forgotPassword(data).then((res) => {
-          console.log("Forgot Password Response:", res);
           setError(res.error);
           setSuccess(res.success);
         });

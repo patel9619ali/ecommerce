@@ -35,10 +35,11 @@ const HamBurger = (
 const menuItems = [
   { label: "Home", href: "/", icon: "🏠" },
   { label: "Shop", href: "/products/blend-ras-portable-juicer", icon: "🛍️" },
-  { label: "About Us", href: "#", icon: "ℹ️" },
+  { label: "My Orders", href: "/my-orders", icon: "📦" },
+  { label: "About Us", href: "/about-us", icon: "ℹ️" },
   { label: "How It Works", href: "#", icon: "⚡" },
-  { label: "FAQs", href: "#", icon: "❓" },
-  { label: "Contact Us", href: "#", icon: "📧" },
+  { label: "FAQs", href: "/faqs", icon: "❓" },
+  { label: "Contact Us", href: "/contact-us", icon: "📧" },
 ];
 
 const quickLinks = [
@@ -112,7 +113,6 @@ useEffect(() => {
     loadWishlist(user.id); // Load wishlist when user logs in
   }
 }, [user?.id, loadWishlist]);
-console.log(items,"items")
   return (
     <header className={cn(
       "w-full sticky top-0 z-50 bg-[#fff]"

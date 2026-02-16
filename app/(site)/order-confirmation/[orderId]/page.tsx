@@ -61,14 +61,11 @@ const OrderConfirmation = () => {
 
   const estimatedDelivery = getEstimatedDelivery();
 
-  console.log("🟢 OrderConfirmation rendering, orderId:", orderId);
 
   // ✅ Single useEffect to handle everything
   useEffect(() => {
-    console.log("🔵 useEffect running, orderId:", orderId);
 
     if (!orderId) {
-      console.error("❌ No orderId, will redirect");
       // Small delay to avoid race conditions
       setTimeout(() => router.push("/"), 100);
       return;
@@ -76,7 +73,6 @@ const OrderConfirmation = () => {
 
     // prevent double fetch
     if (hasFetched.current) {
-      console.log("⏭️ Already fetched");
       return;
     }
     hasFetched.current = true;
@@ -87,7 +83,6 @@ const OrderConfirmation = () => {
       try {
         const parsed = JSON.parse(cached);
         if (parsed?.id === orderId) {
-          console.log("✅ Using cached order");
           setOrder(parsed);
           setIsLoadingOrder(false);
           sessionStorage.removeItem("lastOrder");
@@ -101,7 +96,6 @@ const OrderConfirmation = () => {
     // ✅ Fetch from API
     const fetchOrder = async (attempt = 0) => {
       try {
-        console.log(`📡 Fetching order, attempt ${attempt + 1}`);
 
         const res = await fetch(`/api/orders/${orderId}`, {
           cache: "no-store",
@@ -111,7 +105,6 @@ const OrderConfirmation = () => {
 
         if (!res.ok) {
           if (res.status === 404 && attempt < 2) {
-            console.log("🔄 Retrying...");
             await new Promise((r) => setTimeout(r, 1000));
             return fetchOrder(attempt + 1);
           }
@@ -122,7 +115,6 @@ const OrderConfirmation = () => {
           throw new Error("Order data missing");
         }
 
-        console.log("✅ Order fetched");
         setOrder(data.order);
       } catch (err: any) {
         console.error("❌ Fetch error:", err);
@@ -202,7 +194,7 @@ const OrderConfirmation = () => {
               setLoading(true);
               router.push("/");
             }}
-            className="flex items-center gap-1.5 text-sm font-medium text-[hsl(252_80%_60%)] hover:text-[hsl(252_80%_50%)] transition-colors font-['DM_Sans']"
+            className="cursor-pointer flex items-center gap-1.5 text-sm font-medium text-[hsl(252_80%_60%)] hover:text-[hsl(252_80%_50%)] transition-colors font-['DM_Sans']"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Shop
@@ -450,16 +442,16 @@ const OrderConfirmation = () => {
               setLoading(true);
               router.push("/");
             }}
-            className="flex items-center justify-center gap-2 h-12 px-6 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-['Space_Grotesk'] font-bold text-sm rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+            className="cursor-pointer flex items-center justify-center gap-2 h-12 px-6 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-['Space_Grotesk'] font-bold text-sm rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
           >
             Continue Shopping
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <button className="flex items-center justify-center gap-2 h-12 px-6 bg-[hsl(0_0%_100%)] border border-[hsl(240_10%_90%)] text-[hsl(240_15%_10%)] font-['Space_Grotesk'] font-semibold text-sm rounded-xl hover:bg-[hsl(240_10%_95%)] transition-all duration-200">
+          <button className="cursor-pointer flex items-center justify-center gap-2 h-12 px-6 bg-[hsl(0_0%_100%)] border border-[hsl(240_10%_90%)] text-[hsl(240_15%_10%)] font-['Space_Grotesk'] font-semibold text-sm rounded-xl hover:bg-[hsl(240_10%_95%)] transition-all duration-200">
             <Download className="w-4 h-4" />
             Download Receipt
           </button>
-          <button className="flex items-center justify-center gap-2 h-12 px-6 bg-[hsl(0_0%_100%)] border border-[hsl(240_10%_90%)] text-[hsl(240_15%_10%)] font-['Space_Grotesk'] font-semibold text-sm rounded-xl hover:bg-[hsl(240_10%_95%)] transition-all duration-200">
+          <button className="cursor-pointer flex items-center justify-center gap-2 h-12 px-6 bg-[hsl(0_0%_100%)] border border-[hsl(240_10%_90%)] text-[hsl(240_15%_10%)] font-['Space_Grotesk'] font-semibold text-sm rounded-xl hover:bg-[hsl(240_10%_95%)] transition-all duration-200">
             <Share2 className="w-4 h-4" />
             Share
           </button>

@@ -162,7 +162,6 @@ syncWithDatabase: () => {
       },
 
       resetCart: () => {
-        console.log("🧹 Resetting cart (no DB sync to avoid redirect)");
         set((state) => ({
           items: [],
           isCartOpen: false,

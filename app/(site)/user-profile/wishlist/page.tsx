@@ -23,7 +23,6 @@ export default function WishlistPage() {
   const user = useCurrentUser();
   const { items, removeItem, loadFromDatabase, hydrated } = useWishlistStore();
   const { addItem: addToCart } = useCartStore();
-  console.log(items,"itemsitems");
   // Load wishlist when user logs in
   useEffect(() => {
     if (user?.id) {
@@ -53,7 +52,6 @@ export default function WishlistPage() {
   };
 
   if (!user) return null;
-  console.log(items,"items")
   return (
     <section className="bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] min-h-screen">
       <div className="container px-4 py-6">

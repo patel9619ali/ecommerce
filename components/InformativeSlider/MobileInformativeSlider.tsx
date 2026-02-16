@@ -94,7 +94,7 @@ const MobileInformativeSlider = ({ className,productData }: Props) => {
               {product?.description && (
                 <p
                   className="text-black/80 text-sm leading-relaxed mb-6"
-                  dangerouslySetInnerHTML={{ __html: product.description }}
+                  dangerouslySetInnerHTML={{ __html: product?.description }}
                 />
               )}
 

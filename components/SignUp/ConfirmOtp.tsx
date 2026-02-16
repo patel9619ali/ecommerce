@@ -53,7 +53,6 @@ export default function ConfirmOtp({
       return;
     }
 
-    console.log("OTP Verified:", otp);
     // Next step: create user / verify phone
   };
 
