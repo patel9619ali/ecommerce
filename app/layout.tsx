@@ -6,6 +6,7 @@ import LoaderWrapper from "@/components/Loader/LoaderWrapper";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { SessionProvider } from "next-auth/react";
 import { Suspense } from "react";
+import LayoutClientWrapper from "@/components/LayoutClientWrapper";
 export const metadata: Metadata = {
   title: "BlendRas - Portable Juicer",
   description: "BlendRas - Portable Juicer",
@@ -19,7 +20,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SpeedInsights />
           <Suspense fallback={null}>
             <LoadingProvider>
-              <LoaderWrapper>{children}<Toaster richColors position="top-right" /></LoaderWrapper>
+              <LayoutClientWrapper>
+                <LoaderWrapper>{children}<Toaster richColors position="top-right" /></LoaderWrapper>
+              </LayoutClientWrapper>
             </LoadingProvider>
           </Suspense>
         </SessionProvider>

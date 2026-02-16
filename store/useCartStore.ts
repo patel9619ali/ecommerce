@@ -162,12 +162,14 @@ syncWithDatabase: () => {
       },
 
       resetCart: () => {
-        set({
+        console.log("🧹 Resetting cart (no DB sync to avoid redirect)");
+        set((state) => ({
           items: [],
-          isCartOpen: false, // 👈 close UI
-          userId: null,
+          isCartOpen: false,
+          userId: state.userId, // ✅ Keep userId - user is still logged in!
           hydrated: true,
-        });
+        }));
+        
       },
     }),
     {

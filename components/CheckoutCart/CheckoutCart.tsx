@@ -1,7 +1,7 @@
 // components/CheckoutCart/CheckoutCart.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
@@ -24,9 +24,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { CartProduct } from "@/store/useCartStore"; // ✅ Import type
+import { CartProduct, useCartStore } from "@/store/useCartStore"; // ✅ Import type
 import MobileCheckoutBar from "../Cart/MobileCheckoutBar";
 import { useLoading } from "@/context/LoadingContext";
+import { toast } from "sonner";
 interface CheckoutCartProps {
   items: CartProduct[];
   total: number;
@@ -36,8 +37,9 @@ interface CheckoutCartProps {
 const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps) => {
   const { setLoading } = useLoading();
   const router = useRouter();
-  console.log(totalProp,"totalProp");
-  console.log(items,"items");
+  const { resetCart } = useCartStore();
+  const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
+  const [savedAddressId, setSavedAddressId] = useState<string | null>(null);
   // ✅ Form States
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -54,24 +56,116 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
   const [addressOpen, setAddressOpen] = useState(true);
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
-
+  const [addressSaved, setAddressSaved] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   // ✅ Calculate totals from props (dynamic items)
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const discount = appliedCoupon ? Math.round(subtotal * 0.1) : 0;
   const shipping = subtotal > 500 ? 0 : 15;
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
+  // ✅ FIX 4: Load saved address on mount
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const res = await fetch("/api/address");
+        const data = await res.json();
+
+        if (data.addresses?.[0]) {
+          const addr = data.addresses[0];
+          setFirstName(addr.firstName);
+          setLastName(addr.lastName);
+          setPhone(addr.phone);
+          setAddress(addr.address);
+          setBuilding(addr.building || "");
+          setApartment(addr.apartment || "");
+          setLandmark(addr.landmark || "");
+          setCity(addr.city);
+          setState(addr.state);
+          setPincode(addr.pincode);
+          setSavedAddressId(addr.id);
+          setAddressSaved(true);
+          setAddressOpen(false);
+        }
+      } catch (error) {
+        console.error("Failed to load address:", error);
+      }
+    };
+
+    fetchAddress();
+  }, []);
+
   const handleApplyCoupon = () => {
     if (couponCode.toLowerCase() === "save10") {
       setAppliedCoupon(couponCode);
+      toast.success("Coupon applied! You save ₹" + discount);
+    } else {
+      toast.error("Invalid coupon code");
     }
   };
 
-  const handlePlaceOrder = async () => {
+  const validateAddress = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!firstName || firstName.length < 2) {
+      newErrors.firstName = "First name must be at least 2 characters";
+    }
+    if (!lastName || lastName.length < 2) {
+      newErrors.lastName = "Last name must be at least 2 characters";
+    }
+    if (!phone || !/^[6-9]\d{9}$/.test(phone)) {
+      newErrors.phone = "Please enter a valid 10-digit phone number";
+    }
+    if (!address || address.length < 5) {
+      newErrors.address = "Address must be at least 5 characters";
+    }
+    if (!city || city.length < 2) {
+      newErrors.city = "City is required";
+    }
+    if (!state || state.length < 2) {
+      newErrors.state = "State is required";
+    }
+    if (!pincode || !/^\d{6}$/.test(pincode)) {
+      newErrors.pincode = "PIN code must be 6 digits";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // ✅ FIX 1: Field change handler with keyup validation
+  const handleFieldChange = (
+    field: keyof typeof errors,
+    value: string,
+    setter: (v: string) => void
+  ) => {
+    setter(value);
+
+    if (errors[field]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+
+    if (hasAttemptedSave) {
+      setTimeout(() => validateAddress(), 0);
+    }
+  };
+
+  // ✅ FIX 3: Save address with UPSERT
+  const handleSaveAddress = async () => {
+    setHasAttemptedSave(true);
+
+    if (!validateAddress()) {
+      return; // ✅ NO TOAST - errors are inline
+    }
+
     try {
-      setLoading(true); // 🔥 START GLOBAL LOADER
-      // Save address
-      const addressRes = await fetch("/api/address", {
+      setLoading(true);
+
+      const response = await fetch("/api/address", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -88,29 +182,83 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
         }),
       });
 
-      if (!addressRes.ok) throw new Error("Address save failed");
+      const data = await response.json();
 
-      // Create order
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to save address");
+      }
+
+      setAddressSaved(true);
+      setAddressOpen(false);
+      setSavedAddressId(data.address.id);
+      toast.success("Address saved successfully!");
+    } catch (error: any) {
+      console.error("Address save error:", error);
+      toast.error(error.message || "Failed to save address");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ FIX 2 & 5: Place order with image and proper navigation
+const handlePlaceOrder = async () => {
+    if (!addressSaved) {
+      toast.error("Please save your address first");
+      setAddressOpen(true);
+      return;
+    }
+
+    try {
+      setLoading(true);
+
       const orderRes = await fetch("/api/orders/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          items,
+          items: items.map((item) => ({
+            productId: item.productId,
+            variantKey: item.variantKey,
+            title: item.title,
+            price: item.price,
+            quantity: item.quantity,
+            image: item.image,
+          })),
           total,
           paymentMethod,
         }),
       });
 
-      if (!orderRes.ok) throw new Error("Order creation failed");
+      const data = await orderRes.json();
+      
+      if (!orderRes.ok) {
+        throw new Error(data.error || "Failed to create order");
+      }
 
-      const { order } = await orderRes.json();
+      // ✅ Store order in sessionStorage
+      sessionStorage.setItem("lastOrder", JSON.stringify(data.order));
 
-      // Redirect to payment or confirmation
-      router.push(`/order-confirmation/${order.id}`);
-    } catch (error) {
-      setLoading(false); // ❗ stop loader if error
-      console.error("Order creation failed:", error);
-      alert("Failed to place order. Please try again.");
+      // ✅ DON'T reset cart here - it causes re-renders!
+      // Just navigate to order confirmation
+      router.replace(`/order-confirmation/${data.order.id}`);
+
+      // ✅ Clear cart in background AFTER navigation
+      setTimeout(() => {
+        // Clear cart via API to avoid store re-renders
+        fetch("/api/cart/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ items: [] }),
+        }).catch(console.error);
+        
+        // Clear local storage directly (bypass Zustand)
+        localStorage.removeItem("cart-storage");
+      }, 1000);
+      
+    } catch (error: any) {
+      console.error("Order creation error:", error);
+      toast.error(error.message || "Failed to place order");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -131,8 +279,15 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
                           <MapPin className="h-5 w-5 text-[#ff8000]" />
                         </div>
                         <div>
-                          <CardTitle className="text-lg text-[#000]">Delivery Address</CardTitle>
-                          <p className="text-sm text-[#6a7181]">Where should we deliver?</p>
+                          <CardTitle className="text-lg text-[#000] flex items-center gap-2">
+                            Delivery Address
+                            {addressSaved && (
+                              <CheckCircle2 className="h-5 w-5 text-[#28af60]" />
+                            )}
+                          </CardTitle>
+                          <p className="text-sm text-[#6a7181]">
+                            {addressSaved ? "Address saved" : "Where should we deliver?"}
+                          </p>
                         </div>
                       </div>
                       <ChevronDown className={`h-5 w-5 text-[#6a7181] transition-transform ${addressOpen ? "rotate-180" : ""}`} />
@@ -140,54 +295,105 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
                   </CardHeader>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <CardContent className="space-y-4 pt-0">
+<CardContent className="space-y-4 pt-0">
+                    {/* First Name & Last Name */}
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="firstName">First Name</Label>
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="firstName">
+                          First Name *
+                        </Label>
                         <Input
                           id="firstName"
                           value={firstName}
-                          onChange={(e) => setFirstName(e.target.value)}
+                          onChange={(e) =>
+                            handleFieldChange("firstName", e.target.value, setFirstName)
+                          }
                           placeholder="John"
-                          className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
+                            errors.firstName
+                              ? "border-red-500 focus-visible:border-red-500"
+                              : ""
+                          }`}
                         />
+                        {errors.firstName && (
+                          <p className="text-xs text-red-500 mt-1">{errors.firstName}</p>
+                        )}
                       </div>
+
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="lastName">Last Name</Label>
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="lastName">
+                          Last Name *
+                        </Label>
                         <Input
                           id="lastName"
                           value={lastName}
-                          onChange={(e) => setLastName(e.target.value)}
+                          onChange={(e) =>
+                            handleFieldChange("lastName", e.target.value, setLastName)
+                          }
                           placeholder="Doe"
-                          className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
+                            errors.lastName ? "border-red-500 focus-visible:border-red-500" : ""
+                          }`}
                         />
+                        {errors.lastName && (
+                          <p className="text-xs text-red-500 mt-1">{errors.lastName}</p>
+                        )}
                       </div>
                     </div>
+
+                    {/* Phone */}
                     <div className="space-y-2">
-                      <Label className="text-[#020817] text-sm mb-1 block" htmlFor="phone">Phone Number</Label>
+                      <Label className="text-[#020817] text-sm mb-1 block" htmlFor="phone">
+                        Phone Number *
+                      </Label>
                       <Input
                         id="phone"
                         value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="+91 98765 43210"
-                        className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                        onChange={(e) =>
+                          handleFieldChange(
+                            "phone",
+                            e.target.value.replace(/\D/g, "").slice(0, 10),
+                            setPhone
+                          )
+                        }
+                        placeholder="9876543210"
+                        maxLength={10}
+                        className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
+                          errors.phone ? "border-red-500 focus-visible:border-red-500" : ""
+                        }`}
                       />
+                      {errors.phone && (
+                        <p className="text-xs text-red-500 mt-1">{errors.phone}</p>
+                      )}
                     </div>
+
+                    {/* Street Address */}
                     <div className="space-y-2">
-                      <Label className="text-[#020817] text-sm mb-1 block" htmlFor="address">Street Address</Label>
+                      <Label className="text-[#020817] text-sm mb-1 block" htmlFor="address">
+                        Street Address *
+                      </Label>
                       <Input
                         id="address"
                         value={address}
-                        onChange={(e) => setAddress(e.target.value)}
+                        onChange={(e) =>
+                          handleFieldChange("address", e.target.value, setAddress)
+                        }
                         placeholder="123 Main Street"
-                        className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                        className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
+                          errors.address ? "border-red-500 focus-visible:border-red-500" : ""
+                        }`}
                       />
+                      {errors.address && (
+                        <p className="text-xs text-red-500 mt-1">{errors.address}</p>
+                      )}
                     </div>
-                    
-                    {/* ✅ NEW FIELDS */}
+
+                    {/* Building, Apartment, Landmark */}
                     <div className="grid sm:grid-cols-3 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="building">Building (Optional)</Label>
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="building">
+                          Building (Optional)
+                        </Label>
                         <Input
                           id="building"
                           value={building}
@@ -196,8 +402,11 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
                           className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
                         />
                       </div>
+
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="apartment">Apartment (Optional)</Label>
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="apartment">
+                          Apartment (Optional)
+                        </Label>
                         <Input
                           id="apartment"
                           value={apartment}
@@ -206,57 +415,108 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
                           className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
                         />
                       </div>
+
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="landmark">Landmark (Optional)</Label>
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="landmark">
+                          Landmark (Optional)
+                        </Label>
                         <Input
                           id="landmark"
                           value={landmark}
                           onChange={(e) => setLandmark(e.target.value)}
-                          placeholder="Near XYZ Mall"
+                          placeholder="Near Mall"
                           className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
                         />
                       </div>
                     </div>
 
+                    {/* City, State, Pincode */}
                     <div className="grid sm:grid-cols-3 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="city">City</Label>
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="city">
+                          City *
+                        </Label>
                         <Input
                           id="city"
                           value={city}
-                          onChange={(e) => setCity(e.target.value)}
+                          onChange={(e) => handleFieldChange("city", e.target.value, setCity)}
                           placeholder="Mumbai"
-                          className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
+                            errors.city ? "border-red-500 focus-visible:border-red-500" : ""
+                          }`}
                         />
+                        {errors.city && (
+                          <p className="text-xs text-red-500 mt-1">{errors.city}</p>
+                        )}
                       </div>
+
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="state">State</Label>
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="state">
+                          State *
+                        </Label>
                         <Input
                           id="state"
                           value={state}
-                          onChange={(e) => setState(e.target.value)}
+                          onChange={(e) => handleFieldChange("state", e.target.value, setState)}
                           placeholder="Maharashtra"
-                          className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
+                            errors.state ? "border-red-500 focus-visible:border-red-500" : ""
+                          }`}
                         />
+                        {errors.state && (
+                          <p className="text-xs text-red-500 mt-1">{errors.state}</p>
+                        )}
                       </div>
+
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="pincode">PIN Code</Label>
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="pincode">
+                          PIN Code *
+                        </Label>
                         <Input
                           id="pincode"
                           value={pincode}
-                          onChange={(e) => setPincode(e.target.value)}
+                          onChange={(e) =>
+                            handleFieldChange(
+                              "pincode",
+                              e.target.value.replace(/\D/g, "").slice(0, 6),
+                              setPincode
+                            )
+                          }
                           placeholder="400001"
-                          className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                          maxLength={6}
+                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
+                            errors.pincode ? "border-red-500 focus-visible:border-red-500" : ""
+                          }`}
                         />
+                        {errors.pincode && (
+                          <p className="text-xs text-red-500 mt-1">{errors.pincode}</p>
+                        )}
                       </div>
                     </div>
-                    <Button className="w-full mt-2 cursor-pointer !border-[#254fda] !bg-[#254fda] hover:!bg-[#254fda] hover:!text-[#fff] mb-5 !text-[#fff]" variant="outline">
+
+                    <Button
+                      onClick={handleSaveAddress}
+                      className="w-full mt-2 cursor-pointer !border-[#254fda] !bg-[#254fda] hover:!bg-[#1e40af] mb-5 !text-[#fff]"
+                      variant="outline"
+                    >
                       <CheckCircle2 className="h-4 w-4 mr-2 !text-[#fff]" />
-                      Save Address
+                      {addressSaved ? "Update Address" : "Save Address"}
                     </Button>
                   </CardContent>
                 </CollapsibleContent>
               </Card>
+              {addressSaved && !addressOpen && (
+                <Button
+                  onClick={() => {
+                    setAddressOpen(true);
+                    setAddressSaved(false);
+                  }}
+                  variant="outline"
+                  className="w-full mt-2 cursor-pointer !border-[#254fda] !bg-[#254fda] hover:!bg-[#1e40af] mb-5 !text-[#fff]"
+                >
+                  Edit Address
+                </Button>
+              )}
             </Collapsible>
 
             {/* Payment Method */}
@@ -501,6 +761,8 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
             <MobileCheckoutBar
               total={total}
               itemCount={itemCount}
+              onPayClick={handlePlaceOrder}
+              addressSaved={addressSaved}
             />
           </div>
         </div>

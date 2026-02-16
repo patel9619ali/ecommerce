@@ -44,7 +44,7 @@ const discountPercent = (activeVariant.mrp && activeVariant.sellingPrice && acti
       : 0;
   return (
     <>
-    <div className="bg-foreground text-[#fafafa] text-center py-2.5 text-sm">🎉 
+    <div className="bg-[#000] text-[#fafafa] text-center py-2.5 text-sm">🎉 
       <span className="font-semibold">33% OFF</span> — Limited Time Only | 
       <LoadingLink className="underline underline-offset-2 font-medium ml-3" href="/products/blend-ras-portable-juicer">Shop Now</LoadingLink>
     </div>

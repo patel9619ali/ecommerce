@@ -29,8 +29,6 @@ type Props = {
 const MOBILE_THUMB_LIMIT = 4;
 
 export const ProductGallery = ({ variant,product }: Props) => {
-  console.log(variant,"variantvariantvariant");
-  console.log(product,"variantvariantvariantvariantvariantvariant");
   /* ================= EMBLA ================= */
   const [mainRef, mainApi] = useEmblaCarousel({ loop: true });
 

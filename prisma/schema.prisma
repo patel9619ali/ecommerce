@@ -23,7 +23,8 @@ model User {
   role          UserRole  @default(USER)
   accounts      Account[]
   carts         Cart[]
-  addresses     Address[]  // ✅ Added this line
+  addresses     Address[]
+  orders        Order[]  // ✅ Added this line
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   wishlists Wishlist[]
@@ -118,7 +119,7 @@ model TwoFactorConfirmation {
 }
 
 model Cart {
-  id     String     @id @default(cuid())   // ✅ THIS LINE FIXES EVERYTHING
+  id     String     @id @default(cuid()) 
   userId String     @map("user_id")
   items  CartItem[]
   user   User       @relation(fields: [userId], references: [id])
@@ -132,7 +133,7 @@ model CartItem {
   cartId    String @map("cart_id")
   productId String @map("product_id")
   variantId String @map("variant_id")
-  slug      String?   // ✅ OPTIONAL
+  slug      String?   
   title     String
   price     Int
   quantity  Int
@@ -151,6 +152,8 @@ model Order {
   status    String
   createdAt DateTime    @map("created_at")
   items     OrderItem[]
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade) // ✅ Added relation
 
   @@map("orders")
 }
@@ -163,8 +166,9 @@ model OrderItem {
   title     String
   price     Int
   quantity  Int
+  image     String? // ✅ Added image field
 
-  order Order @relation(fields: [orderId], references: [id])
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@map("order_items")
 }
@@ -172,7 +176,7 @@ model OrderItem {
 // ✅ NEW: Address Model
 model Address {
   id         String   @id @default(cuid())
-  userId     String   @map("user_id")
+  userId     String   @unique @map("user_id") // ✅ Unique for UPSERT
   firstName  String   @map("first_name")
   lastName   String   @map("last_name")
   phone      String
@@ -184,6 +188,7 @@ model Address {
   state      String
   pincode    String
   createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") // ✅ Added updatedAt
   
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

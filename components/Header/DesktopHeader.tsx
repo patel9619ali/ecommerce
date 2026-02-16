@@ -112,6 +112,7 @@ useEffect(() => {
     loadWishlist(user.id); // Load wishlist when user logs in
   }
 }, [user?.id, loadWishlist]);
+console.log(items,"items")
   return (
     <header className={cn(
       "w-full sticky top-0 z-50 bg-[#fff]"
