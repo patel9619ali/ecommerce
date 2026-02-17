@@ -16,7 +16,6 @@ import DirectProductPageLinking from "@/components/DirectProductPageLinking";
 export default async function Home() {
   const products = await getProducts();
   const {data} = products;
-  console.log(data,"datadata");
   return (
     <>
       <BannerSection productData={data}/>
