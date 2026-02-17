@@ -1,7 +1,7 @@
 import { BreadcrumbType } from "@/types/breadcrumbType";
 import { BreadcrumbWithCustomSeparator } from "@/components/Breadcrumb/Breadcrumb";
 import TableOfContents from "@/components/TableOfContent/TableOfContent";
-export const revalidate = 3600;
+;
 const cookiepolicy = [
   {
 

@@ -24,7 +24,7 @@ import CurrencySelector from "./CurrencySelector";
 import { AddToCart } from "../AddToCart/AddToCart";
 import { Skeleton } from "@/components/ui/skeleton"
 import ProfileDropdown from "./ProfileDropdown";
-
+import { useSession } from "next-auth/react";
 const HamBurger = (
   <svg xmlns="http://www.w3.org/2000/svg" width="21" height="16" viewBox="0 0 21 16" fill="none">
     <path d="M1.25 1.25H19.2483" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -49,6 +49,7 @@ const quickLinks = [
   { label: "Return Policy", icon: "↩️" },
 ];
 export function DesktopHeader() {
+  const [loadedUserId, setLoadedUserId] = useState<string | null>(null);
   const items = useCartStore((state) => state.items);
   const { openCart } = useCartStore();
   const resetCart = useCartStore((s) => s.resetCart);
@@ -56,7 +57,8 @@ export function DesktopHeader() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const router = useLoadingRouter();
   const pathName = usePathname();
-  const user = useCurrentUser();
+  const { data: session, status } = useSession();
+  const user = status === "authenticated" ? session?.user : null;
   const loadWishlist = useWishlistStore((s) => s.loadFromDatabase);
   const isHomePage = pathName === '/';
   const [isMobile, setIsMobile] = useState(false);
@@ -98,21 +100,25 @@ export function DesktopHeader() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
+
   useEffect(() => {
-    if (user?.id) {
-      // ✅ User logged in / switched user
-      resetCart();          // 🔥 clear previous user's cart
-      loadFromDatabase(user.id);  // 🔄 load THIS user's cart from DB
-    } else {
-      // ✅ User logged out
-      resetCart();          // 🔥 clear cart completely
-    }
-  }, [user?.id]);
-useEffect(() => {
-  if (user?.id) {
-    loadWishlist(user.id); // Load wishlist when user logs in
+  if (!user?.id) {
+    resetCart();
+    setLoadedUserId(null);
+    return;
   }
-}, [user?.id, loadWishlist]);
+
+  // ✅ Prevent repeated DB calls for same user
+  if (loadedUserId === user.id) return;
+
+  loadFromDatabase(user.id);
+  setLoadedUserId(user.id);
+}, [user?.id, loadedUserId]);
+useEffect(() => {
+  if (!user?.id || loadedUserId !== user.id) return;
+
+  loadWishlist(user.id);
+}, [user?.id, loadedUserId, loadWishlist]);
   return (
     <header className={cn(
       "w-full sticky top-0 z-50 bg-[#fff]"

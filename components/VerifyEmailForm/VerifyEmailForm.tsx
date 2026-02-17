@@ -11,6 +11,7 @@ import {
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { ArrowLeft, Loader2, Mail } from "lucide-react";
 import { verifyEmailOtp } from "@/actions/verify-email";
+import LoadingLink from "../Loader/LoadingLink";
 
 export default function VerifyEmailForm() {
   const router = useRouter();
@@ -154,9 +155,9 @@ const maskedEmail = email?.replace(/(.{2})(.*)(@.*)/, "$1***$3");
               className="w-full text-[#64748b] hover:text-[#020817] hover:bg-[#f1f5f9]"
               asChild
             >
-              <a className="text-[#000000]" href="/sign-up">
+              <LoadingLink className={`${isPending ?"opacity-50 pointer-events-none":"" } text-[#000000]`} href="/sign-up">
                 Back to Sign up
-              </a>
+              </LoadingLink>
             </Button>
           </div>
           

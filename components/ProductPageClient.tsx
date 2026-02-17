@@ -23,11 +23,11 @@ const specs = [
   { label: "Material", value: "BPA-Free Tritan + ABS" },
 ];
 
-const images = ["🫗", "🥤", "🧃", "🍹"];
 export default function ProductPageClient({ 
   product, 
   initialVariant 
 }: ProductPageClientProps) {
+const [liveVariants, setLiveVariants] = useState<any[] | null>(null);
  const router = useRouter();
   const searchParams = useSearchParams();
   const urlVariant = searchParams.get("variant");
@@ -47,10 +47,24 @@ export default function ProductPageClient({
       (v: any) => v.sku === (previewVariantKey ?? variantKey)
     ) ?? product.variants[0];
 
-  const selectedVariant =
-    product.variants?.find((v: any) => v.sku === variantKey) ||
-    product.variants?.[0];
+    const mergedVariants = product.variants.map((v: any) => {
+      const live = liveVariants?.find((l: any) => l.sku === v.sku);
+      return live ? { ...v, ...live } : v;
+    });
 
+    const selectedVariant =
+      mergedVariants.find((v: any) => v.sku === variantKey) ||
+      mergedVariants[0];
+
+    useEffect(() => {
+      async function loadLiveData() {
+        const res = await fetch(`/api/product-live?slug=${product.slug}`);
+        const live = await res.json();
+        setLiveVariants(live);
+      }
+
+      loadLiveData();
+    }, [product.slug]);
   return (
     <section className="bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] lg:py-10 py-5">
       <div className="px-2">

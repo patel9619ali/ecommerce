@@ -1,3 +1,7 @@
+// lib/constants/cache.ts
+
 export const CacheConstant = {
-   revalidateTag: 'blend-ras',
+  product: "product",
+  collections: "collections",
+  homepage: "homepage",
 }
