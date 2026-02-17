@@ -14,6 +14,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useLoading } from "@/context/LoadingContext";
+import { SpinnerCustom } from "@/components/Loader/SpinningLoader";
 
 interface OrderItem {
   id: string;
@@ -95,9 +96,9 @@ const MyOrders = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[hsl(240_10%_98%)]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[hsl(252_80%_60%)] mx-auto mb-4"></div>
+          <SpinnerCustom/>
           <p className="text-[hsl(240_8%_45%)] font-['DM_Sans']">
-            Loading your orders...
+            Loading...
           </p>
         </div>
       </div>
@@ -111,7 +112,7 @@ const MyOrders = () => {
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Package className="w-8 h-8 text-red-600" />
           </div>
-          <h1 className="font-['Space_Grotesk'] text-xl font-bold text-[hsl(240_15%_10%)] mb-2">
+          <h1 className=" text-xl font-bold text-[hsl(240_15%_10%)] mb-2">
             Unable to Load Orders
           </h1>
           <p className="text-sm text-[hsl(240_8%_45%)] mb-4">{error}</p>
@@ -151,7 +152,7 @@ const MyOrders = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="font-['Space_Grotesk'] text-2xl md:text-3xl font-bold text-[hsl(240_15%_10%)]">
+          <h1 className=" text-2xl md:text-3xl font-bold text-[hsl(240_15%_10%)]">
             My Orders
           </h1>
           <p className="text-sm text-[hsl(240_8%_45%)] font-['DM_Sans'] mt-1">
@@ -169,7 +170,7 @@ const MyOrders = () => {
             <div className="w-20 h-20 rounded-full bg-[hsl(252_40%_92%)] flex items-center justify-center mb-5">
               <ShoppingBag className="w-9 h-9 text-[hsl(252_80%_60%)]" />
             </div>
-            <h2 className="font-['Space_Grotesk'] text-xl font-bold text-[hsl(240_15%_10%)] mb-2">
+            <h2 className=" text-xl font-bold text-[hsl(240_15%_10%)] mb-2">
               No orders yet
             </h2>
             <p className="text-sm text-[hsl(240_8%_45%)] font-['DM_Sans'] mb-6 text-center max-w-sm">
@@ -177,7 +178,7 @@ const MyOrders = () => {
             </p>
             <button
               onClick={handleBackClick}
-              className="h-11 px-6 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-['Space_Grotesk'] font-bold text-sm rounded-xl shadow-[0_6px_24px_-4px_hsl(252_80%_60%/0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+              className="h-11 px-6 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)]  font-bold text-sm rounded-xl shadow-[0_6px_24px_-4px_hsl(252_80%_60%/0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
             >
               Start Shopping
             </button>
@@ -201,7 +202,7 @@ const MyOrders = () => {
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <p className="font-['Space_Grotesk'] text-sm font-bold text-[hsl(240_15%_10%)]">
+                      <p className=" text-sm font-bold text-[hsl(240_15%_10%)]">
                         {order.id}
                       </p>
                       <p className="text-xs text-[hsl(240_8%_45%)] font-['DM_Sans'] mt-0.5">
@@ -251,7 +252,7 @@ const MyOrders = () => {
                       ))}
                       {order.items.length > 3 && (
                         <div className="w-11 h-11 md:w-12 md:h-12 rounded-xl border-2 border-[hsl(0_0%_100%)] bg-[hsl(252_40%_92%)] flex items-center justify-center flex-shrink-0">
-                          <span className="text-[10px] font-bold text-[hsl(252_80%_60%)] font-['Space_Grotesk']">
+                          <span className="text-[10px] font-bold text-[hsl(252_80%_60%)] ">
                             +{order.items.length - 3}
                           </span>
                         </div>
@@ -266,7 +267,7 @@ const MyOrders = () => {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-['Space_Grotesk'] text-base md:text-lg font-bold text-[hsl(240_15%_10%)]">
+                      <p className=" text-base md:text-lg font-bold text-[hsl(240_15%_10%)]">
                         ₹{order.amount.toLocaleString()}
                       </p>
                     </div>

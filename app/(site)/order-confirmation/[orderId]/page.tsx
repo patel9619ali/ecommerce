@@ -1,4 +1,5 @@
 "use client";
+import { SpinnerCustom } from "@/components/Loader/SpinningLoader";
 import { useLoading } from "@/context/LoadingContext";
 import { motion } from "framer-motion";
 import {
@@ -139,9 +140,9 @@ const OrderConfirmation = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[hsl(240_10%_98%)]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[hsl(252_80%_60%)] mx-auto mb-4"></div>
+          <SpinnerCustom/>
           <p className="text-[hsl(240_8%_45%)] font-['DM_Sans']">
-            Loading order details...
+            Loading...
           </p>
         </div>
       </div>
@@ -155,7 +156,7 @@ const OrderConfirmation = () => {
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Package className="w-8 h-8 text-red-600" />
           </div>
-          <h1 className="font-['Space_Grotesk'] text-xl font-bold text-[hsl(240_15%_10%)] mb-2">
+          <h1 className=" text-xl font-bold text-[hsl(240_15%_10%)] mb-2">
             Unable to Load Order
           </h1>
           <p className="text-sm text-[hsl(240_8%_45%)] mb-4">{error}</p>
@@ -235,7 +236,7 @@ const OrderConfirmation = () => {
           transition={{ delay: 0.3 }}
           className="text-center mb-8 md:mb-10"
         >
-          <h1 className="font-['Space_Grotesk'] text-2xl md:text-4xl font-bold text-[hsl(240_15%_10%)] mb-2">
+          <h1 className=" text-2xl md:text-4xl font-bold text-[hsl(240_15%_10%)] mb-2">
             Order Confirmed! 🎉
           </h1>
           <p className="text-sm md:text-base text-[hsl(240_8%_45%)] font-['DM_Sans'] max-w-md mx-auto">
@@ -256,7 +257,7 @@ const OrderConfirmation = () => {
               <p className="text-[10px] uppercase tracking-wider text-[hsl(240_8%_45%)] font-['DM_Sans']">
                 Order ID
               </p>
-              <p className="font-['Space_Grotesk'] text-sm font-bold text-[hsl(240_15%_10%)]">
+              <p className=" text-sm font-bold text-[hsl(240_15%_10%)]">
                 {orderId}
               </p>
             </div>
@@ -267,7 +268,7 @@ const OrderConfirmation = () => {
               <p className="text-[10px] uppercase tracking-wider text-[hsl(240_8%_45%)] font-['DM_Sans']">
                 Estimated Delivery
               </p>
-              <p className="font-['Space_Grotesk'] text-sm font-bold text-[hsl(240_15%_10%)]">
+              <p className=" text-sm font-bold text-[hsl(240_15%_10%)]">
                 {estimatedDelivery}
               </p>
             </div>
@@ -281,7 +282,7 @@ const OrderConfirmation = () => {
           transition={{ delay: 0.5 }}
           className="bg-[hsl(0_0%_100%/0.9)] backdrop-blur-xl border border-[hsl(240_10%_90%/0.4)] rounded-2xl p-5 md:p-7 shadow-sm mb-6"
         >
-          <h3 className="font-['Space_Grotesk'] text-base font-bold text-[hsl(240_15%_10%)] mb-5">
+          <h3 className=" text-base font-bold text-[hsl(240_15%_10%)] mb-5">
             Order Progress
           </h3>
           <div className="flex items-center justify-between relative">
@@ -333,7 +334,7 @@ const OrderConfirmation = () => {
             transition={{ delay: 0.6 }}
             className="lg:col-span-3 bg-[hsl(0_0%_100%/0.9)] backdrop-blur-xl border border-[hsl(240_10%_90%/0.4)] rounded-2xl p-5 md:p-7 shadow-sm"
           >
-            <h3 className="font-['Space_Grotesk'] text-base font-bold text-[hsl(240_15%_10%)] mb-4">
+            <h3 className=" text-base font-bold text-[hsl(240_15%_10%)] mb-4">
               Items Ordered
             </h3>
             <div className="space-y-3">
@@ -359,14 +360,14 @@ const OrderConfirmation = () => {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-['Space_Grotesk'] text-sm font-semibold text-[hsl(240_15%_10%)] truncate">
+                    <p className=" text-sm font-semibold text-[hsl(240_15%_10%)] truncate">
                       {item.title}
                     </p>
                     <p className="text-xs text-[hsl(240_8%_45%)] font-['DM_Sans']">
                       Qty: {item.quantity}
                     </p>
                   </div>
-                  <p className="font-['Space_Grotesk'] text-sm font-bold text-[hsl(240_15%_10%)]">
+                  <p className=" text-sm font-bold text-[hsl(240_15%_10%)]">
                     ₹{(item.price * item.quantity).toLocaleString()}
                   </p>
                 </motion.div>
@@ -381,35 +382,35 @@ const OrderConfirmation = () => {
             transition={{ delay: 0.7 }}
             className="lg:col-span-2 bg-[hsl(0_0%_100%/0.9)] backdrop-blur-xl border border-[hsl(240_10%_90%/0.4)] rounded-2xl p-5 md:p-7 shadow-sm h-fit"
           >
-            <h3 className="font-['Space_Grotesk'] text-base font-bold text-[hsl(240_15%_10%)] mb-4">
+            <h3 className=" text-base font-bold text-[hsl(240_15%_10%)] mb-4">
               Payment Summary
             </h3>
             <div className="space-y-2.5 mb-4">
               <div className="flex justify-between text-sm">
                 <span className="text-[hsl(240_8%_45%)] font-['DM_Sans']">Subtotal</span>
-                <span className="font-semibold text-[hsl(240_15%_10%)] font-['Space_Grotesk']">
+                <span className="font-semibold text-[hsl(240_15%_10%)] ">
                   ₹{subtotal.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-[hsl(240_8%_45%)] font-['DM_Sans']">Shipping</span>
-                <span className="font-semibold font-['Space_Grotesk'] text-[hsl(152_65%_45%)]">
+                <span className="font-semibold  text-[hsl(152_65%_45%)]">
                   {shipping === 0 ? "Free" : `₹${shipping}`}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-[hsl(240_8%_45%)] font-['DM_Sans']">Tax</span>
-                <span className="font-semibold text-[hsl(240_15%_10%)] font-['Space_Grotesk']">
+                <span className="font-semibold text-[hsl(240_15%_10%)] ">
                   ₹{tax.toLocaleString()}
                 </span>
               </div>
             </div>
             <div className="h-px bg-[hsl(240_10%_90%)] mb-4" />
             <div className="flex justify-between items-center mb-5">
-              <span className="font-['Space_Grotesk'] text-base font-bold text-[hsl(240_15%_10%)]">
+              <span className=" text-base font-bold text-[hsl(240_15%_10%)]">
                 Total Paid
               </span>
-              <span className="font-['Space_Grotesk'] text-xl md:text-2xl font-bold text-[hsl(240_15%_10%)]">
+              <span className=" text-xl md:text-2xl font-bold text-[hsl(240_15%_10%)]">
                 ₹{total.toLocaleString()}
               </span>
             </div>
@@ -442,16 +443,16 @@ const OrderConfirmation = () => {
               setLoading(true);
               router.push("/");
             }}
-            className="cursor-pointer flex items-center justify-center gap-2 h-12 px-6 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-['Space_Grotesk'] font-bold text-sm rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+            className="cursor-pointer flex items-center justify-center gap-2 h-12 px-6 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)]  font-bold text-sm rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
           >
             Continue Shopping
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <button className="cursor-pointer flex items-center justify-center gap-2 h-12 px-6 bg-[hsl(0_0%_100%)] border border-[hsl(240_10%_90%)] text-[hsl(240_15%_10%)] font-['Space_Grotesk'] font-semibold text-sm rounded-xl hover:bg-[hsl(240_10%_95%)] transition-all duration-200">
+          <button className="cursor-pointer flex items-center justify-center gap-2 h-12 px-6 bg-[hsl(0_0%_100%)] border border-[hsl(240_10%_90%)] text-[hsl(240_15%_10%)]  font-semibold text-sm rounded-xl hover:bg-[hsl(240_10%_95%)] transition-all duration-200">
             <Download className="w-4 h-4" />
             Download Receipt
           </button>
-          <button className="cursor-pointer flex items-center justify-center gap-2 h-12 px-6 bg-[hsl(0_0%_100%)] border border-[hsl(240_10%_90%)] text-[hsl(240_15%_10%)] font-['Space_Grotesk'] font-semibold text-sm rounded-xl hover:bg-[hsl(240_10%_95%)] transition-all duration-200">
+          <button className="cursor-pointer flex items-center justify-center gap-2 h-12 px-6 bg-[hsl(0_0%_100%)] border border-[hsl(240_10%_90%)] text-[hsl(240_15%_10%)]  font-semibold text-sm rounded-xl hover:bg-[hsl(240_10%_95%)] transition-all duration-200">
             <Share2 className="w-4 h-4" />
             Share
           </button>

@@ -71,7 +71,7 @@ export const BuyCartSection = ({
         <BuyNow productId={product?.id?.toString()} slug={product?.slug} title={product?.title} variant={selectedVariant} />
       </div>
       <div className="flex cursor-pointer items-center">
-        <Share className="mt-6 w-6 h-6 cursor-pointer dark:text-black/60 hover:text-white/80  transition-colors duration-300 ease-out rotate-90" />
+        <Share className="mt-6 w-6 h-6 cursor-pointer dark:text-black/60 hover:text-black/80  transition-colors duration-300 ease-out rotate-90" />
         <span className="text-black/80 text-[18px] ml-2 mt-6 hover:underline">Share</span>
       </div>
     </section>
