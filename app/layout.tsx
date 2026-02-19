@@ -9,7 +9,7 @@ import { Suspense } from "react";
 import LayoutClientWrapper from "@/components/LayoutClientWrapper";
 export const metadata: Metadata = {
   title: "BlendRas - Portable Juicer",
-  description: "BlendRas - Portable Juicer",
+  description: "BlendRas",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
