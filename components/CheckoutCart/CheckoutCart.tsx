@@ -1,8 +1,10 @@
-import { useState } from "react";
+// components/CheckoutCart/CheckoutCart.tsx
+"use client";
+
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
-  ChevronLeft,
   MapPin,
   CreditCard,
   Wallet,
@@ -22,48 +24,246 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import type { StaticImageData } from "next/image";
-import productMain from "@/public/assets/Blender/BlackBlender/black1.jpg";
-
-interface ProductState {
-  name: string;
-  color: string;
-  quantity: number;
-  price: number;
-  originalPrice: number;
-  image: string | StaticImageData;
+import { CartProduct, useCartStore } from "@/store/useCartStore"; // ✅ Import type
+import MobileCheckoutBar from "../Cart/MobileCheckoutBar";
+import { useLoading } from "@/context/LoadingContext";
+import { toast } from "sonner";
+interface CheckoutCartProps {
+  items: CartProduct[];
+  total: number;
+  itemCount: number;
 }
 
-const CheckoutCart = () => {
-    const router = useRouter();
-    const product: ProductState = {
-        name: "BlendRas Portable Juicer Pro",
-        color: "Black",
-        quantity: 1,
-        price: 3499,
-        originalPrice: 4999,
-        image: productMain,
-    };
+const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps) => {
+  const { setLoading } = useLoading();
+  const router = useRouter();
+  const { resetCart } = useCartStore();
+  const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
+  const [savedAddressId, setSavedAddressId] = useState<string | null>(null);
+  // ✅ Form States
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [building, setBuilding] = useState("");
+  const [apartment, setApartment] = useState("");
+  const [landmark, setLandmark] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [pincode, setPincode] = useState("");
 
   const [paymentMethod, setPaymentMethod] = useState("upi");
   const [addressOpen, setAddressOpen] = useState(true);
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
-
-  const subtotal = product.price * product.quantity;
-  const shipping = subtotal > 999 ? 0 : 49;
+  const [addressSaved, setAddressSaved] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  // ✅ Calculate totals from props (dynamic items)
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const discount = appliedCoupon ? Math.round(subtotal * 0.1) : 0;
-  const total = subtotal + shipping - discount;
+  const shipping = subtotal > 500 ? 0 : 15;
+  const tax = subtotal * 0.08;
+  const total = subtotal + shipping + tax;
+  // ✅ FIX 4: Load saved address on mount
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const res = await fetch("/api/address");
+        const data = await res.json();
+
+        if (data.addresses?.[0]) {
+          const addr = data.addresses[0];
+          setFirstName(addr.firstName);
+          setLastName(addr.lastName);
+          setPhone(addr.phone);
+          setAddress(addr.address);
+          setBuilding(addr.building || "");
+          setApartment(addr.apartment || "");
+          setLandmark(addr.landmark || "");
+          setCity(addr.city);
+          setState(addr.state);
+          setPincode(addr.pincode);
+          setSavedAddressId(addr.id);
+          setAddressSaved(true);
+          setAddressOpen(false);
+        }
+      } catch (error) {
+        console.error("Failed to load address:", error);
+      }
+    };
+
+    fetchAddress();
+  }, []);
 
   const handleApplyCoupon = () => {
     if (couponCode.toLowerCase() === "save10") {
       setAppliedCoupon(couponCode);
+      toast.success("Coupon applied! You save ₹" + discount);
+    } else {
+      toast.error("Invalid coupon code");
+    }
+  };
+
+  const validateAddress = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!firstName || firstName.length < 2) {
+      newErrors.firstName = "First name must be at least 2 characters";
+    }
+    if (!lastName || lastName.length < 2) {
+      newErrors.lastName = "Last name must be at least 2 characters";
+    }
+    if (!phone || !/^[6-9]\d{9}$/.test(phone)) {
+      newErrors.phone = "Please enter a valid 10-digit phone number";
+    }
+    if (!address || address.length < 5) {
+      newErrors.address = "Address must be at least 5 characters";
+    }
+    if (!city || city.length < 2) {
+      newErrors.city = "City is required";
+    }
+    if (!state || state.length < 2) {
+      newErrors.state = "State is required";
+    }
+    if (!pincode || !/^\d{6}$/.test(pincode)) {
+      newErrors.pincode = "PIN code must be 6 digits";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // ✅ FIX 1: Field change handler with keyup validation
+  const handleFieldChange = (
+    field: keyof typeof errors,
+    value: string,
+    setter: (v: string) => void
+  ) => {
+    setter(value);
+
+    if (errors[field]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+
+    if (hasAttemptedSave) {
+      setTimeout(() => validateAddress(), 0);
+    }
+  };
+
+  // ✅ FIX 3: Save address with UPSERT
+  const handleSaveAddress = async () => {
+    setHasAttemptedSave(true);
+
+    if (!validateAddress()) {
+      return; // ✅ NO TOAST - errors are inline
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await fetch("/api/address", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          phone,
+          address,
+          building,
+          apartment,
+          landmark,
+          city,
+          state,
+          pincode,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to save address");
+      }
+
+      setAddressSaved(true);
+      setAddressOpen(false);
+      setSavedAddressId(data.address.id);
+      toast.success("Address saved successfully!");
+    } catch (error: any) {
+      console.error("Address save error:", error);
+      toast.error(error.message || "Failed to save address");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ FIX 2 & 5: Place order with image and proper navigation
+const handlePlaceOrder = async () => {
+    if (!addressSaved) {
+      toast.error("Please save your address first");
+      setAddressOpen(true);
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const orderRes = await fetch("/api/orders/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: items.map((item) => ({
+            productId: item.productId,
+            variantKey: item.variantKey,
+            title: item.title,
+            price: item.price,
+            quantity: item.quantity,
+            image: item.image,
+          })),
+          total,
+          paymentMethod,
+        }),
+      });
+
+      const data = await orderRes.json();
+      
+      if (!orderRes.ok) {
+        throw new Error(data.error || "Failed to create order");
+      }
+
+      // ✅ Store order in sessionStorage
+      sessionStorage.setItem("lastOrder", JSON.stringify(data.order));
+
+      // ✅ DON'T reset cart here - it causes re-renders!
+      // Just navigate to order confirmation
+      router.replace(`/order-confirmation/${data.order.id}`);
+
+      // ✅ Clear cart in background AFTER navigation
+      setTimeout(() => {
+        // Clear cart via API to avoid store re-renders
+        fetch("/api/cart/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ items: [] }),
+        }).catch(console.error);
+        
+        // Clear local storage directly (bypass Zustand)
+        localStorage.removeItem("cart-storage");
+      }, 1000);
+      
+    } catch (error: any) {
+      console.error("Order creation error:", error);
+      toast.error(error.message || "Failed to place order");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] lg:py-10 py-5">
-
+    <div className="bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] lg:py-10 py-5">
       <main className="container mx-auto px-4">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Forms */}
@@ -79,8 +279,15 @@ const CheckoutCart = () => {
                           <MapPin className="h-5 w-5 text-[#ff8000]" />
                         </div>
                         <div>
-                          <CardTitle className="text-lg text-[#000]">Delivery Address</CardTitle>
-                          <p className="text-sm text-[#6a7181]">Where should we deliver?</p>
+                          <CardTitle className="text-lg text-[#000] flex items-center gap-2">
+                            Delivery Address
+                            {addressSaved && (
+                              <CheckCircle2 className="h-5 w-5 text-[#28af60]" />
+                            )}
+                          </CardTitle>
+                          <p className="text-sm text-[#6a7181]">
+                            {addressSaved ? "Address saved" : "Where should we deliver?"}
+                          </p>
                         </div>
                       </div>
                       <ChevronDown className={`h-5 w-5 text-[#6a7181] transition-transform ${addressOpen ? "rotate-180" : ""}`} />
@@ -88,46 +295,228 @@ const CheckoutCart = () => {
                   </CardHeader>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <CardContent className="space-y-4 pt-0">
+<CardContent className="space-y-4 pt-0">
+                    {/* First Name & Last Name */}
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="firstName">First Name</Label>
-                        <Input id="firstName" placeholder="John" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="firstName">
+                          First Name *
+                        </Label>
+                        <Input
+                          id="firstName"
+                          value={firstName}
+                          onChange={(e) =>
+                            handleFieldChange("firstName", e.target.value, setFirstName)
+                          }
+                          placeholder="John"
+                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
+                            errors.firstName
+                              ? "border-red-500 focus-visible:border-red-500"
+                              : ""
+                          }`}
+                        />
+                        {errors.firstName && (
+                          <p className="text-xs text-red-500 mt-1">{errors.firstName}</p>
+                        )}
                       </div>
+
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="lastName">Last Name</Label>
-                        <Input id="lastName" placeholder="Doe" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="lastName">
+                          Last Name *
+                        </Label>
+                        <Input
+                          id="lastName"
+                          value={lastName}
+                          onChange={(e) =>
+                            handleFieldChange("lastName", e.target.value, setLastName)
+                          }
+                          placeholder="Doe"
+                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
+                            errors.lastName ? "border-red-500 focus-visible:border-red-500" : ""
+                          }`}
+                        />
+                        {errors.lastName && (
+                          <p className="text-xs text-red-500 mt-1">{errors.lastName}</p>
+                        )}
                       </div>
                     </div>
+
+                    {/* Phone */}
                     <div className="space-y-2">
-                      <Label className="text-[#020817] text-sm mb-1 block" htmlFor="phone">Phone Number</Label>
-                      <Input id="phone" placeholder="+91 98765 43210" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                      <Label className="text-[#020817] text-sm mb-1 block" htmlFor="phone">
+                        Phone Number *
+                      </Label>
+                      <Input
+                        id="phone"
+                        value={phone}
+                        onChange={(e) =>
+                          handleFieldChange(
+                            "phone",
+                            e.target.value.replace(/\D/g, "").slice(0, 10),
+                            setPhone
+                          )
+                        }
+                        placeholder="9876543210"
+                        maxLength={10}
+                        className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
+                          errors.phone ? "border-red-500 focus-visible:border-red-500" : ""
+                        }`}
+                      />
+                      {errors.phone && (
+                        <p className="text-xs text-red-500 mt-1">{errors.phone}</p>
+                      )}
                     </div>
+
+                    {/* Street Address */}
                     <div className="space-y-2">
-                      <Label className="text-[#020817] text-sm mb-1 block" htmlFor="address">Street Address</Label>
-                      <Input id="address" placeholder="123 Main Street, Apartment 4B" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                      <Label className="text-[#020817] text-sm mb-1 block" htmlFor="address">
+                        Street Address *
+                      </Label>
+                      <Input
+                        id="address"
+                        value={address}
+                        onChange={(e) =>
+                          handleFieldChange("address", e.target.value, setAddress)
+                        }
+                        placeholder="123 Main Street"
+                        className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
+                          errors.address ? "border-red-500 focus-visible:border-red-500" : ""
+                        }`}
+                      />
+                      {errors.address && (
+                        <p className="text-xs text-red-500 mt-1">{errors.address}</p>
+                      )}
                     </div>
+
+                    {/* Building, Apartment, Landmark */}
                     <div className="grid sm:grid-cols-3 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="city">City</Label>
-                        <Input id="city" placeholder="Mumbai" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="building">
+                          Building (Optional)
+                        </Label>
+                        <Input
+                          id="building"
+                          value={building}
+                          onChange={(e) => setBuilding(e.target.value)}
+                          placeholder="Tower A"
+                          className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                        />
                       </div>
+
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="state">State</Label>
-                        <Input id="state" placeholder="Maharashtra" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="apartment">
+                          Apartment (Optional)
+                        </Label>
+                        <Input
+                          id="apartment"
+                          value={apartment}
+                          onChange={(e) => setApartment(e.target.value)}
+                          placeholder="4B"
+                          className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                        />
                       </div>
+
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="pincode">PIN Code</Label>
-                        <Input id="pincode" placeholder="400001" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="landmark">
+                          Landmark (Optional)
+                        </Label>
+                        <Input
+                          id="landmark"
+                          value={landmark}
+                          onChange={(e) => setLandmark(e.target.value)}
+                          placeholder="Near Mall"
+                          className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+                        />
                       </div>
                     </div>
-                    <Button className="w-full mt-2 cursor-pointer !border-[#254fda] !bg-[#254fda] hover:!bg-[#254fda] hover:!text-[#fff] mb-5 !text-[#fff]" variant="outline">
+
+                    {/* City, State, Pincode */}
+                    <div className="grid sm:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="city">
+                          City *
+                        </Label>
+                        <Input
+                          id="city"
+                          value={city}
+                          onChange={(e) => handleFieldChange("city", e.target.value, setCity)}
+                          placeholder="Mumbai"
+                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
+                            errors.city ? "border-red-500 focus-visible:border-red-500" : ""
+                          }`}
+                        />
+                        {errors.city && (
+                          <p className="text-xs text-red-500 mt-1">{errors.city}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="state">
+                          State *
+                        </Label>
+                        <Input
+                          id="state"
+                          value={state}
+                          onChange={(e) => handleFieldChange("state", e.target.value, setState)}
+                          placeholder="Maharashtra"
+                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
+                            errors.state ? "border-red-500 focus-visible:border-red-500" : ""
+                          }`}
+                        />
+                        {errors.state && (
+                          <p className="text-xs text-red-500 mt-1">{errors.state}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="pincode">
+                          PIN Code *
+                        </Label>
+                        <Input
+                          id="pincode"
+                          value={pincode}
+                          onChange={(e) =>
+                            handleFieldChange(
+                              "pincode",
+                              e.target.value.replace(/\D/g, "").slice(0, 6),
+                              setPincode
+                            )
+                          }
+                          placeholder="400001"
+                          maxLength={6}
+                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
+                            errors.pincode ? "border-red-500 focus-visible:border-red-500" : ""
+                          }`}
+                        />
+                        {errors.pincode && (
+                          <p className="text-xs text-red-500 mt-1">{errors.pincode}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={handleSaveAddress}
+                      className="w-full mt-2 cursor-pointer !border-[#254fda] !bg-[#254fda] hover:!bg-[#1e40af] mb-5 !text-[#fff]"
+                      variant="outline"
+                    >
                       <CheckCircle2 className="h-4 w-4 mr-2 !text-[#fff]" />
-                      Save Address
+                      {addressSaved ? "Update Address" : "Save Address"}
                     </Button>
                   </CardContent>
                 </CollapsibleContent>
               </Card>
+              {addressSaved && !addressOpen && (
+                <Button
+                  onClick={() => {
+                    setAddressOpen(true);
+                    setAddressSaved(false);
+                  }}
+                  variant="outline"
+                  className="w-full mt-2 cursor-pointer !border-[#254fda] !bg-[#254fda] hover:!bg-[#1e40af] mb-5 !text-[#fff]"
+                >
+                  Edit Address
+                </Button>
+              )}
             </Collapsible>
 
             {/* Payment Method */}
@@ -152,7 +541,7 @@ const CheckoutCart = () => {
                     onClick={() => setPaymentMethod("upi")}
                   >
                     <div className="flex items-center gap-3">
-                      <RadioGroupItem value="upi" id="upi" className="border-[#254fda] text-[#254fda]"/>
+                      <RadioGroupItem value="upi" id="upi" className="border-[#254fda] text-[#254fda]" />
                       <Label htmlFor="upi" className="cursor-pointer font-medium text-[#000]">UPI</Label>
                     </div>
                     <div className="flex items-center gap-2">
@@ -226,7 +615,7 @@ const CheckoutCart = () => {
                 {paymentMethod === "upi" && (
                   <div className="mt-4 space-y-2">
                     <Label htmlFor="upiId" className="text-[#020817] text-sm mb-1 block">Enter UPI ID</Label>
-                    <Input id="upiId" placeholder="yourname@upi" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"/>
+                    <Input id="upiId" placeholder="yourname@upi" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]" />
                   </div>
                 )}
 
@@ -260,30 +649,28 @@ const CheckoutCart = () => {
           <div className="space-y-6">
             <Card className="rounded-2xl shadow-md p-4 w-full relative bg-[#fff] sticky top-24">
               <CardHeader>
-                <CardTitle className="text-lg text-[#000]">Order Summary</CardTitle>
+                <CardTitle className="text-xl md:text-2xl font-bold text-[hsl(240_15%_10%)]">Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Product */}
-                <div className="flex gap-4">
-                  <div className="w-20 h-20 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-[#21242c] line-clamp-2">{product.name}</h4>
-                    <p className="text-sm text-[#6a7181]">Color: {product.color}</p>
-                    <p className="text-sm text-[#6a7181]">Qty: {product.quantity}</p>
-                    <div className="flex items-baseline gap-2 mt-1">
-                      <span className="font-semibold text-[#000]">₹{product.price.toLocaleString()}</span>
-                      <span className="text-sm text-[#6a7181] line-through">
-                        ₹{product.originalPrice.toLocaleString()}
-                      </span>
+                {/* ✅ Dynamic Products from Cart */}
+                {items.map((item) => (
+                  <div key={item.id} className="flex gap-4">
+                    <div className="w-20 h-20 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
+                      <img
+                        src={`${process.env.NEXT_PUBLIC_CMS_URL}${item.image}`}
+                        alt={item.title || "Product"}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-[#21242c] line-clamp-2">{item.title}</h4>
+                      <p className="text-sm text-[#6a7181]">Qty: {item.quantity}</p>
+                      <div className="flex items-baseline gap-2 mt-1">
+                        <span className="font-semibold text-[#000]">₹{item.price.toLocaleString()}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                ))}
 
                 <Separator />
 
@@ -335,6 +722,10 @@ const CheckoutCart = () => {
                       {shipping === 0 ? "FREE" : `₹${shipping}`}
                     </span>
                   </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-[hsl(240_8%_45%)] ">Tax</span>
+                    <span className="font-semibold text-[hsl(240_15%_10%)]">₹{tax.toFixed(2)}</span>
+                  </div>
                   {discount > 0 && (
                     <div className="flex justify-between text-[#28af60]">
                       <span>Coupon Discount</span>
@@ -350,7 +741,7 @@ const CheckoutCart = () => {
                   <span className="font-bold text-2xl text-[#21242c]">₹{total.toLocaleString()}</span>
                 </div>
 
-                <Button className="cursor-pointer border-[#254fda] bg-[#254fda] w-full h-12 text-base font-semibold !text-[#fff]">
+                <Button onClick={handlePlaceOrder} className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer" >
                   Pay ₹{total.toLocaleString()}
                 </Button>
 
@@ -367,19 +758,12 @@ const CheckoutCart = () => {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Delivery Info */}
-            {/* <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3 text-sm">
-                  <Truck className="h-5 w-5 text-[#254fda] border-[#254fda] text-[#254fda]" />
-                  <div>
-                    <p className="font-medium text-[#21242c]">Estimated Delivery</p>
-                    <p className="text-[#6a7181]">3-5 business days</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card> */}
+            <MobileCheckoutBar
+              total={total}
+              itemCount={itemCount}
+              onPayClick={handlePlaceOrder}
+              addressSaved={addressSaved}
+            />
           </div>
         </div>
       </main>

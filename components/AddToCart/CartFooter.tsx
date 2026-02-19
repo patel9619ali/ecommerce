@@ -8,6 +8,8 @@ import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Checkbox } from '../ui/checkbox';
 import { useCartStore } from "@/store/useCartStore";
+import { useLoading } from "@/context/LoadingContext";
+import { useRouter } from "next/navigation";
 let NoteSVG = (
     <svg width={15} height={15} xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" fill="none" viewBox="0 0 512 512">
       <path fillRule="evenodd" clipRule="evenodd" d="M493.25 56.26l-37.51-37.51C443.25 6.25 426.87 0 410.49 0s-32.76 6.25-45.26 18.74L12.85 371.12.15 485.34C-1.45 499.72 9.88 512 23.95 512c.89 0 1.78-.05 2.69-.15l114.14-12.61 352.48-352.48c24.99-24.99 24.99-65.51-.01-90.5zM126.09 468.68l-93.03 10.31 10.36-93.17 263.89-263.89 82.77 82.77-263.99 263.98zm344.54-344.54l-57.93 57.93-82.77-82.77 57.93-57.93c6.04-6.04 14.08-9.37 22.63-9.37 8.55 0 16.58 3.33 22.63 9.37l37.51 37.51c12.47 12.48 12.47 32.78 0 45.26z" fill="currentColor"></path>
@@ -47,6 +49,25 @@ export function CartFooter({ onCheckout }: { onCheckout: () => void }) {
     (sum, i) => sum + i.price * i.quantity,
     0
   );
+  const router = useRouter();
+  const { setLoading } = useLoading();
+    const { closeCart } = useCartStore(); // 👈 get this
+
+    const handleCheckout = () => {
+    // 1️⃣ Close local bottom sheets
+    setSheetNoteOpen(false);
+    setSheetShippingOpen(false);
+    setSheetDiscountOpen(false);
+
+    // 2️⃣ Close cart sheet (Zustand one)
+    closeCart();
+
+    // 3️⃣ Start loader
+    setLoading(true);
+
+    // 4️⃣ Navigate
+    router.push("/checkout");
+    };
   return (
         <>
             <div className='sticky bottom-[0]'>
@@ -190,7 +211,7 @@ export function CartFooter({ onCheckout }: { onCheckout: () => void }) {
                     </div>
 
                     <p className='text-[13px] text-left font-[500] text-[#fff]'>Taxes, discounts and shipping calculated at checkout.</p>
-                    <Button onClick={onCheckout} className='uppercase bg-[#fff] px-4 font-[700] w-[250px] text-[#000000f0] text-[14px]'>Check out - ₹ {total}</Button>
+                    <button onClick={handleCheckout} className='py-2 cursor-pointer uppercase bg-[#fff] px-4 font-[700] w-[250px] text-[#000000f0] text-[14px] rounded-md text-center'>Check out - ₹ {total}</button>
                 </div>
             </div>
         </>

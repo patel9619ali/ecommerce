@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { BreadcrumbType } from "@/types/breadcrumbType"
+import LoadingLink from "../Loader/LoadingLink"
 
 type BreadcrumbProps = {
   items: BreadcrumbType[]
@@ -21,7 +22,7 @@ export function BreadcrumbWithCustomSeparator({
           return (
             <li key={index} className="flex items-center gap-2">
               {item.href && !isLast ? (
-                <Link
+                <LoadingLink
                   href={item.href}
                   className="font-[600] text-[16px] leading-[24px] uppercase text-[#053E54] flex items-center gap-2"
                 >
@@ -43,7 +44,7 @@ export function BreadcrumbWithCustomSeparator({
                     </svg>
                   )}
                   {item.label}
-                </Link>
+                </LoadingLink>
               ) : (
                 <span
                   className="font-[600] text-[16px] leading-[24px] uppercase text-[#053E54]"

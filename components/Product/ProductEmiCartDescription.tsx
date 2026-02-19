@@ -2,8 +2,7 @@
 
 
 import type { Product, Variant } from "@/data/types";
-import Link from "next/link";
-import { Star, Heart, Share2, ShieldCheck, Truck, RotateCcw, Minus, Plus, ChevronRight } from "lucide-react";
+import { Star, Share2, Minus, Plus } from "lucide-react";
 import { ProductBenefitsCarousel } from "./ProductBenefitsCarousel";
 import { ProductColorSelector } from "./ProductColorSelector";
 import { useRouter } from "next/navigation";
@@ -11,68 +10,118 @@ import { useCartStore } from "@/store/useCartStore";
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { motion } from "framer-motion";
 import { Button } from "../ui/button";
-import { BuyNow } from "../Loader/BuyNow";
+import { useLoading } from "@/context/LoadingContext";
+import { WishlistButton } from "../WishList/WishlistButton";
 type Props = {
   product: Product;
   variant: Variant;
-  setVariantKey: React.Dispatch<React.SetStateAction<string>>
+  setVariantKey: (key: string) => void;
   setPreviewVariantKey: React.Dispatch<React.SetStateAction<string | null>>
   previewVariantKey: string | null
 };
 
 export default function ProductEmiCartDescription({ product, variant,setVariantKey,setPreviewVariantKey,previewVariantKey }: Props) {
-    const router = useRouter();
-    const { addItem } = useCartStore();
-    const [quantity, setQuantity] = useState(1);
-    console.log(variant,"variant");
-    const handleAddToCart = () => {
-        addItem({
-        id: `${product.slug}-${variant.key}`,
-        productId: product.id,
-        slug: product.slug,
-        title: product.title,
-        price: variant.price,
-        quantity,
-        variantKey: variant.key,
-        image: variant.images[0].src, // ✅ FIX
-        });
-    };
+ const router = useRouter();
+  const { items, addItem } = useCartStore();
+  const { setLoading } = useLoading();
+  const [quantity, setQuantity] = useState(1);
+  // ✅ Add to Cart - opens cart sheet
+  const handleAddToCart = () => {
+    if (!product || !variant) return;
 
-    const handleBuyNow = () => {
-        handleAddToCart();
-        router.push(
-            `/checkout?name=${product.title}&color=${variant.key}&qty=${quantity}&price=${variant.price}&originalPrice=${4999}`
-          );
-    };
-      const originalPrice = 4999;
-    const discountedPrice = 3499;
-    const discountPercent = Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
+      addItem(
+    {
+      id: `${product.slug}-${variant.sku}`,
+      productId: product.id?.toString(),
+      slug: product.slug,
+      title: product.title,
+      price: Number(variant.sellingPrice),
+      mrp: Number(variant.mrp),
+      variantKey: variant.sku, // ✅ SINGLE SOURCE OF TRUTH
+      image: variant.images[0].url,
+      quantity: quantity,
+    },
+    true
+  );
+
+    // 🔔 Facebook Pixel tracking (optional)
+    if (typeof window !== "undefined" && typeof window.fbq === "function") {
+      window.fbq("track", "AddToCart", {
+        content_ids: [`${product.id}-${variant.sku}`],
+        content_name: product.title,
+        content_type: "product",
+        value: variant.sellingPrice,
+        currency: "INR",
+      });
+    }
+  };
+
+  // ✅ Buy Now - goes to checkout WITHOUT opening cart
+  
+  const handleBuyNow = () => {
+    if (!product || !variant) return;
+    setLoading(true);
+    // 🔎 Check if this variant already exists in cart
+    const exists = items.some(
+      (i) =>
+        i.productId === product.id?.toString() &&
+      i.variantKey === variant.sku
+    ); 
+
+    // ➕ Only add if it doesn't already exist
+    if (!exists) {
+      addItem(
+        {
+          id: `${product.slug}-${variant.sku}`,
+          productId: product.id?.toString(),
+          slug: product.slug,
+          title: product.title,
+          price: Number(variant.sellingPrice),
+          mrp: Number(variant.mrp),
+          variantKey: variant.sku, // ✅ Use variant.sku
+          image: variant.images[0].url,
+          quantity: 1, // ✅ Always 1 for Buy Now
+        },
+        false // ❌ DON'T open cart sheet
+      );
+    }
+
+    // 🚀 Navigate to checkout
+    router.push("/checkout");
+  };
+
+  const originalPrice = variant?.mrp;
+  const discountedPrice = variant?.sellingPrice;
+  const displayKey = previewVariantKey ?? variant.sku;
+  
+  // Calculate discount percentage
+  const discountPercent = (originalPrice && discountedPrice && originalPrice > 0) 
+    ? Math.round(((originalPrice - discountedPrice) / originalPrice) * 100) 
+    : 0;
     return(
         <>
         <div className="space-y-6">
           <div>
               <div className="flex items-center gap-2 mb-2">
                 <Badge variant="secondary" className="bg-[#eafaf1] text-[#1e8549] hover:bg-[#f3f4f6cc]">New Arrival</Badge>
-                <Badge variant="outline" className="text-[#28af60] border-[#28af60]">-{discountPercent}% OFF</Badge>
+                <Badge variant="outline" className="text-[#28af60] border-[#28af60]">{discountPercent}% OFF</Badge>
               </div>
               <h1 className="text-2xl lg:text-3xl font-bold text-[#21242c] mb-2">
-                BlendRas Portable Juicer Pro
+                {product?.title} - {displayKey?.replace(/-/g, ' ').toUpperCase()} 
               </h1>
-              <p className="text-[#6a7181] mb-3">
-                Powerful 400ml portable blender with USB-C charging
+              <p className="text-[#6a7181] mb-3" dangerouslySetInnerHTML={{ __html: product?.description }}>
               </p>
               <div className="flex items-center gap-4">
                 <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`h-5 w-5 ${i < 4 ? "fill-[#f59f0a] text-[#f59f0a]" : "fill-[#8e9dbc] text-[#aab7c4bf]"}`}
+                      className={`h-5 w-5 ${i < Math.round(product?.rating) ? "fill-[#f59f0a] text-[#f59f0a]" : "fill-[#8e9dbc] text-[#aab7c4bf]"}`}
                     />
                   ))}
                 </div>
-                <span className="text-sm text-[#6a7181]">4.2 (2,847 reviews)</span>
+                <span className="text-sm text-[#6a7181]">{`${product?.rating} (${product?.ratingCount} reviews)`}</span>
                 <span className="text-sm text-[#28af60] font-medium">500+ bought last month</span>
               </div>
             </div>
@@ -90,7 +139,7 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
             </div>
 
             <Separator />
-            <ProductColorSelector product={product} activeKey={variant.key} onHover={setPreviewVariantKey} onLeave={() => setPreviewVariantKey(null)} onSelect={setVariantKey} previewVariantKey={previewVariantKey}/>
+            <ProductColorSelector product={product} activeKey={variant.sku} onHover={setPreviewVariantKey} onLeave={() => setPreviewVariantKey(null)} onSelect={setVariantKey} previewVariantKey={previewVariantKey}/>
             <Separator/>
             
         
@@ -126,18 +175,21 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
               <Button className="cursor-pointer flex-1 h-12 text-[16px] !bg-[#ffffff99] text-[#000] hover:text-[#254fda] hover:bg-[#eafaf1] border border-[#aeb2bb] rounded-lg" variant="outline" onClick={handleAddToCart} >
                 Add to Cart
               </Button>
-              <BuyNow productId={product.id} slug={product.slug} title={product.title} variant={variant}/>
-              
+              <Button className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer" onClick={handleBuyNow} > Buy Now </Button>
             </div>
 
-          <ProductBenefitsCarousel benefits={variant.benefits} />
+          <ProductBenefitsCarousel benefits={variant?.benefits} />
           <div className="flex justify-between">
             <p className="text-xs text-black/60 flex items-center gap-1 text-[15px]">
               🔒 Secure transaction
             </p>
-            <Button variant="outline" size="icon" className="cursor-pointer h-8 w-8 border-1 !border-[#000]">
-              <Share2 className="h-5 w-5 text-[#000]" />
-            </Button>
+            <div className="flex justify-between">
+              <div className="flex gap-2">
+                <Button variant="outline" size="icon" className="cursor-pointer h-8 w-8 border-1 !border-[#000]">
+                  <Share2 className="h-5 w-5 text-[#000]" />
+                </Button>
+            </div>
+          </div>
           </div>
         </div>
 

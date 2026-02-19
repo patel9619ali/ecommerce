@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 
 import Link from "next/link";
 import Image from "next/image";
+import LoadingLink from "../Loader/LoadingLink";
 export default function Footer() {
   const [loginOpen, setLoginOpen] = useState(false);
   const [view, setView] = useState<"phone" | "country">("phone");
@@ -57,7 +58,11 @@ export default function Footer() {
             <path d="M95.4747 19.6221H89.3405C88.8974 19.0728 88.3993 18.5455 87.8536 18.0699C80.1776 11.2787 68.8283 11.9829 59.2808 13.229C51.2752 14.1987 42.343 11.9423 36.9229 5.68564C42.9546 10.9985 51.3301 12.2741 58.8707 10.6076L62.7673 9.76703C69.5681 8.35864 76.6618 7.96414 83.4699 9.90345C88.4506 11.3819 93.292 14.689 95.4747 19.6221Z" fill="#fff" />
           </svg>
         </div> */}
-        <h1 className="text-2xl font-bold text-[#28af60]">BlendRas</h1>
+        <h3 className="text-2xl lg:text-3xl font-bold tracking-tight">
+            <LoadingLink href={`/`}><span className="text-gradient">Blend</span>
+            <span className="text-[#000]">Ras</span>
+          </LoadingLink>
+        </h3>
         {/* Top Section */}
         {/* <div className="grid grid-cols-2 grid-rows-[auto_auto] lg:grid-cols-[25%_25%_50%] lg:grid-rows-1 pb-8 border-b border-dashed border-[#FFFFFF33]">
           
@@ -101,13 +106,13 @@ export default function Footer() {
 
 
         {/* Bottom Section */}
-        <div className="flex flex-col-reverse lg:flex-row justify-between items-center gap-4 pt-6">
+        <div className="flex flex-col-reverse lg:flex-row justify-between items-center gap-4 pt-6 lg:mb-0 mb-10">
           <div className="flex flex-wrap justify-center lg:justify-start gap-3">
-            <Link href={`/terms-and-conditions`} className="lg:text-[16px] text-[12px] font-[400] text-[#053E54]">Terms & Conditions</Link>
+            <LoadingLink href={`/terms-and-conditions`} className="lg:text-[16px] text-[12px] font-[400] text-[#053E54]">Terms & Conditions</LoadingLink>
             <span className="lg:text-[16px] text-[12px] font-[400] text-[#053E54]">|</span>
-            <Link href={`/privacy-and-policy`} className="lg:text-[16px] text-[12px] font-[400] text-[#053E54]">Privacy & Policy</Link>
+            <LoadingLink href={`/privacy-and-policy`} className="lg:text-[16px] text-[12px] font-[400] text-[#053E54]">Privacy & Policy</LoadingLink>
             <span className="lg:text-[16px] text-[12px] font-[400] text-[#053E54]">|</span>
-            <Link href={`/cookie-policy`} className="lg:text-[16px] text-[12px] font-[400] text-[#053E54]">Cookie Policy</Link>
+            <LoadingLink href={`/cookie-policy`} className="lg:text-[16px] text-[12px] font-[400] text-[#053E54]">Cookie Policy</LoadingLink>
             <p className="text-[12px] font-[400] text-[#FFFFFFB2] lg:hidden ">
               © 2026 | BlendRas Portable Juicer
             </p>

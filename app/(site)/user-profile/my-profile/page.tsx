@@ -31,7 +31,6 @@ export default function MyProfile() {
     const [isChangeEmail, setIsChangeEmail] = useState(false);
     const [openPassword, setOpenPassword] = useState(false);
     const user = useCurrentUser();
-    console.log(user,"useruseruser")
     return (
         <>
             <section className="bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)]">

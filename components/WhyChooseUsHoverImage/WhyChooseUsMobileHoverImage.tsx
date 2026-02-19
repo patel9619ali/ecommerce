@@ -57,18 +57,15 @@ const WhyChooseUsMobileHoverImage = ({
   const [activeIndex, setActiveIndex] = useState(0); // first visible by default
 
   return (
-    <section className={clsx("w-full py-16 bg-[#dbd4d463] dark:bg-[#fffffff]", className)}>
+    <section className={clsx("w-full py-16 bg-[#fff] dark:bg-[#fff]", className)}>
       <div className="container mx-auto !px-3">
-        <h2 className="text-[36px] text-[#000] text-center font-semibold mb-12">
-          Why BlendRas Portable Juicer
-        </h2>
-
-        <div className="bg-[#3a4149] rounded-lg">
+        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-center">Why BlendRas  <span className="text-gradient-accent">Portable Juicer</span></h2>
+        <div className="bg-[linear-gradient(180deg,hsl(262,40%,98%)_0%,hsl(262,30%,95%)_100%)] rounded-lg border-[2px] border-[#eae8ee] hover:border-[#7c3bed33] hover:shadow-xl transition-all duration-500">
           {slides.map((item, index) => {
             const isActive = activeIndex === index;
 
             return (
-              <div key={item.id} className="border-b border-white/10">
+              <div key={item.id} className="border-b border-black/10">
                 {/* TITLE */}
                 <button
                   onClick={() => setActiveIndex(index)}
@@ -77,8 +74,8 @@ const WhyChooseUsMobileHoverImage = ({
                   <h3
                     className={clsx(
                       isActive
-                        ? "text-white text-[18px] font-[700]"
-                        : "text-white/70 text-[14px] font-[500]"
+                        ? "text-black text-[18px] font-[700]"
+                        : "text-black/70 text-[14px] font-[500]"
                     )}
                   >
                     {item.title}
@@ -88,11 +85,11 @@ const WhyChooseUsMobileHoverImage = ({
                 {/* EXPANDED CONTENT */}
                 {isActive && (
                   <div className="px-4 pb-6 animate-fadeIn">
-                    <div className="text-white mb-4">
+                    <div className="text-black mb-4">
                       <h4 className="text-[14px] font-semibold mb-2">
                         {item.subtitle}
                       </h4>
-                      <p className="text-white/70 leading-relaxed">
+                      <p className="text-black/70 leading-relaxed">
                         {item.description}
                       </p>
                     </div>

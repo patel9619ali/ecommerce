@@ -21,8 +21,15 @@ export async function signup(values: unknown): Promise<AuthResponse> {
     where: { email },
   });
 
-  if (existingUser) {
+    if (existingUser?.emailVerified) {
     return { error: "Email already exists" };
+  }
+
+  // ✅ If unverified user exists, delete them (allow re-signup)
+  if (existingUser && !existingUser.emailVerified) {
+    await db.user.delete({
+      where: { email },
+    });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -33,13 +40,19 @@ export async function signup(values: unknown): Promise<AuthResponse> {
       name,
       email,
       password: hashedPassword,
+      emailVerified: null, // ❌ NOT verified - can't login
     },
   });
 
-  // 2️⃣ Generate OTP
+  // ✅ Delete old OTPs for this email
+  await db.verificationToken.deleteMany({
+    where: { email },
+  });
+
+  // ✅ Generate new OTP
   const otp = await generateEmailVerificationOtp(email);
 
-  // 3️⃣ Send OTP email
+  // ✅ Send OTP email
   await sendEmailVerificationOtp(otp.email, otp.token);
 
   // 4️⃣ Tell frontend to show OTP screen

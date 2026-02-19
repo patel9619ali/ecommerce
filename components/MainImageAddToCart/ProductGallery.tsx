@@ -19,14 +19,16 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
-
+import { WishlistButton } from "../WishList/WishlistButton";
+import { Product,Variant } from "@/data/types";
 type Props = {
   variant: any;
+  product: any;
 };
 
 const MOBILE_THUMB_LIMIT = 4;
 
-export const ProductGallery = ({ variant }: Props) => {
+export const ProductGallery = ({ variant,product }: Props) => {
   /* ================= EMBLA ================= */
   const [mainRef, mainApi] = useEmblaCarousel({ loop: true });
 
@@ -96,8 +98,8 @@ export const ProductGallery = ({ variant }: Props) => {
                 <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
                   <DialogTrigger asChild>
                     <img
-                      src={image.src}
-                      alt={variant.name}
+                      src={`${process.env.NEXT_PUBLIC_CMS_URL}${image?.url}`}
+                      alt={image.name}
                       className="w-full lg:h-[550px] h-full object-cover select-none cursor-pointer"
                     />
                   </DialogTrigger>
@@ -115,7 +117,7 @@ export const ProductGallery = ({ variant }: Props) => {
                       {variant.images.map((img: any, i: number) => (
                         <img
                           key={i}
-                          src={img.src}
+                          src={`${process.env.NEXT_PUBLIC_CMS_URL}${img?.url}`}
                           alt={variant.name}
                           className="w-full object-cover"
                         />
@@ -141,6 +143,19 @@ export const ProductGallery = ({ variant }: Props) => {
           >
             <ChevronRight className="text-white" />
           </div>
+        </div>
+        <div className="absolute top-0 right-0">
+            <WishlistButton
+                productId={product?.id?.toString()}  // ✅ From product
+                variantId={variant.sku}             // ✅ From variant
+                slug={product.slug}                 // ✅ From product
+                title={`${product.title} - ${variant.colorName}`} // ✅ Both
+                price={Number(variant.sellingPrice)} // ✅ From variant
+                mrp={Number(variant.mrp)}           // ✅ From variant
+                image={variant.images[0]?.url}      // ✅ From variant
+                colorName={variant.colorName}       // ✅ From variant
+                colorHex={variant.colorHex}         // ✅ From variant
+              />
         </div>
 
         {/* MOBILE ZOOM ICON */}
@@ -168,7 +183,7 @@ export const ProductGallery = ({ variant }: Props) => {
                 }`}
               >
                 <img
-                  src={image.src}
+                  src={`${process.env.NEXT_PUBLIC_CMS_URL}${image?.url}`}
                   alt="Thumb"
                   className="w-full h-full object-cover"
                 />
@@ -200,7 +215,7 @@ export const ProductGallery = ({ variant }: Props) => {
                 }`}
               >
                 <img
-                  src={image.src}
+                  src={`${process.env.NEXT_PUBLIC_CMS_URL}${image?.url}`}
                   alt="Thumb"
                   className="w-full h-full object-cover"
                 />
@@ -211,13 +226,13 @@ export const ProductGallery = ({ variant }: Props) => {
           <div className="flex justify-center gap-3 mt-3">
             <button
               onClick={scrollPrev}
-              className="w-8 h-8 bg-black/60 flex items-center justify-center"
+              className="cursor-pointer w-8 h-8 bg-black/60 flex items-center justify-center"
             >
               <ChevronsUp className="text-white" />
             </button>
             <button
               onClick={scrollNext}
-              className="w-8 h-8 bg-black/60 flex items-center justify-center"
+              className="cursor-pointer w-8 h-8 bg-black/60 flex items-center justify-center"
             >
               <ChevronsDown className="text-white" />
             </button>
@@ -250,7 +265,7 @@ export const ProductGallery = ({ variant }: Props) => {
                 }`}
               >
                 <img
-                  src={image.src}
+                  src={`${process.env.NEXT_PUBLIC_CMS_URL}${image?.url}`}
                   alt="Thumb"
                   className="w-full h-full object-cover"
                 />

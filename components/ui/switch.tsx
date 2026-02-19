@@ -13,13 +13,7 @@ function Switch({
     <SwitchPrimitive.Root
       data-slot="switch"
       className={cn(
-        "peer inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-sm transition-all outline-none disabled:cursor-not-allowed disabled:opacity-50",
-        // Checked state - teal/green
-        "data-[state=checked]:bg-[#057C72]",
-        // Unchecked state - gray
-        "data-[state=unchecked]:bg-[#C9C9C9]",
-        // Focus state
-        "focus-visible:ring-2 focus-visible:ring-[#057C72] focus-visible:ring-offset-2",
+        "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors data-[state=checked]:bg-[#8c3cdd] data-[state=unchecked]:bg-[#1e293b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[#fafafa] disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}
@@ -27,13 +21,7 @@ function Switch({
       <SwitchPrimitive.Thumb
         data-slot="switch-thumb"
         className={cn(
-          "pointer-events-none block size-4 rounded-full ring-0 transition-transform",
-          // Thumb is always white
-          "bg-white shadow-md",
-          // Position when checked
-          "data-[state=checked]:translate-x-[calc(100%+10px)]",
-          // Position when unchecked
-          "data-[state=unchecked]:translate-x-0"
+          "pointer-events-none block h-5 w-5 rounded-full bg-[#fafafa] shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0"
         )}
       />
     </SwitchPrimitive.Root>

@@ -1,28 +1,30 @@
-import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useCartStore } from "@/store/useCartStore";
+'use client';
+import { useState } from "react";
 import { ProductGallery } from "./ProductGallery";
 import { BuyCartSection } from "./BuyCartSection";
-import { PRODUCTS } from "@/data/products";
+import { Product } from "@/data/types";
 import type { Variant } from "@/data/types";
-export const MainImageAddToCart = () => {
+type Props = {
+  productData?: Product[];
+}
+export const MainImageAddToCart = ({productData}:Props) => {
   /** 1️⃣ Pick the product (homepage featured product) */
-  const product = PRODUCTS[0]; // DYNASTY HEADPHONE
+   const product = productData?.[0];
 
-  /** 2️⃣ Variant state */
-  const [variantKey, setVariantKey] = useState(
-    product.variants[0].key
+  const [variantKey, setVariantKey] = useState<string | null>(
+    product?.variant?.[0]?.sku ?? null
   );
 
-  /** 3️⃣ Selected variant */
-  const selectedVariant = product.variants.find(
-    (v) => v.key === variantKey
-  ) as Variant;
+  const selectedVariant =
+    product?.variant?.find(v => v.sku === variantKey) ||
+    product?.variant?.[0];
+
+  if (!product || !selectedVariant) return null;
   return (
-    <section className="w-full bg-[#fff] py-5">
+    <section className="w-full bg-[#fff] py-14">
         <div className="container mx-auto">
             <div className="grid lg:grid-cols-[2.5fr_1.5fr]">
-                <ProductGallery variant={selectedVariant} />
+                <ProductGallery variant={selectedVariant} product={product}/>
                 <BuyCartSection
                   product={product}
                   selectedVariant={selectedVariant}

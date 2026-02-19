@@ -3,6 +3,7 @@ import { useRouter} from "next/navigation";
 import { useCartStore } from "@/store/useCartStore";
 import Image from "next/image";
 import Link from "next/link";
+import LoadingLink from "@/components/Loader/LoadingLink"
 import {
   Sheet,
   SheetClose,
@@ -25,9 +26,19 @@ export function AddToCart() {
   const hydrated = useHydrated();
 
 if (!hydrated) return null;
-  
   const item = items[0]; // single-product store
   if (!item) return null;
+  const getImageSrc = (image?: string) => {
+  if (!image) return "/placeholder.png";
+
+  // Already absolute (http or https)
+  if (/^https?:\/\//i.test(image)) {
+    return image;
+  }
+
+  // Relative path → prepend CMS URL
+  return `${process.env.NEXT_PUBLIC_CMS_URL}${image}`;
+};
   return (
  <>
 
@@ -49,9 +60,9 @@ if (!hydrated) return null;
             <div className='mt-6 overflow-y-auto'>
 
                 {items.map((item,index) => (
-                    <Link href={`/products/${item.slug}?variant=${item.variantKey}&editCart=true`} key={`${item.title}-${index}`} onClick={() => closeCart()} className='grid grid-cols-[1fr_3fr] gap-2 mx-4 first:pt-0 pt-5 pb-5 last:pb-0 last:border-0 border-b border-[#ffffff4f]'>
+                    <LoadingLink href={`/products/${item?.slug}?variant=${item?.variantKey}`} key={`${item.title}-${index}`} onClick={() => closeCart()} className='grid grid-cols-[1fr_3fr] gap-2 mx-4 first:pt-0 pt-5 pb-5 last:pb-0 last:border-0 border-b border-[#ffffff4f]'>
                         <div className="lg:w-[120px] xs:w-[120px] w-[100px]">
-                        <Image src={item.image} alt={item.title} width={120} height={120} className="object-cover rounded-md" />
+                        <Image src={getImageSrc(item.image)} alt={item?.title || "Product image"} width={120} height={120} className="object-cover rounded-md" />
 
                         </div>
                     <div className='flex flex-col gap-3 items-start mb-5'>
@@ -68,7 +79,7 @@ if (!hydrated) return null;
                                 <button onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    updateQuantity(item.id, Math.max(1, item.quantity - 1));
+                                    updateQuantity( item.productId, item.variantKey, Math.max(1, item.quantity - 1) );
                                 }}  className='px-2 cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed lg:h-[30px] h-[25px]'>
                                     <Minus size={10} />
                                 </button>
@@ -78,7 +89,7 @@ if (!hydrated) return null;
                                 <button onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    updateQuantity(item.id, item.quantity + 1);
+                                    updateQuantity( item.productId, item.variantKey, item.quantity + 1 );
                                 }}  className='px-2 transition-colors cursor-pointer lg:h-[30px] h-[25px]' aria-label="Increase quantity">
                                     <Plus size={10} />
                                 </button>
@@ -87,13 +98,13 @@ if (!hydrated) return null;
                             <button onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                removeItem(item.id);
+                                removeItem(item.productId, item.variantKey);
                             }} className='cursor-pointer opacity-70 hover:opacity-100 transition-opacity' aria-label="Remove item">
                             {TrashSVG}
                             </button>
                         </div>
                     </div>
-                </Link >
+                    </LoadingLink >
             ))}
             </div>
           

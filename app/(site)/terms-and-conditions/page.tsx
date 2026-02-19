@@ -1,7 +1,7 @@
 import TableOfContents from "@/components/TableOfContent/TableOfContent";
 import { BreadcrumbType } from "@/types/breadcrumbType";
 import { BreadcrumbWithCustomSeparator } from "@/components/Breadcrumb/Breadcrumb";
-
+;
 const termsAndConditions = [
   {
     title: "1. Introduction",

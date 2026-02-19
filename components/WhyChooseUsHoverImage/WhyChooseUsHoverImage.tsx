@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useCallback, useEffect } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 type WhyChooseUsHoverImageProps = {
@@ -65,13 +66,14 @@ const WhyChooseUsHoverImage = ({ className }: WhyChooseUsHoverImageProps) => {
   return (
     <section className={`w-full bg-[#fff] py-10 ${className}`}>
       <div className='container mx-auto'>
-          <h2 className='text-[40px] text-[#000] text-center font-[600] mb-5'>Why BlendRas Portable Juicer</h2>
-          
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-8 block text-center">
+            Why BlendRas <span className="text-gradient"> Portable Juicer</span>
+          </h2>
             <div className="h-[600px] flex gap-8">
               {/* Left Side - Text Items */}
               <div className="flex flex-col w-1/2 justify-center">
                 {slides.map((slide, index) => (
-                  <div key={index} onMouseEnter={() => scrollTo(index)} className={`p-6 rounded-lg cursor-pointer transition-all duration-500 ${ selectedIndex === index ? 'bg-[#dbd4d463]' : 'bg-transparent hover:bg-white/5' }`} >
+                  <div key={index} onMouseEnter={() => scrollTo(index)} className={`p-6 rounded-lg cursor-pointer transition-all duration-500 ${ selectedIndex === index ? 'bg-[linear-gradient(180deg,hsl(262,40%,98%)_0%,hsl(262,30%,95%)_100%)]' : 'bg-transparent hover:border-[#7c3bed33] hover:bg-white/5 hover:shadow-xl' }`} >
                     <h3
                       className={`text-xl font-bold mb-1 transition-colors duration-300 ${
                         selectedIndex === index ? 'text-black dark:text-black' : 'dark:text-black text-white-400'

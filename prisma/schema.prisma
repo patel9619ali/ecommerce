@@ -1,3 +1,4 @@
+// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -6,25 +7,59 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-enum UserRole{
+
+enum UserRole {
   ADMIN
   USER
 }
+
 model User {
-  id            String          @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String          @unique
+  email         String    @unique
   emailVerified DateTime?
   image         String?
-  password         String?
-  role  UserRole @default(USER)
+  password      String?
+  role          UserRole  @default(USER)
   accounts      Account[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-
-  isTwoFactorEnabled Boolean @default(false)
+  carts         Cart[]
+  addresses     Address[]
+  orders        Order[]  // ✅ Added this line
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  wishlists Wishlist[]
+  isTwoFactorEnabled    Boolean                @default(false)
   twoFactorConfirmation TwoFactorConfirmation?
+}
+
+model Wishlist {
+  id        String         @id @default(cuid())
+  userId    String         @map("user_id")
+  items     WishlistItem[]
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+  @@map("wishlists")
+}
+
+model WishlistItem {
+  id         String   @id @default(cuid())
+  wishlistId String   @map("wishlist_id")
+  productId  String   @map("product_id")
+  variantId  String   @map("variant_id")
+  slug       String
+  title      String
+  price      Int
+  mrp        Int
+  image      String
+  colorName  String?  @map("color_name")
+  colorHex   String?  @map("color_hex")
+  addedAt    DateTime @default(now()) @map("added_at")
+
+  wishlist Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+
+  @@unique([wishlistId, productId, variantId])
+  @@map("wishlist_items")
 }
 
 model Account {
@@ -39,45 +74,123 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
- 
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   @@id([provider, providerAccountId])
 }
 
 model VerificationToken {
-  id String @id @default(cuid())
-  email String
-  token String  @unique
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
   expires DateTime
 
-  @@unique([email,token])
+  @@unique([email, token])
 }
 
 model PasswordResetToken {
-  id String @id @default(cuid())
-  email String
-  token String @unique
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
   expires DateTime
+
   @@unique([email, token])
 }
 
 model TwoFactorToken {
-  id String @id @default(cuid())
-  email String
-  token String @unique
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
   expires DateTime
 
   @@unique([email, token])
 }
 
 model TwoFactorConfirmation {
-  id String @id @default(cuid())
+  id     String @id @default(cuid())
   userId String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId])
+}
+
+model Cart {
+  id     String     @id @default(cuid()) 
+  userId String     @map("user_id")
+  items  CartItem[]
+  user   User       @relation(fields: [userId], references: [id])
+
+  @@unique([userId])
+  @@map("carts")
+}
+
+model CartItem {
+  id        String @id
+  cartId    String @map("cart_id")
+  productId String @map("product_id")
+  variantId String @map("variant_id")
+  slug      String?   
+  title     String
+  price     Int
+  quantity  Int
+  image     String
+
+  cart Cart @relation(fields: [cartId], references: [id])
+
+  @@unique([cartId, productId, variantId])
+  @@map("cart_items")
+}
+
+model Order {
+  id        String      @id
+  userId    String      @map("user_id")
+  amount    Int
+  status    String
+  createdAt DateTime    @map("created_at")
+  items     OrderItem[]
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade) // ✅ Added relation
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String @id
+  orderId   String @map("order_id")
+  productId String @map("product_id")
+  variantId String @map("variant_id")
+  title     String
+  price     Int
+  quantity  Int
+  image     String? // ✅ Added image field
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_items")
+}
+
+// ✅ NEW: Address Model
+model Address {
+  id         String   @id @default(cuid())
+  userId     String   @unique @map("user_id") // ✅ Unique for UPSERT
+  firstName  String   @map("first_name")
+  lastName   String   @map("last_name")
+  phone      String
+  address    String
+  building   String?
+  apartment  String?
+  landmark   String?
+  city       String
+  state      String
+  pincode    String
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") // ✅ Added updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("addresses")
 }
