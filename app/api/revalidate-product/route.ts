@@ -1,15 +1,16 @@
-import { revalidatePath } from "next/cache";
 import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const { slug } = await req.json();
+  const body = await req.json();
+  const slug = body?.entry?.slug;
 
   if (!slug) {
-    return NextResponse.json({ error: "Slug required" }, { status: 400 });
+    return NextResponse.json({ error: "No slug found" }, { status: 400 });
   }
 
-  revalidateTag(`product-${slug}`, "max");
+  revalidateTag(`product-${slug}`, "max"); // ✅ REQUIRED in your version
+  revalidateTag("homepage-products", "max"); // ✅ also revalidate listing
 
   return NextResponse.json({ revalidated: true });
 }
