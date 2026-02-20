@@ -1,76 +1,87 @@
-"use client";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-    Carousel,
-    CarouselContent,
-    CarouselItem,
-    CarouselNext,
-    CarouselPrevious,
-} from "@/components/ui/carousel";
-import Image from "next/image";
+'use client';
+import { motion } from "framer-motion";
+import { Leaf, Zap, Heart, Recycle } from "lucide-react";
 
-const cars = [
-    {
-        location: "Access to Exclusive Deals",
-        img: `${process.env.NEXT_PUBLIC_APP_URL}/assets/images/Access_to_Exclusive_Fleet_Deals.png`,
-    },
-    {
-        location: "Transparent & Fair Bidding",
-        img: `${process.env.NEXT_PUBLIC_APP_URL}/assets/images/Transparent_Fair_Bidding.png`,
-    },
-    {
-        location: "Expert Guidance",
-        img: `${process.env.NEXT_PUBLIC_APP_URL}/assets/images/Expert_Guidance.png`,
-    },
-    {
-        location: "Wide Selection of Cars",
-        img: `${process.env.NEXT_PUBLIC_APP_URL}/assets/images/Wide_Selection_of_Cars.png`,
-    }
+const values = [
+  {
+    icon: Leaf,
+    title: "Fresh First",
+    description: "We champion fresh, whole ingredients. Our blenders are engineered to preserve nutrients and maximize flavor from real fruits and vegetables.",
+  },
+  {
+    icon: Zap,
+    title: "Power On-The-Go",
+    description: "With USB-C charging and powerful motors, Blendras delivers café-quality smoothies in seconds — wherever you are.",
+  },
+  {
+    icon: Heart,
+    title: "Built With Care",
+    description: "Every Blendras product is crafted with premium BPA-free materials and undergoes rigorous quality testing for your peace of mind.",
+  },
+  {
+    icon: Recycle,
+    title: "Sustainably Made",
+    description: "We're committed to reducing single-use plastic. One Blendras replaces hundreds of disposable cups and bottles each year.",
+  },
 ];
 
-export default function AboutUsCards() {
-    return (
- <section className="bg-gradient-to-b from-[#FFFFFF] to-[rgba(255,255,255,0)] rounded-[63px] py-8">
-            <div className={`container mx-auto flex relative flex-col items-center lg:gap-2 gap-2 flex-wrap lg:mb-4 mb-4`}>
-                <h2 className={`text-[19px] sm:text-[37px] font-bold relative z-[2] bg-gradient-to-r from-[#053E54] to-[#057C72] bg-clip-text text-transparent xs:mb-6 mb-3 bg-clip-text max-w-3xl lg:text-center text-center lg:leading-[48px] leading-normal`}>Enjoy exclusive deals, transparent bidding, expert guidance, and a wide selection of cars—making it simple to save time</h2>
-
-                {/* Carousel */}
-                <Carousel className="w-full">
-                    <CarouselContent>
-                        {cars.map((car, index) => (
-                        <CarouselItem key={index} className="basis-[calc(100%/1.2)] sm:basis-[calc(100%/2)] md:basis-[calc(100%/2.2)] lg:basis-[calc(100%/3.5)] xl:basis-[calc(100%/4)] first:pl-4 pl-5 h-auto">
-                            <Card className="p-0 border-none shadow-none bg-transparent gap-0">
-                            <CardContent className="rounded-[20px] overflow-hidden border-[#fff] border-[2px] bg-white/40 backdrop-blur-sm shadow-none px-0">
-                                <Image src={car.img} alt={car.location} width={250} height={250} className="!w-full h-full object-cover" unoptimized/>
-                            </CardContent>
-                            <CardContent className="p-4 space-y-2">
-                                <h3 className="font-[700] text-[#053e54] text-center sm:text-[27px] text-[17px] uppercase leading-[34px]">
-                                {car.location}
-                                </h3>
-                            </CardContent>
-                            </Card>
-                        </CarouselItem>
-                        ))}
-                    </CarouselContent>
-
-                    <div className="flex justify-center gap-2 mt-8">
-                        <CarouselPrevious
-                        className="
-                            ![position:unset] hidden disabled:opacity-0 disabled:pointer-events-none
-                            sm:w-[60px] sm:h-[60px] w-[40px] h-[40px]
-                            sm:rounded-[20px] rounded-[16px]
-                            bg-[#C8FFFA] hover:bg-[#C8FFFA]
-                            border border-[2px] border-[#fff]
-                        "
-                        />
-                        <CarouselNext
-                        className="![position:unset] hidden disabled:opacity-0 disabled:pointer-events-none sm:w-[60px] sm:h-[60px] w-[40px] h-[40px] sm:rounded-[20px] rounded-[16px] bg-[#C8FFFA] hover:bg-[#C8FFFA] border border-[2px] border-[#fff]"
-                        />
-                    </div>
-                </Carousel>
-
-                <p className={`xs:text-[23px] text-[19px] font-[500] mb-3 max-w-2xl lg:text-center text-center lg:leading-[30px] leading-normal text-[#666666]`}>Quality isn’t just about the cars we sell; it’s about the experience we provide. We treat every transaction as a partnership, ensuring that the process of growing your fleet or finding a reliable ride is as smooth and enjoyable as the drive itself. At Zabeel Cars, your satisfaction is our final destination.</p>
-            </div>
-        </section>
-    );
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.15 } },
 };
+
+const item = {
+  hidden: { opacity: 0, y: 30 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
+};
+
+const AboutUsCards = () => {
+  return (
+    <section className="py-24 bg-[#F9FBF9]">
+      <div className="container mx-auto px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <h2 className="font-display text-4xl md:text-5xl font-bold text-[#172B22] mb-4">
+            What We Stand For
+          </h2>
+          <p className="text-[#687B72] text-lg max-w-2xl mx-auto font-body">
+            Four pillars that drive everything we create at Blendras.
+          </p>
+        </motion.div>
+
+        <motion.div
+          variants={container}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8"
+        >
+          {values.map((value) => (
+            <motion.div
+              key={value.title}
+              variants={item}
+              className="group p-8 rounded-2xl bg-[#FFFFFF] border border-[#DCE4DE] hover:border-[#2B966050] transition-all duration-300 shadow-[0_4px_24px_-4px_rgba(43,150,96,0.12)]"
+            >
+              <div className="w-14 h-14 rounded-xl bg-[#E0F0E8] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <value.icon className="w-7 h-7 text-[#2B9660]" />
+              </div>
+              <h3 className="font-display text-xl font-semibold text-[#172B22] mb-3">
+                {value.title}
+              </h3>
+              <p className="text-[#687B72] font-body leading-relaxed text-sm">
+                {value.description}
+              </p>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
+export default AboutUsCards;

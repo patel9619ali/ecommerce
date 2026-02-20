@@ -1,21 +1,51 @@
-"use client";
-import Image from "next/image";
-import React,{useState,useMemo} from "react";
+'use client';
+import { motion } from "framer-motion";
+import heroImage from "@/assets/Blender/BlackBlender/black1.jpg";
 
+const AboutUsBanner = () => {
+  return (
+    <section className="relative overflow-hidden py-24 md:py-32" style={{ background: "linear-gradient(135deg, rgba(43,150,96,0.08), rgba(224,138,40,0.06))" }}>
+      <div className="container mx-auto px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            <span className="inline-block px-4 py-1.5 rounded-full bg-[#E0F0E8] text-[#205040] text-sm font-medium font-body mb-6">
+              Our Story
+            </span>
+            <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-[#172B22] leading-tight mb-6">
+              Blend Your Life,{" "}
+              <span className="text-[#2B9660]">Anywhere.</span>
+            </h1>
+            <p className="text-lg text-[#687B72] font-body leading-relaxed max-w-lg">
+              At Blendras, we believe healthy living shouldn't stop when you leave your kitchen. 
+              Our portable juicers are designed for people who refuse to compromise on nutrition — 
+              no matter where life takes them.
+            </p>
+          </motion.div>
 
-export default function AboutUsBanner() {
-    return (
-        <section className="py-8">
-            <div className={`flex relative flex-col items-center lg:gap-2 gap-2 flex-wrap lg:mb-4 mb-4`}>
-                <h2 className={`text-[19px] sm:text-[37px] font-bold relative z-[2] bg-gradient-to-r from-[#053E54] to-[#057C72] bg-clip-text text-transparent mb-3 bg-clip-text max-w-2xl lg:text-center text-center lg:leading-[48px] leading-normal`}>Welcome to Zabeel Cars, the trusted gateway to premium fleet-owned vehicles.</h2>
-                <p className={`lg:text-[19px] text-[12px] font-[400] to-[#666666] mb-3 max-w-2xl lg:text-center text-center lg:leading-[26px] leading-normal`}>Backed by the decades-long heritage of A.A. Al Moosa Enterprise, we make car trading simple, secure, and accessible for automotive professionals. By offering vehicles directly from our own world-class rental fleets, including Thrifty and Dollar, we ensure a seamless experience that combines transparent ownership with competitive, intermediary-free pricing.</p>
-                <div className="flex justify-center w-full">
-                    <div className="w-full max-w-[1058px] rounded-[20px] overflow-hidden">
-                        <Image src="/assets/images/about-us-image.jpg" alt="About Us Banner" width={1058} height={369} className="w-full h-auto aspect-[1058/369] object-cover rounded-[20px]" unoptimized/>
-                    </div>
-                </div>
-
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            className="relative"
+          >
+            <div className="relative rounded-3xl overflow-hidden shadow-[0_8px_32px_-8px_rgba(23,43,34,0.08)]">
+              <img
+                src={"/assets/Blender/BlackBlender/black1.jpg"}
+                alt="Blendras portable juicer surrounded by fresh fruits"
+                className="w-full h-auto object-cover"
+              />
             </div>
-        </section>
-    );
-};              
+            <div className="absolute -bottom-4 -left-4 w-24 h-24 rounded-full bg-[#E08A2833] animate-float" />
+            <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full bg-[#2B966026] animate-float" style={{ animationDelay: "2s" }} />
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default AboutUsBanner;
