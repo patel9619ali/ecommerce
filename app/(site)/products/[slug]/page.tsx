@@ -43,6 +43,6 @@ export default async function ProductPage(props: Props) {
 // ✅ Generate static params for popular products (optional)
 export async function generateStaticParams() {
   return [
-    { slug: 'blend-ras-portable-juicer' },
+    { slug: 'blend-ras' },
   ];
 }

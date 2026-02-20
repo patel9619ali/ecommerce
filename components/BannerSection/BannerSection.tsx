@@ -46,7 +46,7 @@ const discountPercent = (activeVariant.mrp && activeVariant.sellingPrice && acti
     <>
     <div className="bg-[#000] text-[#fafafa] text-center py-2.5 text-sm">🎉 
       <span className="font-semibold">{`${discountPercent}% OFF`}</span> — Limited Time Only | 
-      <LoadingLink className="underline underline-offset-2 font-medium ml-3" href="/products/blend-ras-portable-juicer">Shop Now</LoadingLink>
+      <LoadingLink className="underline underline-offset-2 font-medium ml-3" href="/products/blend-ras">Shop Now</LoadingLink>
     </div>
     <section id="hero" className="relative overflow-hidden min-h-screen flex items-center">
       <div className="absolute inset-0 bg-[linear-gradient(180deg,hsl(262,40%,98%)_0%,hsl(262,30%,95%)_100%)]" />
