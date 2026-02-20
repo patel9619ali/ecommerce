@@ -126,7 +126,7 @@ const InformativeSlider = ({ className,productData }: InformativeSliderProps) =>
 
                     <motion.div key={`image-${index}`} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.8, ease: "easeOut" }} className="absolute left-[15%] top-0 w-[85%] h-full">
                       <img 
-                        src={`${process.env.NEXT_PUBLIC_CMS_URL}${variantImage?.url}`}
+                        src={`${variantImage?.url}`}
                         alt={variantImage?.name} 
                         className={`w-full ${isActive ? 'h-[100vh]' : 'h-[75vh]'} object-cover aspect-3/2`}
                       />
@@ -134,7 +134,7 @@ const InformativeSlider = ({ className,productData }: InformativeSliderProps) =>
                   </div>
                 ) : (
                     <motion.img initial={{ opacity: 0.7 }} animate={{ opacity: 1 }} transition={{ duration: 1.8, ease: "easeOut" }}
-                      src={`${process.env.NEXT_PUBLIC_CMS_URL}${variantImage?.url}`}
+                      src={`${variantImage?.url}`}
                       alt={variantImage?.name}
                       className={`w-full ${isActive ? 'h-[100vh]' : 'h-[75vh]'} object-cover aspect-3/2`} 
                     />

@@ -55,7 +55,7 @@ const MobileInformativeSlider = ({ className,productData }: Props) => {
               className="flex-[0_0_100%] min-w-0 relative"
             >
               <img
-                  src={`${process.env.NEXT_PUBLIC_CMS_URL}${img?.url}`}
+                  src={`${img?.url}`}
                   alt={img?.name || variant.colorName}
                 className="w-full aspect-[3/4] object-cover h-[300px]"
               />

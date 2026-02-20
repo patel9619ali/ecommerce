@@ -50,7 +50,7 @@ export default function WishlistPage() {
         quantity: 1,
       }, true);
   };
-
+  console.log(items,"item")
   if (!user) return null;
   return (
     <section className="bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] min-h-screen">
@@ -99,7 +99,7 @@ export default function WishlistPage() {
                         <CardContent className="p-0">
                           <div className="aspect-square bg-muted/50 flex items-center justify-center relative">
                             <img
-                              src={`${process.env.NEXT_PUBLIC_CMS_URL}${item.image}`}
+                              src={`${item.image}`}
                               alt={item.title}
                               className="w-full h-full object-cover"
                             />

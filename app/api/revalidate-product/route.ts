@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Slug required" }, { status: 400 });
   }
 
-  revalidatePath(`product-${slug}`);
+  revalidateTag(`product-${slug}`, "max");
 
   return NextResponse.json({ revalidated: true });
 }

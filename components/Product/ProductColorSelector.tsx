@@ -46,7 +46,7 @@ export function ProductColorSelector({
         >
           <div className="w-full aspect-square rounded-lg duration-500 ease-out hover:scale-110">
             <Image
-              src={`${process.env.NEXT_PUBLIC_CMS_URL}${variantItem.images[0].url}`}
+              src={`${variantItem.images[0].url}`}
               alt={variantItem.sku}
               width={80}
               height={80}

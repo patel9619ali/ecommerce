@@ -349,7 +349,7 @@ const OrderConfirmation = () => {
                   <div className="w-14 h-14 md:w-16 md:h-16 rounded-xl overflow-hidden flex-shrink-0 bg-[hsl(240_10%_95%)]">
                     {item.image ? (
                       <img
-                        src={`${process.env.NEXT_PUBLIC_CMS_URL}${item.image}`}
+                        src={`${item.image}`}
                         alt={item.title}
                         className="w-full h-full object-cover"
                       />

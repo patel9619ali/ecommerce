@@ -657,7 +657,7 @@ const handlePlaceOrder = async () => {
                   <div key={item.id} className="flex gap-4">
                     <div className="w-20 h-20 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
                       <img
-                        src={`${process.env.NEXT_PUBLIC_CMS_URL}${item.image}`}
+                        src={`${item.image}`}
                         alt={item.title || "Product"}
                         className="w-full h-full object-cover"
                       />

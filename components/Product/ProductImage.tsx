@@ -50,7 +50,7 @@ export default function ProductImage({ product, variant }: Props) {
                   }`}
               >
                 <Image
-                  src={`${process.env.NEXT_PUBLIC_CMS_URL}${img.url}`}
+                  src={`${img.url}`}
                   alt={`${variant?.id} thumbnail`}
                   width={80}
                   height={80}
@@ -100,7 +100,7 @@ export default function ProductImage({ product, variant }: Props) {
       {/* ================= MAIN IMAGE ================= */}
       {isMobile ? (
         <div className="order-1">
-          <ImageHoverZoom product={product} variant={variant} src={`${process.env.NEXT_PUBLIC_CMS_URL}${activeImage}`} alt={`${product.title} - ${variant.id}`} />
+          <ImageHoverZoom product={product} variant={variant} src={`${activeImage}`} alt={`${product.title} - ${variant.id}`} />
         </div>
       ) : (
         <AnimatePresence mode="wait">
@@ -112,7 +112,7 @@ export default function ProductImage({ product, variant }: Props) {
             transition={{ duration: 0.25 }}
             className="lg:order-2 order-1"
           >
-            <ImageHoverZoom product={product} variant={variant} src={`${process.env.NEXT_PUBLIC_CMS_URL}${variant.images[activeIndex].url}`} alt={`${product.title} - ${variant.id}`} />
+            <ImageHoverZoom product={product} variant={variant} src={`${variant.images[activeIndex].url}`} alt={`${product.title} - ${variant.id}`} />
           </motion.div>
         </AnimatePresence>
       )}
@@ -145,7 +145,7 @@ export default function ProductImage({ product, variant }: Props) {
             }`}
           >
           <Image
-            src={`${process.env.NEXT_PUBLIC_CMS_URL}${img.url}`}
+            src={`${img.url}`}
             alt={`${variant.id} thumbnail`}
             fill
             sizes="25vw"

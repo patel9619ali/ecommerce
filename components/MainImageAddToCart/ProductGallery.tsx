@@ -98,7 +98,7 @@ export const ProductGallery = ({ variant,product }: Props) => {
                 <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
                   <DialogTrigger asChild>
                     <img
-                      src={`${process.env.NEXT_PUBLIC_CMS_URL}${image?.url}`}
+                      src={`${image?.url}`}
                       alt={image.name}
                       className="w-full lg:h-[550px] h-full object-cover select-none cursor-pointer"
                     />
@@ -117,7 +117,7 @@ export const ProductGallery = ({ variant,product }: Props) => {
                       {variant.images.map((img: any, i: number) => (
                         <img
                           key={i}
-                          src={`${process.env.NEXT_PUBLIC_CMS_URL}${img?.url}`}
+                          src={`${img?.url}`}
                           alt={variant.name}
                           className="w-full object-cover"
                         />
@@ -183,7 +183,7 @@ export const ProductGallery = ({ variant,product }: Props) => {
                 }`}
               >
                 <img
-                  src={`${process.env.NEXT_PUBLIC_CMS_URL}${image?.url}`}
+                  src={`${image?.url}`}
                   alt="Thumb"
                   className="w-full h-full object-cover"
                 />
@@ -215,7 +215,7 @@ export const ProductGallery = ({ variant,product }: Props) => {
                 }`}
               >
                 <img
-                  src={`${process.env.NEXT_PUBLIC_CMS_URL}${image?.url}`}
+                  src={`${image?.url}`}
                   alt="Thumb"
                   className="w-full h-full object-cover"
                 />
@@ -265,7 +265,7 @@ export const ProductGallery = ({ variant,product }: Props) => {
                 }`}
               >
                 <img
-                  src={`${process.env.NEXT_PUBLIC_CMS_URL}${image?.url}`}
+                  src={`${image?.url}`}
                   alt="Thumb"
                   className="w-full h-full object-cover"
                 />

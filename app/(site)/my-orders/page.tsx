@@ -239,7 +239,7 @@ const MyOrders = () => {
                         >
                           {item.image ? (
                             <img 
-                              src={`${process.env.NEXT_PUBLIC_CMS_URL}${item.image}`} 
+                              src={`${item.image}`} 
                               alt={item.title} 
                               className="w-full h-full object-cover" 
                             />

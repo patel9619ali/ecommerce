@@ -40,7 +40,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemove, index }: CartItemProps) =>
         {/* Image */}
         <div className="w-[80px] h-[100px] md:w-32 md:h-32 rounded-xl overflow-hidden bg-[hsl(240_8%_93%)]">
           <img
-            src={`${process.env.NEXT_PUBLIC_CMS_URL}${item?.image}`}
+            src={`${item?.image}`}
             alt={item?.title || "Product"}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform"
           />

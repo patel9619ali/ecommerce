@@ -162,7 +162,7 @@ const discountPercent = (activeVariant.mrp && activeVariant.sellingPrice && acti
           <AnimatePresence mode="wait">
             <motion.img
               key={activeVariant.id}
-              src={`${process.env.NEXT_PUBLIC_CMS_URL}${imageUrl}`}
+              src={`${imageUrl}`}
               className="relative drop-shadow-2xl float-animation w-full lg:h-[550px] h-full object-cover select-none cursor-pointer drop-shadow-2xl"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

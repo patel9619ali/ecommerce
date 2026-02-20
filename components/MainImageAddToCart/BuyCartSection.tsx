@@ -45,7 +45,7 @@ export const BuyCartSection = ({
             `}
           >
             <img
-              src={`${process.env.NEXT_PUBLIC_CMS_URL}${variant.images[0].url}`}
+              src={`${variant.images[0].url}`}
               alt={variant.images[0].name}
               className="w-full h-full object-cover"
             />
