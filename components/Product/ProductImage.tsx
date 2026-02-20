@@ -86,7 +86,7 @@ export default function ProductImage({ product, variant }: Props) {
                 }`}
             >
               <Image
-                src={`${process.env.NEXT_PUBLIC_CMS_URL || ""}${img.url}`}
+                src={`${img.url}`}
                 alt={`${variant.id} thumbnail`}
                 width={60}
                 height={60}
