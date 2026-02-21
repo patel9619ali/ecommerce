@@ -104,7 +104,7 @@ const MyOrders = () => {
       </div>
     );
   }
-
+console.log(orders,"orderId order my order");
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[hsl(240_10%_98%)]">

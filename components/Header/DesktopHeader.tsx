@@ -50,7 +50,7 @@ const quickLinks = [
 ];
 export function DesktopHeader() {
   const [loadedUserId, setLoadedUserId] = useState<string | null>(null);
-  const items = useCartStore((state) => state.items);
+  const cartItems = useCartStore((state) => state.items);
   const { openCart } = useCartStore();
   const resetCart = useCartStore((s) => s.resetCart);
   const loadFromDatabase = useCartStore((s) => s.loadFromDatabase);
@@ -65,7 +65,7 @@ export function DesktopHeader() {
   const [isFixed, setIsFixed] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-
+  const { items: wishlistItems, removeItem, loadFromDatabase: loadWishlistFromDB, hydrated } = useWishlistStore();
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -210,13 +210,18 @@ useEffect(() => {
             <span className="sr-only">Search</span>
           </Button> */}
           <LoadingLink href="/user-profile/wishlist" className="rounded-lg hover:bg-[#f1f5f9] transition-colors relative" aria-label="Wishlist">
-            <Heart className="h-5 w-5" />
+            <Heart className={`h-5 w-5 ${wishlistItems.length > 0 ? 'fill-red-500 text-red-500' : 'text-gray-500'}`} />
+            {wishlistItems.length > 0 && (
+              <span className="absolute -top-3 -right-3 h-5 w-5 rounded-full p-0 flex items-center justify-center rounded-full text-[10px] font-bold text-white bg-[linear-gradient(135deg,hsl(252,80%,60%),hsl(16,90%,58%))] shadow-[0_4px_12px_-2px_rgba(104,71,235,0.3)]">
+                {wishlistItems.length}
+              </span>
+            )}
           </LoadingLink>
-          <Button className="cursor-pointer relative" onClick={() => router.push('/cart')} variant="ghost" size="icon" disabled={items.length === 0}>
+          <Button className="cursor-pointer relative" onClick={() => router.push('/cart')} variant="ghost" size="icon" disabled={cartItems.length === 0}>
             <ShoppingCart className="h-5 w-5 dark:text-black" />
-            {items.length > 0 && (
+            {cartItems.length > 0 && (
               <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full p-0 flex items-center justify-center rounded-full text-[10px] font-bold text-white bg-[linear-gradient(135deg,hsl(252,80%,60%),hsl(16,90%,58%))] shadow-[0_4px_12px_-2px_rgba(104,71,235,0.3)]">
-                {items.length}
+                {cartItems.length}
               </span>
             )}
           </Button>
