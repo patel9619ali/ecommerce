@@ -16,31 +16,35 @@ export async function GET(
       );
     }
 
-    // ✅ Fetch order with items
-    const order = await db.order.findUnique({
-      where: {
-        id: orderId,
-      },
-      include: {
-        items: true,
-      },
-    });
+    // ✅ Fetch order and session in parallel for speed
+    const [order, session] = await Promise.all([
+      db.order.findUnique({
+        where: { id: orderId },
+        include: { items: true },
+      }),
+      auth().catch(() => null), // ✅ Never let auth failure crash the route
+    ]);
 
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // ✅ Optional: Add session check for security (but don't block if session is loading)
-    const session = await auth();
+    // ✅ If session exists, verify ownership — if no session, still allow
+    // (guest just landed from payment redirect)
     if (session?.user?.id && order.userId !== session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
     return NextResponse.json({ order });
-  } catch (error) {
-    console.error("Fetch order error:", error);
+  } catch (error: any) {
+    // ✅ Log full error details so Vercel logs show exactly what broke
+    console.error("❌ Fetch order error:", {
+      message: error?.message,
+      stack: error?.stack,
+      cause: error?.cause,
+    });
     return NextResponse.json(
-      { error: "Failed to fetch order" },
+      { error: error?.message || "Failed to fetch order" },
       { status: 500 }
     );
   }

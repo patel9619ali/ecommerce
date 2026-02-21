@@ -147,6 +147,7 @@ const OrderConfirmation = () => {
   const shipping = 0;
   const tax = Math.round(subtotal * 0.08);
   const total = order?.amount || subtotal + shipping + tax;
+  console.log(orderId, order,"orderId order");
   if (isLoadingOrder) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[hsl(240_10%_98%)]">
