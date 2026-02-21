@@ -58,27 +58,33 @@ const OrderConfirmation = () => {
 
   // ✅ Extract orderId once - don't depend on params changing
   const rawOrderId = params?.orderId;
-  const orderId = (Array.isArray(rawOrderId) ? rawOrderId[0] : rawOrderId) || '';
-
+  const orderId = (Array.isArray(rawOrderId) ? rawOrderId[0] : rawOrderId) ?? '';
+  const redirectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const estimatedDelivery = getEstimatedDelivery();
 
 
   // ✅ Single useEffect to handle everything
   useEffect(() => {
-
+    // ✅ orderId not yet resolved (common on first render in production)
+    // Wait instead of immediately redirecting
     if (!orderId) {
-      // Small delay to avoid race conditions
-      setTimeout(() => router.push("/"), 100);
+      redirectTimer.current = setTimeout(() => {
+        router.push("/");
+      }, 2000); // Give params 2s to resolve before giving up
       return;
     }
 
-    // prevent double fetch
-    if (hasFetched.current) {
-      return;
+    // ✅ Clear any pending redirect since orderId is now available
+    if (redirectTimer.current) {
+      clearTimeout(redirectTimer.current);
+      redirectTimer.current = null;
     }
+
+    // ✅ Prevent double fetch (React StrictMode / re-renders)
+    if (hasFetched.current) return;
     hasFetched.current = true;
 
-    // ✅ Try sessionStorage first
+    // ✅ Try sessionStorage cache first (avoids extra API call right after payment)
     const cached = sessionStorage.getItem("lastOrder");
     if (cached) {
       try {
@@ -87,17 +93,16 @@ const OrderConfirmation = () => {
           setOrder(parsed);
           setIsLoadingOrder(false);
           sessionStorage.removeItem("lastOrder");
-          return; // Done!
+          return;
         }
       } catch (e) {
         console.error("❌ Cache parse error:", e);
       }
     }
 
-    // ✅ Fetch from API
+    // ✅ Fetch from API with retry logic
     const fetchOrder = async (attempt = 0) => {
       try {
-
         const res = await fetch(`/api/orders/${orderId}`, {
           cache: "no-store",
         });
@@ -126,7 +131,14 @@ const OrderConfirmation = () => {
     };
 
     fetchOrder();
-  }, [orderId, router]); // Only depend on orderId and router
+
+    // ✅ Cleanup redirect timer on unmount
+    return () => {
+      if (redirectTimer.current) {
+        clearTimeout(redirectTimer.current);
+      }
+    };
+  }, [orderId, router]);
 
   const subtotal =
     order?.items.reduce((sum, item) => sum + item.price * item.quantity, 0) ||
@@ -135,7 +147,6 @@ const OrderConfirmation = () => {
   const shipping = 0;
   const tax = Math.round(subtotal * 0.08);
   const total = order?.amount || subtotal + shipping + tax;
-  console.log(orderId, order,"orderId order");
   if (isLoadingOrder) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[hsl(240_10%_98%)]">
