@@ -580,7 +580,7 @@ const handlePlaceOrder = async () => {
               </CardHeader>
               <CardContent className="lg:px-6 px-0">
                 <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
-                  <div
+                  {/* <div
                     className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
                       paymentMethod === "upi" ? "border-[#254fda] bg-[#28af600d]" : "border-[#e2e4e9] hover:border-[#254fda]"
                     }`}
@@ -642,7 +642,7 @@ const handlePlaceOrder = async () => {
                         <Label htmlFor="wallet" className="cursor-pointer font-medium text-[#000]">Wallets</Label>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
 
                   <div
                     className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
@@ -658,7 +658,7 @@ const handlePlaceOrder = async () => {
                   </div>
                 </RadioGroup>
 
-                {paymentMethod === "upi" && (
+                {/* {paymentMethod === "upi" && (
                   <div className="mt-4 space-y-2">
                     <Label htmlFor="upiId" className="text-[#020817] text-sm mb-1 block">Enter UPI ID</Label>
                     <Input id="upiId" placeholder="yourname@upi" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]" />
@@ -686,7 +686,7 @@ const handlePlaceOrder = async () => {
                       <Input id="cardName" placeholder="JOHN DOE" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]" />
                     </div>
                   </div>
-                )}
+                )} */}
               </CardContent>
             </Card>
           </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { useLoading } from "@/context/LoadingContext"
 import { ComponentProps, MouseEvent } from "react"
 
@@ -17,22 +17,29 @@ export default function LoadingLink({
   ...props 
 }: LoadingLinkProps) {
   const { setLoading } = useLoading()
-  const router = useRouter()
+  const pathname = usePathname()
 
   const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
-    // Call custom onClick if provided
+    const isExternal = typeof href === 'string' && href.startsWith('http')
+    const isSamePageAnchor = typeof href === 'string' && href.startsWith('#')
+    const isModifiedClick = e.metaKey || e.ctrlKey || e.shiftKey || e.altKey
+    const hrefString = typeof href === 'string' ? href : href?.pathname ?? ''
+    const isSamePage = hrefString === pathname
+
+    if (isSamePage) {
+      // ✅ Prevent navigation entirely when already on this page
+      // This stops the sheet close/reopen flicker
+      e.preventDefault()
+      // Still call onClick (so sheet closes if needed)
+      if (onClick) onClick(e)
+      return
+    }
+
+    // Call custom onClick for actual navigation
     if (onClick) {
       onClick(e)
     }
 
-    // Don't show loader for:
-    // - External links
-    // - Same page anchors
-    // - modifier keys (open in new tab)
-    const isExternal = typeof href === 'string' && href.startsWith('http')
-    const isSamePageAnchor = typeof href === 'string' && href.startsWith('#')
-    const isModifiedClick = e.metaKey || e.ctrlKey || e.shiftKey || e.altKey
-    
     if (showLoader && !isExternal && !isSamePageAnchor && !isModifiedClick) {
       setLoading(true)
     }
