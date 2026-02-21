@@ -52,7 +52,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
   const [state, setState] = useState("");
   const [pincode, setPincode] = useState("");
 
-  const [paymentMethod, setPaymentMethod] = useState("upi");
+  const [paymentMethod, setPaymentMethod] = useState(""); // ✅ Nothing selected by default
   const [addressOpen, setAddressOpen] = useState(true);
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
@@ -65,7 +65,8 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
   // testing
   const shipping = 0;
   const tax = subtotal * 0.08;
-  const total = subtotal + shipping + tax;
+  const codCharge = paymentMethod === "cod" ? 30 : 0;
+  const total = subtotal + shipping + tax + codCharge;
   const loadRazorpay = () =>
   new Promise((resolve) => {
     const script = document.createElement("script");
@@ -217,10 +218,15 @@ const handlePlaceOrder = async () => {
     return;
   }
 
+  if (!paymentMethod) {
+    toast.error("Please select a payment method");
+    return;
+  }
+
   try {
     setLoading(true);
 
-    // ✅ COD Flow — skip Razorpay entirely
+    // ✅ COD Flow
     if (paymentMethod === "cod") {
       const orderRes = await fetch("/api/orders/create", {
         method: "POST",
@@ -240,12 +246,8 @@ const handlePlaceOrder = async () => {
       });
 
       const data = await orderRes.json();
+      if (!orderRes.ok) throw new Error(data.error || "Failed to create order");
 
-      if (!orderRes.ok) {
-        throw new Error(data.error || "Failed to create order");
-      }
-
-      // ✅ Cache order in sessionStorage so confirmation page loads instantly
       sessionStorage.setItem("lastOrder", JSON.stringify(data.order));
       router.replace(`/order-confirmation/${data.order.id}`);
 
@@ -258,97 +260,91 @@ const handlePlaceOrder = async () => {
         localStorage.removeItem("cart-storage");
       }, 1000);
 
-      return; // ✅ Done, skip Razorpay
+      return;
     }
 
-    // ✅ Razorpay Flow — for all other payment methods
-    await loadRazorpay();
+    // ✅ Razorpay Flow
+    if (paymentMethod === "razorpay") {
+      await loadRazorpay();
 
-    const paymentRes = await fetch("/api/payment/create-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: total }),
-    });
+      const paymentRes = await fetch("/api/payment/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: total }),
+      });
 
-    const paymentData = await paymentRes.json();
+      const paymentData = await paymentRes.json();
+      if (!paymentRes.ok) throw new Error("Failed to initialize payment");
 
-    if (!paymentRes.ok) {
-      throw new Error("Failed to initialize payment");
-    }
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: paymentData.order.amount,
+        currency: "INR",
+        name: "BlendRas",
+        description: "Order Payment",
+        order_id: paymentData.order.id,
 
-    const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-      amount: paymentData.order.amount,
-      currency: "INR",
-      name: "BlendRas",
-      description: "Order Payment",
-      order_id: paymentData.order.id,
-
-      handler: async function (response: any) {
-        try {
-          const orderRes = await fetch("/api/orders/create", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              items: items.map((item) => ({
-                productId: item.productId,
-                variantKey: item.variantKey,
-                title: item.title,
-                price: item.price,
-                quantity: item.quantity,
-                image: item.image,
-              })),
-              total,
-              paymentMethod,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpayOrderId: response.razorpay_order_id,
-            }),
-          });
-
-          const data = await orderRes.json();
-
-          if (!orderRes.ok) {
-            throw new Error(data.error || "Failed to create order");
-          }
-
-          sessionStorage.setItem("lastOrder", JSON.stringify(data.order));
-          router.replace(`/order-confirmation/${data.order.id}`);
-
-          setTimeout(() => {
-            fetch("/api/cart/sync", {
+        handler: async function (response: any) {
+          try {
+            const orderRes = await fetch("/api/orders/create", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ items: [] }),
-            }).catch(console.error);
-            localStorage.removeItem("cart-storage");
-          }, 1000);
+              body: JSON.stringify({
+                items: items.map((item) => ({
+                  productId: item.productId,
+                  variantKey: item.variantKey,
+                  title: item.title,
+                  price: item.price,
+                  quantity: item.quantity,
+                  image: item.image,
+                })),
+                total,
+                paymentMethod: "razorpay",
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpayOrderId: response.razorpay_order_id,
+              }),
+            });
 
-        } catch (err: any) {
-          toast.error(err.message || "Order creation failed");
-          setLoading(false);
-        }
-      },
+            const data = await orderRes.json();
+            if (!orderRes.ok) throw new Error(data.error || "Failed to create order");
 
-      modal: {
-        ondismiss: function () {
-          // ✅ User closed Razorpay modal — stop loader
-          setLoading(false);
+            sessionStorage.setItem("lastOrder", JSON.stringify(data.order));
+            router.replace(`/order-confirmation/${data.order.id}`);
+
+            setTimeout(() => {
+              fetch("/api/cart/sync", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ items: [] }),
+              }).catch(console.error);
+              localStorage.removeItem("cart-storage");
+            }, 1000);
+
+          } catch (err: any) {
+            toast.error(err.message || "Order creation failed");
+            setLoading(false);
+          }
         },
-      },
 
-      theme: { color: "#254fda" },
-    };
+        modal: {
+          ondismiss: function () {
+            setLoading(false); // ✅ Stop loader when user closes modal
+          },
+        },
 
-    const razor = new (window as any).Razorpay(options);
-    razor.open();
+        theme: { color: "#254fda" },
+      };
+
+      const razor = new (window as any).Razorpay(options);
+      razor.open();
+    }
 
   } catch (error: any) {
     console.error(error);
     toast.error(error.message || "Payment failed");
     setLoading(false);
   }
-  // ✅ NOTE: Don't put setLoading(false) in finally here
-  // because Razorpay handler is async — finally runs before handler completes
+  // ✅ No finally setLoading(false) — Razorpay handler is async
 };
 
   return (
@@ -609,129 +605,69 @@ const handlePlaceOrder = async () => {
             </Collapsible>
 
             {/* Payment Method */}
-            <Card className="rounded-2xl shadow-md p-6 w-full relative bg-[#fff]">
-              <CardHeader className="lg:px-6 px-0">
-                <div className="flex items-center gap-3 px-0">
-                  <div className="h-10 w-10 rounded-full bg-[#fff2e5] flex items-center justify-center">
-                    <CreditCard className="h-5 w-5 text-[#ff8000]" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg text-[#000]">Payment Method</CardTitle>
-                    <p className="text-sm text-[#6a7181]">All transactions are secure</p>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="lg:px-6 px-0">
-                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
-                  {/* <div
-                    className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                      paymentMethod === "upi" ? "border-[#254fda] bg-[#28af600d]" : "border-[#e2e4e9] hover:border-[#254fda]"
-                    }`}
-                    onClick={() => setPaymentMethod("upi")}
-                  >
-                    <div className="flex items-center gap-3">
-                      <RadioGroupItem value="upi" id="upi" className="border-[#254fda] text-[#254fda]" />
-                      <Label htmlFor="upi" className="cursor-pointer font-medium text-[#000]">UPI</Label>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="text-xs text-[#000]">GPay</Badge>
-                      <Badge variant="secondary" className="text-xs text-[#000]">PhonePe</Badge>
-                      <Badge variant="secondary" className="text-xs text-[#000]">Paytm</Badge>
-                    </div>
-                  </div>
+{/* Payment Method */}
+<Card className="rounded-2xl shadow-md p-6 w-full relative bg-[#fff]">
+  <CardHeader className="lg:px-6 px-0">
+    <div className="flex items-center gap-3 px-0">
+      <div className="h-10 w-10 rounded-full bg-[#fff2e5] flex items-center justify-center">
+        <CreditCard className="h-5 w-5 text-[#ff8000]" />
+      </div>
+      <div>
+        <CardTitle className="text-lg text-[#000]">Payment Method</CardTitle>
+        <p className="text-sm text-[#6a7181]">All transactions are secure</p>
+      </div>
+    </div>
+  </CardHeader>
+  <CardContent className="lg:px-6 px-0">
+    <div className="space-y-3">
 
-                  <div
-                    className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                      paymentMethod === "card" ? "border-[#254fda] bg-[#28af600d]" : "border-[#e2e4e9] hover:border-[#254fda]"
-                    }`}
-                    onClick={() => setPaymentMethod("card")}
-                  >
-                    <div className="flex items-center gap-3">
-                      <RadioGroupItem value="card" id="card" className="border-[#254fda] text-[#254fda]" />
-                      <Label htmlFor="card" className="cursor-pointer font-medium text-[#000]">Credit / Debit Card</Label>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="text-xs text-[#000]">Visa</Badge>
-                      <Badge variant="secondary" className="text-xs text-[#000]">MC</Badge>
-                      <Badge variant="secondary" className="text-xs text-[#000]">RuPay</Badge>
-                    </div>
-                  </div>
+      {/* ✅ Razorpay Option */}
+      <div
+        className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
+          paymentMethod === "razorpay"
+            ? "border-[#254fda] bg-[#254fda0d]"
+            : "border-[#e2e4e9] hover:border-[#254fda]"
+        }`}
+        onClick={() => setPaymentMethod(prev => prev === "razorpay" ? "" : "razorpay")}
+      >
+        <div className="flex items-center gap-3">
+          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
+            paymentMethod === "razorpay" ? "border-[#254fda] bg-[#254fda]" : "border-gray-300"
+          }`}>
+            {paymentMethod === "razorpay" && <div className="w-2 h-2 rounded-full bg-white" />}
+          </div>
+          <label className="cursor-pointer font-medium text-[#000]">Pay Online</label>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Badge variant="secondary" className="text-xs text-[#000]">UPI</Badge>
+          <Badge variant="secondary" className="text-xs text-[#000]">Card</Badge>
+          <Badge variant="secondary" className="text-xs text-[#000]">NetBanking</Badge>
+        </div>
+      </div>
 
-                  <div
-                    className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                      paymentMethod === "netbanking" ? "border-[#254fda] bg-[#28af600d]" : "border-[#e2e4e9] hover:border-[#254fda]"
-                    }`}
-                    onClick={() => setPaymentMethod("netbanking")}
-                  >
-                    <div className="flex items-center gap-3">
-                      <RadioGroupItem value="netbanking" id="netbanking" className="border-[#254fda] text-[#254fda]" />
-                      <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-[#6a7181]" />
-                        <Label htmlFor="netbanking" className="cursor-pointer font-medium text-[#000]">Net Banking</Label>
-                      </div>
-                    </div>
-                  </div>
+      {/* ✅ COD Option */}
+      <div
+        className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
+          paymentMethod === "cod"
+            ? "border-[#254fda] bg-[#28af600d]"
+            : "border-[#e2e4e9] hover:border-[#254fda]"
+        }`}
+        onClick={() => setPaymentMethod(prev => prev === "cod" ? "" : "cod")}
+      >
+        <div className="flex items-center gap-3">
+          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
+            paymentMethod === "cod" ? "border-[#254fda] bg-[#254fda]" : "border-gray-300"
+          }`}>
+            {paymentMethod === "cod" && <div className="w-2 h-2 rounded-full bg-white" />}
+          </div>
+          <label className="cursor-pointer font-medium text-[#000]">Cash on Delivery</label>
+        </div>
+        <Badge variant="outline" className="text-xs text-[#000]">+₹30</Badge>
+      </div>
 
-                  <div
-                    className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                      paymentMethod === "wallet" ? "border-[#254fda] bg-[#28af600d]" : "border-[#e2e4e9] hover:border-[#254fda]"
-                    }`}
-                    onClick={() => setPaymentMethod("wallet")}
-                  >
-                    <div className="flex items-center gap-3">
-                      <RadioGroupItem value="wallet" id="wallet" className="border-[#254fda] text-[#254fda]" />
-                      <div className="flex items-center gap-2">
-                        <Wallet className="h-4 w-4 text-[#6a7181]" />
-                        <Label htmlFor="wallet" className="cursor-pointer font-medium text-[#000]">Wallets</Label>
-                      </div>
-                    </div>
-                  </div> */}
-
-                  <div
-                    className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                      paymentMethod === "cod" ? "border-[#254fda] bg-[#28af600d]" : "border-[#e2e4e9] hover:border-[#254fda]"
-                    }`}
-                    onClick={() => setPaymentMethod("cod")}
-                  >
-                    <div className="flex items-center gap-3">
-                      <RadioGroupItem value="cod" id="cod" className="border-[#254fda] text-[#254fda]" />
-                      <Label htmlFor="cod" className="cursor-pointer font-medium text-[#000]">Cash on Delivery</Label>
-                    </div>
-                    <Badge variant="outline" className="text-xs text-[#000]">+₹30</Badge>
-                  </div>
-                </RadioGroup>
-
-                {/* {paymentMethod === "upi" && (
-                  <div className="mt-4 space-y-2">
-                    <Label htmlFor="upiId" className="text-[#020817] text-sm mb-1 block">Enter UPI ID</Label>
-                    <Input id="upiId" placeholder="yourname@upi" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]" />
-                  </div>
-                )}
-
-                {paymentMethod === "card" && (
-                  <div className="mt-4 space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="cardNumber" className="text-[#020817] text-sm mb-1 block">Card Number</Label>
-                      <Input id="cardNumber" placeholder="1234 5678 9012 3456" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="expiry" className="text-[#020817] text-sm mb-1 block">Expiry Date</Label>
-                        <Input id="expiry" placeholder="MM/YY" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="cvv" className="text-[#020817] text-sm mb-1 block">CVV</Label>
-                        <Input id="cvv" placeholder="123" type="password" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]" />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="cardName" className="text-[#020817] text-sm mb-1 block">Name on Card</Label>
-                      <Input id="cardName" placeholder="JOHN DOE" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]" />
-                    </div>
-                  </div>
-                )} */}
-              </CardContent>
-            </Card>
+    </div>
+  </CardContent>
+</Card>
           </div>
 
           {/* Right Column - Order Summary */}
@@ -830,9 +766,17 @@ const handlePlaceOrder = async () => {
                   <span className="font-bold text-2xl text-[#21242c]">₹{total.toLocaleString()}</span>
                 </div>
 
-                <Button onClick={handlePlaceOrder} className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer" >
-                  {paymentMethod === "cod" ? `Place Order ₹${total.toLocaleString()}` : `Pay ₹${total.toLocaleString()}`}
-                </Button>
+                <Button
+  onClick={handlePlaceOrder}
+  disabled={!paymentMethod} // ✅ Disable if nothing selected
+  className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+>
+{!paymentMethod
+  ? "Select Payment Method"
+  : paymentMethod === "cod"
+  ? `Place Order ₹${total.toLocaleString()}`
+  : `Pay ₹${total.toLocaleString()}`}
+</Button>
 
                 {/* Trust Badges */}
                 <div className="flex items-center justify-center gap-4 pt-2 text-xs text-[#6a7181]">
