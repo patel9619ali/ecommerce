@@ -7,9 +7,10 @@ interface MobileCheckoutBarProps {
   itemCount: number;
   onPayClick: () => void; // ✅ Callback to trigger payment
   addressSaved: boolean; // ✅ To show different states
+  paymentMethod: string;
 }
 
-const MobileCheckoutBar = ({ total, itemCount, onPayClick, addressSaved  }: MobileCheckoutBarProps) => {
+const MobileCheckoutBar = ({ total, itemCount, onPayClick, addressSaved, paymentMethod   }: MobileCheckoutBarProps) => {
   if (itemCount === 0) return null;
 
   return (
@@ -39,7 +40,7 @@ const MobileCheckoutBar = ({ total, itemCount, onPayClick, addressSaved  }: Mobi
             } text-[hsl(0_0%_100%)] font-bold text-sm rounded-xl px-6 h-12 shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] transition-all duration-300 group flex-shrink-0 flex items-center gap-1.5`}
           >
             <Lock className="w-3.5 h-3.5" />
-            Pay ₹{total.toLocaleString()}
+            {paymentMethod === "cod" ? `Order ₹${total.toLocaleString()}` : `Pay ₹${total.toLocaleString()}`}
           </button>
         </div>
       </div>

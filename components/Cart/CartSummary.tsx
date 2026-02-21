@@ -15,7 +15,8 @@ const CartSummary = ({ subtotal, itemCount }: CartSummaryProps) => {
   const router = useRouter();
   const { setLoading } = useLoading();
   const [promoCode, setPromoCode] = useState("");
-  const shipping = subtotal > FREE_SHIPPING_THRESHOLD ? 0 : 15.0;
+  // const shipping = subtotal > FREE_SHIPPING_THRESHOLD ? 0 : 15.0;
+  const shipping = 0;
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
   const shippingProgress = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
@@ -90,7 +91,8 @@ const CartSummary = ({ subtotal, itemCount }: CartSummaryProps) => {
             {shipping === 0 ? (
               <span className="text-[hsl(152_65%_45%)]">Free</span>
             ) : (
-              `₹${shipping.toFixed(2)}`
+              // `₹${shipping.toFixed(2)}`
+              `₹${shipping}`
             )}
           </span>
         </div>

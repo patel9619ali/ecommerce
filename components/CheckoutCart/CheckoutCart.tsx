@@ -220,10 +220,50 @@ const handlePlaceOrder = async () => {
   try {
     setLoading(true);
 
-    // ✅ Load Razorpay script
+    // ✅ COD Flow — skip Razorpay entirely
+    if (paymentMethod === "cod") {
+      const orderRes = await fetch("/api/orders/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: items.map((item) => ({
+            productId: item.productId,
+            variantKey: item.variantKey,
+            title: item.title,
+            price: item.price,
+            quantity: item.quantity,
+            image: item.image,
+          })),
+          total,
+          paymentMethod: "cod",
+        }),
+      });
+
+      const data = await orderRes.json();
+
+      if (!orderRes.ok) {
+        throw new Error(data.error || "Failed to create order");
+      }
+
+      // ✅ Cache order in sessionStorage so confirmation page loads instantly
+      sessionStorage.setItem("lastOrder", JSON.stringify(data.order));
+      router.replace(`/order-confirmation/${data.order.id}`);
+
+      setTimeout(() => {
+        fetch("/api/cart/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ items: [] }),
+        }).catch(console.error);
+        localStorage.removeItem("cart-storage");
+      }, 1000);
+
+      return; // ✅ Done, skip Razorpay
+    }
+
+    // ✅ Razorpay Flow — for all other payment methods
     await loadRazorpay();
 
-    // ✅ 1️⃣ Create Razorpay Order
     const paymentRes = await fetch("/api/payment/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -246,7 +286,6 @@ const handlePlaceOrder = async () => {
 
       handler: async function (response: any) {
         try {
-          // ✅ 2️⃣ After successful payment → call YOUR existing order API
           const orderRes = await fetch("/api/orders/create", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -272,9 +311,7 @@ const handlePlaceOrder = async () => {
             throw new Error(data.error || "Failed to create order");
           }
 
-          // ✅ Keep your existing logic
           sessionStorage.setItem("lastOrder", JSON.stringify(data.order));
-
           router.replace(`/order-confirmation/${data.order.id}`);
 
           setTimeout(() => {
@@ -283,18 +320,23 @@ const handlePlaceOrder = async () => {
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ items: [] }),
             }).catch(console.error);
-
             localStorage.removeItem("cart-storage");
           }, 1000);
 
         } catch (err: any) {
           toast.error(err.message || "Order creation failed");
+          setLoading(false);
         }
       },
 
-      theme: {
-        color: "#254fda",
+      modal: {
+        ondismiss: function () {
+          // ✅ User closed Razorpay modal — stop loader
+          setLoading(false);
+        },
       },
+
+      theme: { color: "#254fda" },
     };
 
     const razor = new (window as any).Razorpay(options);
@@ -303,9 +345,10 @@ const handlePlaceOrder = async () => {
   } catch (error: any) {
     console.error(error);
     toast.error(error.message || "Payment failed");
-  } finally {
     setLoading(false);
   }
+  // ✅ NOTE: Don't put setLoading(false) in finally here
+  // because Razorpay handler is async — finally runs before handler completes
 };
 
   return (
@@ -788,7 +831,7 @@ const handlePlaceOrder = async () => {
                 </div>
 
                 <Button onClick={handlePlaceOrder} className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer" >
-                  Pay ₹{total.toLocaleString()}
+                  {paymentMethod === "cod" ? `Place Order ₹${total.toLocaleString()}` : `Pay ₹${total.toLocaleString()}`}
                 </Button>
 
                 {/* Trust Badges */}
@@ -809,6 +852,7 @@ const handlePlaceOrder = async () => {
               itemCount={itemCount}
               onPayClick={handlePlaceOrder}
               addressSaved={addressSaved}
+              paymentMethod={paymentMethod}
             />
           </div>
         </div>

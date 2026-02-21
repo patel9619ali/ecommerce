@@ -10,37 +10,34 @@ export async function GET(
     const { orderId } = await params;
 
     if (!orderId) {
-      return NextResponse.json(
-        { error: "Order ID required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Order ID required" }, { status: 400 });
     }
 
-    // ✅ Fetch order with items
-    const order = await db.order.findUnique({
-      where: {
-        id: orderId,
-      },
-      include: {
-        items: true,
-      },
-    });
+    // ✅ Run in parallel, never let auth crash the route
+    const [order, session] = await Promise.all([
+      db.order.findUnique({
+        where: { id: orderId },
+        include: { items: true },
+      }),
+      auth().catch(() => null), // ✅ Auth failure never crashes this
+    ]);
 
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // ✅ Optional: Add session check for security (but don't block if session is loading)
-    const session = await auth();
     if (session?.user?.id && order.userId !== session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
     return NextResponse.json({ order });
-  } catch (error) {
-    console.error("Fetch order error:", error);
+  } catch (error: any) {
+    console.error("❌ Fetch order error:", {
+      message: error?.message,
+      stack: error?.stack,
+    });
     return NextResponse.json(
-      { error: "Failed to fetch order" },
+      { error: error?.message || "Failed to fetch order" },
       { status: 500 }
     );
   }

@@ -44,7 +44,7 @@ export default function CartPage() {
     router.push("/checkout");
   };
   const totalItems = items.reduce((s, i) => s + i.quantity, 0);
-  const shipping = subtotal > 500 ? 0 : 15;
+  const shipping = 0;
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
 
