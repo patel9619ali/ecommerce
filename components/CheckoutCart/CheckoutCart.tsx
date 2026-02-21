@@ -61,9 +61,18 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
   // ✅ Calculate totals from props (dynamic items)
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const discount = appliedCoupon ? Math.round(subtotal * 0.1) : 0;
-  const shipping = subtotal > 500 ? 0 : 15;
+  // const shipping = subtotal > 500 ? 0 : 15;
+  // testing
+  const shipping = 0;
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
+  const loadRazorpay = () =>
+  new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    document.body.appendChild(script);
+  });
   // ✅ FIX 4: Load saved address on mount
   useEffect(() => {
     const fetchAddress = async () => {
@@ -202,65 +211,102 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
 
   // ✅ FIX 2 & 5: Place order with image and proper navigation
 const handlePlaceOrder = async () => {
-    if (!addressSaved) {
-      toast.error("Please save your address first");
-      setAddressOpen(true);
-      return;
+  if (!addressSaved) {
+    toast.error("Please save your address first");
+    setAddressOpen(true);
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    // ✅ Load Razorpay script
+    await loadRazorpay();
+
+    // ✅ 1️⃣ Create Razorpay Order
+    const paymentRes = await fetch("/api/payment/create-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount: total }),
+    });
+
+    const paymentData = await paymentRes.json();
+
+    if (!paymentRes.ok) {
+      throw new Error("Failed to initialize payment");
     }
 
-    try {
-      setLoading(true);
+    const options = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      amount: paymentData.order.amount,
+      currency: "INR",
+      name: "BlendRas",
+      description: "Order Payment",
+      order_id: paymentData.order.id,
 
-      const orderRes = await fetch("/api/orders/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: items.map((item) => ({
-            productId: item.productId,
-            variantKey: item.variantKey,
-            title: item.title,
-            price: item.price,
-            quantity: item.quantity,
-            image: item.image,
-          })),
-          total,
-          paymentMethod,
-        }),
-      });
+      handler: async function (response: any) {
+        try {
+          // ✅ 2️⃣ After successful payment → call YOUR existing order API
+          const orderRes = await fetch("/api/orders/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              items: items.map((item) => ({
+                productId: item.productId,
+                variantKey: item.variantKey,
+                title: item.title,
+                price: item.price,
+                quantity: item.quantity,
+                image: item.image,
+              })),
+              total,
+              paymentMethod,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpayOrderId: response.razorpay_order_id,
+            }),
+          });
 
-      const data = await orderRes.json();
-      
-      if (!orderRes.ok) {
-        throw new Error(data.error || "Failed to create order");
-      }
+          const data = await orderRes.json();
 
-      // ✅ Store order in sessionStorage
-      sessionStorage.setItem("lastOrder", JSON.stringify(data.order));
+          if (!orderRes.ok) {
+            throw new Error(data.error || "Failed to create order");
+          }
 
-      // ✅ DON'T reset cart here - it causes re-renders!
-      // Just navigate to order confirmation
-      router.replace(`/order-confirmation/${data.order.id}`);
+          // ✅ Keep your existing logic
+          sessionStorage.setItem("lastOrder", JSON.stringify(data.order));
 
-      // ✅ Clear cart in background AFTER navigation
-      setTimeout(() => {
-        // Clear cart via API to avoid store re-renders
-        fetch("/api/cart/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ items: [] }),
-        }).catch(console.error);
-        
-        // Clear local storage directly (bypass Zustand)
-        localStorage.removeItem("cart-storage");
-      }, 1000);
-      
-    } catch (error: any) {
-      console.error("Order creation error:", error);
-      toast.error(error.message || "Failed to place order");
-    } finally {
-      setLoading(false);
-    }
-  };
+          router.replace(`/order-confirmation/${data.order.id}`);
+
+          setTimeout(() => {
+            fetch("/api/cart/sync", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ items: [] }),
+            }).catch(console.error);
+
+            localStorage.removeItem("cart-storage");
+          }, 1000);
+
+        } catch (err: any) {
+          toast.error(err.message || "Order creation failed");
+        }
+      },
+
+      theme: {
+        color: "#254fda",
+      },
+    };
+
+    const razor = new (window as any).Razorpay(options);
+    razor.open();
+
+  } catch (error: any) {
+    console.error(error);
+    toast.error(error.message || "Payment failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] lg:py-10 py-5">

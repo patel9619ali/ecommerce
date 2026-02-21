@@ -45,7 +45,7 @@ const CartSummary = ({ subtotal, itemCount }: CartSummaryProps) => {
             </span>
           ) : (
             <span className="text-xs font-medium text-[hsl(240_8%_45%)]">
-              Add <span className="font-bold text-[hsl(240_15%_10%)]">${amountToFreeShipping.toFixed(2)}</span> more for free shipping
+              Add <span className="font-bold text-[hsl(240_15%_10%)]">₹{amountToFreeShipping.toFixed(2)}</span> more for free shipping
             </span>
           )}
         </div>
