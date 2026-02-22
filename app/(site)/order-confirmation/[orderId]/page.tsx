@@ -63,13 +63,7 @@ const OrderConfirmation = () => {
     if (id) setOrderId(id);
   }, [params]);
 
-  // ✅ Step 2: Redirect only if params truly never resolved after 3s
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!orderId) router.push('/');
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+ 
 
   // ✅ Step 3: Fetch order only when orderId is available
   useEffect(() => {

@@ -1,17 +1,33 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const publicRoutes = ['/', '/verify-email'];
-const authRoutes = ['/sign-in', '/sign-up', '/forgot-password','/new-password'];
+const authRoutes = ['/sign-in', '/sign-up', '/forgot-password', '/new-password'];
 const apiAuthPrefix = '/api/auth';
 const DEFAULT_REDIRECT_PAGE = '/';
 
+// ✅ Routes that never require auth
+const publicRoutes = [
+  '/',
+  '/verify-email',
+  '/about-us',        // ✅ No auth needed
+  '/faqs',            // ✅ No auth needed
+  '/contact-us',      // ✅ No auth needed
+  '/products',        // ✅ No auth needed
+];
+
+// ✅ Route PREFIXES that never require auth (dynamic routes)
+const publicPrefixes = [
+  '/products/',
+  '/order-confirmation/', // ✅ KEY FIX — order confirmation is public
+  '/api/orders/',         // ✅ API must be reachable
+];
+
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  
-  // Check if user is logged in via session cookie
-  const token = req.cookies.get('authjs.session-token') || 
-                req.cookies.get('__Secure-authjs.session-token');
+
+  const token =
+    req.cookies.get('authjs.session-token') ||
+    req.cookies.get('__Secure-authjs.session-token');
   const isLoggedIn = !!token;
 
   // Skip API auth routes
@@ -19,7 +35,12 @@ export function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Handle auth routes (sign-in, sign-up, etc.)
+  // ✅ Skip all API routes entirely — let the API handle its own auth
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.next();
+  }
+
+  // Handle auth routes
   if (authRoutes.includes(pathname)) {
     if (isLoggedIn) {
       return NextResponse.redirect(new URL(DEFAULT_REDIRECT_PAGE, req.url));
@@ -27,8 +48,13 @@ export function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Handle public routes
+  // ✅ Check public exact routes
   if (publicRoutes.includes(pathname)) {
+    return NextResponse.next();
+  }
+
+  // ✅ Check public prefix routes (dynamic segments)
+  if (publicPrefixes.some(prefix => pathname.startsWith(prefix))) {
     return NextResponse.next();
   }
 
