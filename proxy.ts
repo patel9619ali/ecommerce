@@ -18,8 +18,7 @@ const publicRoutes = [
 // ✅ Route PREFIXES that never require auth (dynamic routes)
 const publicPrefixes = [
   '/products/',
-  '/order-confirmation/', // ✅ KEY FIX — order confirmation is public
-  '/api/orders/',         // ✅ API must be reachable
+  '/order-confirmation/',      // ✅ API must be reachable
 ];
 
 export function proxy(req: NextRequest) {
