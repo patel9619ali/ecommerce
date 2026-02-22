@@ -1,13 +1,19 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
 export async function GET(
-  request: Request,
-  { params }: { params: { orderId: string } }
+  request: NextRequest,
+  context: { params: Promise<{ orderId: string }> }
 ) {
   try {
-    const { orderId } = params;
+    const { orderId } = await context.params;
+
+    if (!orderId) {
+      return NextResponse.json(
+        { error: "Order ID required" },
+        { status: 400 }
+      );
+    }
 
     const order = await db.order.findUnique({
       where: { id: orderId },
@@ -15,7 +21,10 @@ export async function GET(
     });
 
     if (!order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Order not found" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({ order });
