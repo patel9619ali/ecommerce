@@ -17,7 +17,7 @@ export default function DirectProductPageLinking() {
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Blend Fresh?</h2>
             <p className="text-white/80 max-w-md mx-auto mb-8">Join 50,000+ happy customers who blend on the go every day.</p>
             <Button asChild size="lg" className="bg-white text-[#020817] hover:bg-white/90 rounded-full px-8 h-12 text-base font-semibold">
-              <Link href="/products/blend-ras">
+              <Link href="/products">
                 Get Your BlendRas Now <ChevronRight className="h-4 w-4 ml-1" />
               </Link>
             </Button>
