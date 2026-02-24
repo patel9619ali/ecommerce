@@ -1,9 +1,30 @@
+'use client';
 import { useState, useCallback, useEffect, useRef } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { Heart, Star } from "lucide-react";
-import { Product } from "@/data/dummyProduct";
 import { useIsMobile } from "@/hooks/use-mobile";
+import Image from "next/image";
+import { WishlistButton } from "../WishList/WishlistButton";
+import LoadingLink from "../Loader/LoadingLink";
+
+interface Product {
+  id: number;
+  slug: string;
+  productId: string;
+  variantId: string;
+  name: string;
+  description: string;
+  price: number;
+  originalPrice: number;
+  discount: number;
+  rating: number;
+  reviewCount: number;
+  images: string[];
+  category: string;
+  color: string;
+  colorHex?: string;
+}
 
 interface ProductCardProps {
   product: Product;
@@ -47,103 +68,96 @@ const ProductCard = ({ product }: ProductCardProps) => {
   }, [isHovered, emblaApi, isMobile, product.images.length]);
 
   return (
-    <div
-      className="group relative bg-[hsl(0,0%,100%)] rounded-lg overflow-hidden border border-[hsl(260,15%,90%)] hover:shadow-xl transition-shadow duration-300"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Image Carousel */}
-      <div className="relative aspect-[3/4] overflow-hidden" ref={emblaRef}>
-        <div className="flex h-full">
-          {product.images.map((img, idx) => (
-            <div
-              key={idx}
-              className="flex-[0_0_100%] min-w-0 relative h-full"
-            >
-              <img
-                src={img}
-                alt={`${product.name} - view ${idx + 1}`}
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Dot Indicators */}
-        {product.images.length > 1 && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-            {product.images.map((_, idx) => (
-              <button
+    <LoadingLink href={`/products/${product.slug}?variant=${product.variantId}`} className="block">
+      <div className="group relative bg-[hsl(0,0%,100%)] rounded-lg overflow-hidden border border-[hsl(260,15%,90%)] hover:shadow-xl transition-shadow duration-300" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+        {/* Image Carousel */}
+        <div className="relative aspect-[3/4] overflow-hidden" ref={emblaRef}>
+          <div className="flex h-full">
+            {product.images.map((img, idx) => (
+              <div
                 key={idx}
-                className={`w-1.5 h-1.5 rounded-full transition-all ${
-                  idx === selectedIndex
-                    ? "bg-[linear-gradient(135deg,hsl(262,83%,58%)_0%,hsl(280,80%,50%)_50%,hsl(320,85%,55%)_100%)] w-4"
-                    : "bg-[hsl(0,0%,10%)]/30"
-                }`}
-                onClick={() => emblaApi?.scrollTo(idx)}
-              />
+                className="flex-[0_0_100%] min-w-0 relative h-full"
+              >
+                <Image src={img} alt={`${product.name} - view ${idx + 1}`} fill className="object-cover" sizes="(max-width: 768px) 100vw, 25vw" />
+              </div>
             ))}
           </div>
-        )}
 
-        {/* Badges */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1">
-          {product.isNew && (
-            <span className="bg-[linear-gradient(135deg,hsl(262,83%,58%)_0%,hsl(280,80%,50%)_50%,hsl(320,85%,55%)_100%)] text-white text-[10px] font-bold px-2 py-0.5 rounded">
-              NEW
-            </span>
+          {/* Dot Indicators */}
+          {product.images.length > 1 && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+              {product.images.map((_, idx) => (
+                <button
+                  key={idx}
+                  className={`w-1.5 h-1.5 rounded-full transition-all ${
+                    idx === selectedIndex
+                      ? "bg-[linear-gradient(135deg,hsl(262,83%,58%)_0%,hsl(280,80%,50%)_50%,hsl(320,85%,55%)_100%)] w-4"
+                      : "bg-[hsl(0,0%,10%)]/30"
+                  }`}
+                  onClick={() => emblaApi?.scrollTo(idx)}
+                />
+              ))}
+            </div>
           )}
-          {product.isBestseller && (
-            <span className="bg-[hsl(0,0%,10%)] text-white text-[10px] font-bold px-2 py-0.5 rounded">
-              BESTSELLER
-            </span>
-          )}
+
+          {/* Badges */}
+          <div className="absolute top-2 left-2 flex flex-col gap-1">
+              <span className="bg-[linear-gradient(135deg,hsl(262,83%,58%)_0%,hsl(280,80%,50%)_50%,hsl(320,85%,55%)_100%)] text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                NEW
+              </span>
+              {/* <span className="bg-[hsl(0,0%,10%)] text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                BESTSELLER
+              </span> */}
+          </div>
+
+          {/* Rating Badge */}
+          <div className="absolute bottom-8 left-2 flex items-center gap-1 bg-[hsl(0,0%,100%)]/90 backdrop-blur-sm px-2 py-0.5 rounded text-xs font-semibold">
+            <span>{product.rating}</span>
+            <Star className="w-3 h-3 fill-[hsl(45,100%,50%)] text-[hsl(45,100%,50%)]" />
+            <span className="text-[hsl(260,10%,45%)]">| {product.reviewCount >= 1000 ? `${(product.reviewCount / 1000).toFixed(1)}k` : product.reviewCount}</span>
+          </div>
         </div>
 
-        {/* Rating Badge */}
-        <div className="absolute bottom-8 left-2 flex items-center gap-1 bg-[hsl(0,0%,100%)]/90 backdrop-blur-sm px-2 py-0.5 rounded text-xs font-semibold">
-          <span>{product.rating}</span>
-          <Star className="w-3 h-3 fill-[hsl(45,100%,50%)] text-[hsl(45,100%,50%)]" />
-          <span className="text-[hsl(260,10%,45%)]">| {product.reviewCount >= 1000 ? `${(product.reviewCount / 1000).toFixed(1)}k` : product.reviewCount}</span>
+        {/* Wishlist Button */}
+        {/* <button
+          onClick={(e) => { e.stopPropagation(); setWishlisted(!wishlisted); }}
+          className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-[hsl(0,0%,100%)]/80 backdrop-blur-sm border border-[hsl(260,15%,90%)] hover:scale-110 transition-transform"
+        >
+          <Heart
+            className={`w-4 h-4 transition-colors ${
+              wishlisted
+                ? "fill-[hsl(340,80%,55%)] text-[hsl(340,80%,55%)]"
+                : "text-[hsl(260,10%,45%)]"
+            }`}
+          />
+        </button> */}
+        <div className="absolute top-0 right-0">
+          <WishlistButton productId={product.productId} variantId={product.variantId} slug={product.slug} title={`${product.name} - ${product.color}`} price={product.price} mrp={product.originalPrice} image={product.images[0]} colorName={product.color} colorHex={product.colorHex} />
+
+        </div>
+
+        {/* Product Info */}
+        <div className="p-3 space-y-1">
+          <h3 className="font-semibold text-sm text-[hsl(0,0%,10%)] truncate">
+            {product.name}
+          </h3>
+          <p className="text-xs text-[hsl(260,10%,45%)] truncate">
+            {product.description}
+          </p>
+          <div className="flex items-center gap-2 pt-1">
+            <span className="font-bold text-sm text-[hsl(0,0%,10%)]">
+              ₹{product.price.toLocaleString("en-IN")}
+            </span>
+            <span className="text-xs text-[hsl(260,10%,45%)] line-through">
+              ₹{product.originalPrice.toLocaleString("en-IN")}
+            </span>
+            <span className="text-xs font-semibold text-[hsl(16,90%,55%)]">
+              ({product.discount}% OFF)
+            </span>
+          </div>
         </div>
       </div>
-
-      {/* Wishlist Button */}
-      <button
-        onClick={(e) => { e.stopPropagation(); setWishlisted(!wishlisted); }}
-        className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-[hsl(0,0%,100%)]/80 backdrop-blur-sm border border-[hsl(260,15%,90%)] hover:scale-110 transition-transform"
-      >
-        <Heart
-          className={`w-4 h-4 transition-colors ${
-            wishlisted
-              ? "fill-[hsl(340,80%,55%)] text-[hsl(340,80%,55%)]"
-              : "text-[hsl(260,10%,45%)]"
-          }`}
-        />
-      </button>
-
-      {/* Product Info */}
-      <div className="p-3 space-y-1">
-        <h3 className="font-semibold text-sm text-[hsl(0,0%,10%)] truncate">
-          {product.name}
-        </h3>
-        <p className="text-xs text-[hsl(260,10%,45%)] truncate">
-          {product.description}
-        </p>
-        <div className="flex items-center gap-2 pt-1">
-          <span className="font-bold text-sm text-[hsl(0,0%,10%)]">
-            ₹{product.price.toLocaleString("en-IN")}
-          </span>
-          <span className="text-xs text-[hsl(260,10%,45%)] line-through">
-            ₹{product.originalPrice.toLocaleString("en-IN")}
-          </span>
-          <span className="text-xs font-semibold text-[hsl(16,90%,55%)]">
-            ({product.discount}% OFF)
-          </span>
-        </div>
-      </div>
-    </div>
+    </LoadingLink>
   );
 };
 

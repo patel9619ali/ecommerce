@@ -44,5 +44,7 @@ export default async function ProductPage(props: Props) {
 export async function generateStaticParams() {
   return [
     { slug: 'blend-ras' },
+    { slug: 'xl-jar-945-m-l' },
+    { slug: 'jetsetter-insulated-tote' },
   ];
 }

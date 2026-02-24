@@ -178,12 +178,12 @@ export default function FAQ({ className = {}, count }: FAQProps) {
                 <SearchFunctionalityFAQ className={`${className.searchFunctionalityVisiblity}`} onSearch={(value) => setSearchTerm(value)}/>
                 <Tabs defaultValue="GeneralQuestion" orientation="vertical" className={`grid ${!searchTerm ? "lg:grid-cols-[35%_65%]" : "lg:grid-cols-[75%] grid-cols-[100%] !justify-center"}`} onValueChange={(val) => { setActiveTab(val); setSearchTerm(""); }}>
                     {!searchTerm && (
-                        <TabsList className={`flex flex-row lg:flex-col items-stretch *:justify-start border-b-2 border-[#C9C9C9] lg:border-b-0 lg:border-r-2 lg:border-[#C9C9C9] overflow-x-auto lg:overflow-x-visible lg:overflow-y-auto rounded-none`}>
+                        <TabsList className={`flex flex-row lg:flex-col items-stretch *:justify-start border-b-2 border-[#C9C9C9] lg:border-b-0 lg:border-r-2 lg:border-[#C9C9C9] overflow-x-auto lg:overflow-x-visible lg:overflow-y-auto rounded-none !bg-transparent`}>
                             {faqTabs.map((tab) => (
                                 <TabsTrigger
                                 key={tab.id}
                                 value={tab.id}
-                                className="font-[500] data-[state=active]:font-[700] lg:text-[23px] text-[14px] data-[state=active]:text-[#000] text-[#666666] data-[state=active]:bg-transparent relative before:content-[''] before:absolute before:rounded-none before:opacity-0 data-[state=active]:before:opacity-100 before:transition-opacity before:duration-300 before:bottom-0 before:left-1/2 before:-translate-x-1/2 before:w-[100%] before:border-b-[3px] before:border-[#000] lg:before:left-0 lg:before:top-1/2 lg:before:-translate-y-1/2 lg:before:translate-x-0 lg:before:h-3/4 lg:before:w-auto lg:before:border-b-0 lg:before:border-l-[3px] lg:mr-3 lg:pr-0 lg:ps-3 mr-3 pr-0 ps-0 hover:text-[#000] hover:font-bold"
+                                className="font-[500] data-[state=active]:font-[700] lg:text-[23px] text-[14px] data-[state=active]:text-[#000] text-[#666666] data-[state=active]:bg-transparent relative before:content-[''] before:absolute before:rounded-none before:opacity-0 data-[state=active]:before:opacity-100 before:transition-opacity before:duration-300 before:bottom-0 before:left-1/2 before:-translate-x-1/2 before:w-[100%] before:border-b-[3px] before:border-[#000] lg:before:left-0 lg:before:top-1/2 lg:before:-translate-y-1/2 lg:before:translate-x-0 lg:before:h-3/4 lg:before:w-auto lg:before:border-b-0 lg:before:border-l-[3px] lg:mr-3 lg:pr-0 lg:ps-3 mr-3 pr-0 ps-0 hover:text-[#000] hover:font-bold !bg-transparent"
                                 >
                                 {tab.label}
                                 </TabsTrigger>
