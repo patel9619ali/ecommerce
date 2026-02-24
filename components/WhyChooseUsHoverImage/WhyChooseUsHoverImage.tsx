@@ -12,38 +12,48 @@ const WhyChooseUsHoverImage = ({ className }: WhyChooseUsHoverImageProps) => {
   });
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const slides = [
-    {
-      title: "CRAFTED FOR THE SENSES",
-      subtitle: "LESS EFFORT. MORE EMOTION.",
-      description: "You can see it in the soft lambskin leather, picked and stitched with exacting attention to detail. You can feel it in the precision-cut aluminium frame that's robust yet beautiful.",
-      image: "/assets/Blender/BlackBlender/black1.jpg",
-    },
-    {
-      title: "STANDOUT ACCESSORIES",
-      subtitle: "MUSIC AT YOUR FINGERTIPS",
-      description: "Premium carrying case crafted from genuine leather. Magnetic closure ensures your headphones stay protected while maintaining that luxurious feel in your hands.",
-      image: "/assets/Blender/BlueBlender/royal_blue_1.jpg",
-    },
-    {
-      title: "FIDELITY THAT FLEXES",
-      subtitle: "ALMOST-UNREAL COMFORT",
-      description: "Advanced acoustic engineering meets ergonomic design. Memory foam ear cups adapt to your unique ear shape, providing hours of fatigue-free listening pleasure.",
-      image: "/assets/Blender/CoconotBlender/coconot-1.jpg",
-    },
-    {
-      title: "TIMELESS DESIGN",
-      subtitle: "MADE TO LAST",
-      description: "Every component carefully selected for durability and aesthetics. From the brushed metal finish to the reinforced cables, these headphones are built for generations.",
-      image: "/assets/Blender/IceBlender/ice_blender_1.jpg",
-    },
-    {
-      title: "WIRELESS FREEDOM",
-      subtitle: "SEAMLESS CONNECTIVITY",
-      description: "Latest Bluetooth 5.0 technology ensures stable connection up to 30 feet. Quick pairing with all your devices, and battery life that lasts all day long.",
-      image: "/assets/Blender/RubyBlender/Ruby_1.jpg",
-    }
-  ];
+const slides = [
+  {
+    id: "powerful",
+    title: "POWERFUL 304 STAINLESS STEEL BLADES",
+    subtitle: "BLEND ANYTHING. ANYWHERE.",
+    description:
+      "Engineered with sharp, food-grade 304 stainless steel blades that effortlessly crush ice, frozen fruits, and hard vegetables. Built to deliver smooth, consistent results every single time.",
+    image: "/assets/Blender/BlackBlender/black1.jpg",
+  },
+  {
+    id: "portable",
+    title: "TRULY PORTABLE DESIGN",
+    subtitle: "YOUR KITCHEN IN YOUR POCKET",
+    description:
+      "Compact and lightweight, BlendRas fits in your bag, gym kit, or car cupholder. Whether you're at the office, gym, or hiking trail — fresh juice is always within reach.",
+    image: "/assets/Blender/BlueBlender/royal_blue_1.jpg",
+  },
+  {
+    id: "battery",
+    title: "LONG-LASTING BATTERY LIFE",
+    subtitle: "BLEND ALL DAY. WORRY-FREE.",
+    description:
+      "Powered by a high-capacity rechargeable battery, BlendRas delivers up to 20+ blending cycles on a single charge. USB-C fast charging means you're never out of juice — literally.",
+    image: "/assets/Blender/CoconotBlender/coconot-1.jpg",
+  },
+  {
+    id: "design",
+    title: "SLEEK & DURABLE BUILD",
+    subtitle: "BUILT TO LAST. DESIGNED TO IMPRESS.",
+    description:
+      "Crafted from BPA-free, food-grade materials with a premium finish. The leak-proof seal and shatter-resistant body ensure your blender handles everyday life without missing a beat.",
+    image: "/assets/Blender/IceBlender/ice_blender_1.jpg",
+  },
+  {
+    id: "easy",
+    title: "EFFORTLESS CLEAN & USE",
+    subtitle: "BLEND. RINSE. REPEAT.",
+    description:
+      "Self-cleaning in seconds — just add water, blend, and rinse. No complicated parts, no mess. BlendRas is designed for real people living real, busy lives.",
+    image: "/assets/Blender/RubyBlender/Ruby_1.jpg",
+  },
+];
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;

@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
 import LoadingLink from "../Loader/LoadingLink"
 const menuItems = [
   { label: "Home", href: "/", icon: "🏠" },
-  { label: "Shop", href: "/products/blend-ras", icon: "🛍️" },
+  { label: "Shop", href: "/products", icon: "🛍️" },
   { label: "My Orders", href: "/my-orders", icon: "📦" },
   { label: "About Us", href: "#", icon: "ℹ️" },
   { label: "How It Works", href: "#", icon: "⚡" },

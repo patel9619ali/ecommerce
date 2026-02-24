@@ -24,10 +24,10 @@ export default async function Home() {
       <MainImageAddToCart productData={data}/>
       {/* <DualSpecsScroll className={`hidden md:block`}/>
       <MobileSpecs className={`block md:hidden`}/> */}
+      <DirectProductPageLinking/>
       <Features/>
       <HowItWorks/>
       <ProductSpecs/>
-      <DirectProductPageLinking/>
       <WhyChooseUsHoverImage className={`hidden md:block`}/>
       <WhyChooseUsMobileHoverImage className={`block md:hidden`}/>
       <Reviews/>
