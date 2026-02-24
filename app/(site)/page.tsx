@@ -20,11 +20,11 @@ export default async function Home() {
     <>
       <BannerSection productData={data}/>
       {/* <InformativeSlider className={`hidden md:block`} productData={data}/> */}
-      <MobileInformativeSlider className={`block md:hidden`} productData={data}/>
+      <DirectProductPageLinking/>
       <MainImageAddToCart productData={data}/>
+      <MobileInformativeSlider className={`block md:hidden`} productData={data}/>
       {/* <DualSpecsScroll className={`hidden md:block`}/>
       <MobileSpecs className={`block md:hidden`}/> */}
-      <DirectProductPageLinking/>
       <Features/>
       <HowItWorks/>
       <ProductSpecs/>
