@@ -144,7 +144,7 @@ export const ProductGallery = ({ variant,product }: Props) => {
             <ChevronRight className="text-white" />
           </div>
         </div>
-        <div className="absolute top-0 left-0">
+        <div className="absolute top-0 md:right-0 md:left-auto left-0">
             <WishlistButton
                 productId={product?.id?.toString()}  // ✅ From product
                 variantId={variant.sku}             // ✅ From variant

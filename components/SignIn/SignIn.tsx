@@ -28,14 +28,21 @@ export default function SignIn() {
   const router = useRouter();
   const { setLoading } = useLoading();
 
-  useEffect(() => {
-    const oauthError = searchParams.get("error");
-    if (oauthError === "OAuthAccountNotLinked") {
-      setError(
-        "You have already signed in using a different provider. Please use the same sign-in method as before."
-      );
-    }
-  }, [searchParams]);
+useEffect(() => {
+  const oauthError = searchParams.get("error");
+  const verified = searchParams.get("verified");
+
+  if (oauthError === "OAuthAccountNotLinked") {
+    setError("You have already signed in using a different provider. Please use the same sign-in method as before.");
+  }
+
+  // Clear any lingering errors when arriving from email verification
+if (verified === "true") {
+  setError(undefined);
+  setSuccess("Email verified! You can now sign in.");
+  reset(); // 👈 clears email & password fields
+}
+}, [searchParams]);
   
   const onClick = (provider: "google") => {
     setLoading(true);
@@ -54,6 +61,7 @@ export default function SignIn() {
     handleSubmit,
     reset,
     control,
+    watch,
     formState: { errors },
   } = useForm<FormValues>();
 
@@ -105,7 +113,12 @@ export default function SignIn() {
       .catch(() => setError("Something went wrong"));
   });
 };
-
+useEffect(() => {
+  const subscription = watch(() => {
+    if (error) setError(undefined); // Clear error when user starts typing
+  });
+  return () => subscription.unsubscribe();
+}, [watch, error]);
   const [showPassword, setShowPassword] = useState(false);
   return (
     <div className="min-h-screen flex items-center justify-center bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)]">
@@ -227,7 +240,7 @@ export default function SignIn() {
                   </label>
                 </div>
                 {!showTwoFactor && (
-                  <LoadingLink href="/forgot-password" className="text-sm text-[#254fda] hover:underline" >
+                  <LoadingLink href="/forgot-password" className={`${isPending ?"opacity-50 pointer-events-none":"" } text-sm text-[#254fda] hover:underline`}>
                     Forgot password?
                   </LoadingLink>
                 )}

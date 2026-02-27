@@ -24,7 +24,12 @@ export async function login(values: unknown): Promise<AuthResponse> {
   const { email, password, code } = validatedFields.data;
   const existingUser = await getUserByEmail(email);
   
-  if (!existingUser || !existingUser.email || !existingUser.password) {
+  // With these two:
+  if (!existingUser || !existingUser.email) {
+    return { error: "This email is not registered. Please sign up first." };
+  }
+
+  if (!existingUser.password) {
     return { error: "Invalid email or password" };
   }
   
