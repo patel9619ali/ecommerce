@@ -81,33 +81,31 @@ const OrderConfirmation = () => {
     }
 
     // ✅ Fetch from API with absolute URL + retry for DB write delay
-    const fetchOrder = async (attempt = 0): Promise<void> => {
-      try {
-        const res = await fetch(`${window.location.origin}/api/orders/${orderId}`, {
-          cache: 'no-store',
-        });
+const fetchOrder = async (attempt = 0): Promise<void> => {
+  try {
+    const res = await fetch(`${window.location.origin}/api/orders/${orderId}`, {
+      cache: 'no-store',
+    });
 
-        if (res.status === 404 && attempt < 4) {
-          const delay = (attempt + 1) * 800;
-          await new Promise((r) => setTimeout(r, delay));
-          return fetchOrder(attempt + 1);
-        }
+    if (res.status === 404 && attempt < 4) {
+      const delay = (attempt + 1) * 800;
+      await new Promise((r) => setTimeout(r, delay));
+      return fetchOrder(attempt + 1);
+    }
 
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.error || 'Order not found');
-        }
-
-        if (!data.order) throw new Error('Order data missing');
-        setOrder(data.order);
-      } catch (err: any) {
-        console.error('❌ Fetch error:', err);
-        setError(err.message);
-      } finally {
-        setIsLoadingOrder(false);
-      }
-    };
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Order not found');
+    if (!data.order) throw new Error('Order data missing');
+    setOrder(data.order);
+  } catch (err: any) {
+    // ✅ Ignore errors from third-party scripts with unresolved template vars
+    if (err.message?.includes('%%') || orderId.includes('%%')) return;
+    console.error('❌ Fetch error:', err);
+    setError(err.message);
+  } finally {
+    setIsLoadingOrder(false);
+  }
+};
 
     fetchOrder();
   }, [orderId]);
