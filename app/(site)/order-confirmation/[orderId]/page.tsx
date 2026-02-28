@@ -59,56 +59,60 @@ const OrderConfirmation = () => {
   const hasFetched = useRef(false);
   const estimatedDelivery = getEstimatedDelivery();
 
-  useEffect(() => {
-    if (!orderId) return;
-    if (hasFetched.current) return;
-    hasFetched.current = true;
-
-    // ✅ Check localStorage FIRST — persists across Razorpay redirects unlike sessionStorage
-    try {
-      const cached = localStorage.getItem('lastOrder');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed?.id === orderId) {
-          setOrder(parsed);
-          setIsLoadingOrder(false);
-          localStorage.removeItem('lastOrder'); // clean up after reading
-          return;
-        }
-      }
-    } catch (e) {
-      console.error('❌ Cache parse error:', e);
-    }
-
-    // ✅ Fetch from API with absolute URL + retry for DB write delay
-const fetchOrder = async (attempt = 0): Promise<void> => {
-  try {
-    const res = await fetch(`${window.location.origin}/api/orders/${orderId}`, {
-      cache: 'no-store',
-    });
-
-    if (res.status === 404 && attempt < 4) {
-      const delay = (attempt + 1) * 800;
-      await new Promise((r) => setTimeout(r, delay));
-      return fetchOrder(attempt + 1);
-    }
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Order not found');
-    if (!data.order) throw new Error('Order data missing');
-    setOrder(data.order);
-  } catch (err: any) {
-    // ✅ Ignore errors from third-party scripts with unresolved template vars
-    if (err.message?.includes('%%') || orderId.includes('%%')) return;
-    console.error('❌ Fetch error:', err);
-    setError(err.message);
-  } finally {
+useEffect(() => {
+  if (!orderId) return;
+  
+  // ✅ Guard: only run for valid ORD- prefixed IDs, ignore extension garbage
+  if (!orderId.startsWith('ORD-')) {
     setIsLoadingOrder(false);
+    return;
   }
-};
+  
+  if (hasFetched.current) return;
+  hasFetched.current = true;
 
-    fetchOrder();
-  }, [orderId]);
+  // ✅ Check localStorage FIRST
+  try {
+    const cached = localStorage.getItem('lastOrder');
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (parsed?.id === orderId) {
+        setOrder(parsed);
+        setIsLoadingOrder(false);
+        localStorage.removeItem('lastOrder');
+        return;
+      }
+    }
+  } catch (e) {
+    console.error('❌ Cache parse error:', e);
+  }
+
+  const fetchOrder = async (attempt = 0): Promise<void> => {
+    try {
+      const res = await fetch(`${window.location.origin}/api/orders/${orderId}`, {
+        cache: 'no-store',
+      });
+
+      if (res.status === 404 && attempt < 4) {
+        const delay = (attempt + 1) * 800;
+        await new Promise((r) => setTimeout(r, delay));
+        return fetchOrder(attempt + 1);
+      }
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Order not found');
+      if (!data.order) throw new Error('Order data missing');
+      setOrder(data.order);
+    } catch (err: any) {
+      console.error('❌ Fetch error:', err);
+      setError(err.message);
+    } finally {
+      setIsLoadingOrder(false);
+    }
+  };
+
+  fetchOrder();
+}, [orderId]);
 
   const subtotal =
     order?.items.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
