@@ -7,9 +7,6 @@ export async function POST(req: Request) {
 
     const finalAmount = Math.round(Number(amount) * 100);
 
-    console.log("Incoming amount:", amount);
-    console.log("Final amount (paise):", finalAmount);
-
     const order = await razorpay.orders.create({
       amount: finalAmount,
       currency: "INR",

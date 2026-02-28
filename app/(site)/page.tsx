@@ -13,6 +13,7 @@ import Features from "@/components/Features/Features";
 import HowItWorks from "@/components/HowItWorks/HowItWorks";
 import Reviews from "@/components/Reviews/Reviews";
 import DirectProductPageLinking from "@/components/DirectProductPageLinking";
+import HomePageProduct from "@/components/HomePageProduct";
 export default async function Home() {
   const products = await getProducts();
   const {data} = products;
@@ -22,6 +23,7 @@ export default async function Home() {
       {/* <InformativeSlider className={`hidden md:block`} productData={data}/> */}
       <DirectProductPageLinking/>
       <MainImageAddToCart productData={data}/>
+      <HomePageProduct productData={data}/>
       <MobileInformativeSlider className={`block md:hidden`} productData={data}/>
       {/* <DualSpecsScroll className={`hidden md:block`}/>
       <MobileSpecs className={`block md:hidden`}/> */}

@@ -14,7 +14,7 @@ const ProductPage = async (props: Props) => {
   // ✅ Fetch on server with ISR caching
   const productBySlug = await getProductBySlug(slug);
   const product = await getProducts();
-
+    
   return (
     <MainProductPage product={product} />
   );

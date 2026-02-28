@@ -7,7 +7,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 const MainProductPage = ({ product }: any) => {
   const isMobile = useIsMobile();
-
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedColor, setSelectedColor] = useState("All");
   const [sortBy, setSortBy] = useState("recommended");
