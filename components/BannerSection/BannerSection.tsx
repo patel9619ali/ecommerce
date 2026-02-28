@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Star, Check } from "lucide-react";
 import { Product } from "@/data/types";
 import LoadingLink from "../Loader/LoadingLink";
-
+import { startTransition } from "react";
 type BannerSectionProps = {
   productData?: Product[];
 };
@@ -24,21 +24,23 @@ const BannerSection = ({ productData }: BannerSectionProps) => {
 
   const imageUrl = activeVariant.images?.[0]?.url;
 
-  const handleAddToCart = () => {
-    if (!imageUrl) return;
+const handleAddToCart = () => {
+  if (!imageUrl) return;
 
+  startTransition(() => {
     addItem({
-      id: `${product.id}-${activeVariant.sku}`, // UI only
-      productId: String(product.id), // ✅ string
+      id: `${product.id}-${activeVariant.sku}`,
+      productId: String(product.id),
       slug: product.slug,
       title: product.title,
-      variantKey: String(activeVariant.sku), // ✅ string
-      price: Number(activeVariant.sellingPrice), // ✅ number
-      mrp: Number(activeVariant.mrp), // ✅ number
-      image: imageUrl, // ✅ string URL
+      variantKey: String(activeVariant.sku),
+      price: Number(activeVariant.sellingPrice),
+      mrp: Number(activeVariant.mrp),
+      image: imageUrl,
       quantity: 1,
-    },true);
-  };
+    }, true);
+  });
+};
 const discountPercent = (activeVariant.mrp && activeVariant.sellingPrice && activeVariant.mrp > 0) 
       ? Math.round(((activeVariant.mrp - activeVariant.sellingPrice) / activeVariant.mrp) * 100) 
       : 0;

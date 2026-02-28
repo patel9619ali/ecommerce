@@ -43,7 +43,8 @@ export function proxy(req: NextRequest) {
   // 🔥 Protect only specific private pages instead of everything
   if (pathname.startsWith('/dashboard') ||
       pathname.startsWith('/profile') ||
-      pathname.startsWith('/my-orders')) {
+      pathname.startsWith('/my-orders')||
+      pathname.startsWith('/checkout')) {
 
     const token =
       req.cookies.get('authjs.session-token') ||
