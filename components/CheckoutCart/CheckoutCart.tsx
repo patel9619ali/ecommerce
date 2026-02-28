@@ -24,10 +24,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { CartProduct, useCartStore } from "@/store/useCartStore"; // ✅ Import type
+import { CartProduct, useCartStore } from "@/store/useCartStore";
 import MobileCheckoutBar from "../Cart/MobileCheckoutBar";
 import { useLoading } from "@/context/LoadingContext";
 import { toast } from "sonner";
+
 interface CheckoutCartProps {
   items: CartProduct[];
   total: number;
@@ -40,7 +41,6 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
   const { resetCart } = useCartStore();
   const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
   const [savedAddressId, setSavedAddressId] = useState<string | null>(null);
-  // ✅ Form States
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
@@ -52,29 +52,28 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
   const [state, setState] = useState("");
   const [pincode, setPincode] = useState("");
 
-  const [paymentMethod, setPaymentMethod] = useState(""); // ✅ Nothing selected by default
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [addressOpen, setAddressOpen] = useState(true);
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const [addressSaved, setAddressSaved] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  // ✅ Calculate totals from props (dynamic items)
+
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const discount = appliedCoupon ? Math.round(subtotal * 0.1) : 0;
-  // const shipping = subtotal > 500 ? 0 : 15;
-  // testing
   const shipping = 0;
   const tax = subtotal * 0.08;
   const codCharge = paymentMethod === "cod" ? 30 : 0;
   const total = subtotal + shipping + tax + codCharge;
+
   const loadRazorpay = () =>
-  new Promise((resolve) => {
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.onload = () => resolve(true);
-    document.body.appendChild(script);
-  });
-  // ✅ FIX 4: Load saved address on mount
+    new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      document.body.appendChild(script);
+    });
+
   useEffect(() => {
     const fetchAddress = async () => {
       try {
@@ -143,7 +142,6 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
     return Object.keys(newErrors).length === 0;
   };
 
-  // ✅ FIX 1: Field change handler with keyup validation
   const handleFieldChange = (
     field: keyof typeof errors,
     value: string,
@@ -164,12 +162,11 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
     }
   };
 
-  // ✅ FIX 3: Save address with UPSERT
   const handleSaveAddress = async () => {
     setHasAttemptedSave(true);
 
     if (!validateAddress()) {
-      return; // ✅ NO TOAST - errors are inline
+      return;
     }
 
     try {
@@ -210,142 +207,142 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
     }
   };
 
-  // ✅ FIX 2 & 5: Place order with image and proper navigation
-const handlePlaceOrder = async () => {
-  if (!addressSaved) {
-    toast.error("Please save your address first");
-    setAddressOpen(true);
-    return;
-  }
-
-  if (!paymentMethod) {
-    toast.error("Please select a payment method");
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    // ✅ COD Flow
-    if (paymentMethod === "cod") {
-      const orderRes = await fetch("/api/orders/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: items.map((item) => ({
-            productId: item.productId,
-            variantKey: item.variantKey,
-            title: item.title,
-            price: item.price,
-            quantity: item.quantity,
-            image: item.image,
-          })),
-          total,
-          paymentMethod: "cod",
-        }),
-      });
-
-      const data = await orderRes.json();
-      if (!orderRes.ok) throw new Error(data.error || "Failed to create order");
-
-      sessionStorage.setItem("lastOrder", JSON.stringify(data.order));
-      router.replace(`/order-confirmation/${data.order.id}`);
-
-      setTimeout(() => {
-        fetch("/api/cart/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ items: [] }),
-        }).catch(console.error);
-        localStorage.removeItem("cart-storage");
-      }, 1000);
-
+  const handlePlaceOrder = async () => {
+    if (!addressSaved) {
+      toast.error("Please save your address first");
+      setAddressOpen(true);
       return;
     }
 
-    // ✅ Razorpay Flow
-    if (paymentMethod === "razorpay") {
-      await loadRazorpay();
-
-      const paymentRes = await fetch("/api/payment/create-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: total }),
-      });
-
-      const paymentData = await paymentRes.json();
-      if (!paymentRes.ok) throw new Error("Failed to initialize payment");
-
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: paymentData.order.amount,
-        currency: "INR",
-        name: "BlendRas",
-        description: "Order Payment",
-        order_id: paymentData.order.id,
-
-        handler: async function (response: any) {
-          try {
-            const orderRes = await fetch("/api/orders/create", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                items: items.map((item) => ({
-                  productId: item.productId,
-                  variantKey: item.variantKey,
-                  title: item.title,
-                  price: item.price,
-                  quantity: item.quantity,
-                  image: item.image,
-                })),
-                total,
-                paymentMethod: "razorpay",
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpayOrderId: response.razorpay_order_id,
-              }),
-            });
-
-            const data = await orderRes.json();
-            if (!orderRes.ok) throw new Error(data.error || "Failed to create order");
-
-            sessionStorage.setItem("lastOrder", JSON.stringify(data.order));
-            router.replace(`/order-confirmation/${data.order.id}`);
-
-            setTimeout(() => {
-              fetch("/api/cart/sync", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ items: [] }),
-              }).catch(console.error);
-              localStorage.removeItem("cart-storage");
-            }, 1000);
-
-          } catch (err: any) {
-            toast.error(err.message || "Order creation failed");
-            setLoading(false);
-          }
-        },
-
-        modal: {
-          ondismiss: function () {
-            setLoading(false); // ✅ Stop loader when user closes modal
-          },
-        },
-
-        theme: { color: "#254fda" },
-      };
-
-      const razor = new (window as any).Razorpay(options);
-      razor.open();
+    if (!paymentMethod) {
+      toast.error("Please select a payment method");
+      return;
     }
 
-  } catch (error: any) {
-    console.error(error);
-    toast.error(error.message || "Payment failed");
-    setLoading(false);
-  }
-  // ✅ No finally setLoading(false) — Razorpay handler is async
-};
+    try {
+      setLoading(true);
+
+      // ✅ COD Flow
+      if (paymentMethod === "cod") {
+        const orderRes = await fetch("/api/orders/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: items.map((item) => ({
+              productId: item.productId,
+              variantKey: item.variantKey,
+              title: item.title,
+              price: item.price,
+              quantity: item.quantity,
+              image: item.image,
+            })),
+            total,
+            paymentMethod: "cod",
+          }),
+        });
+
+        const data = await orderRes.json();
+        if (!orderRes.ok) throw new Error(data.error || "Failed to create order");
+
+        // ✅ CHANGED: localStorage instead of sessionStorage (persists across Razorpay redirect)
+        localStorage.setItem("lastOrder", JSON.stringify(data.order));
+        router.replace(`/order-confirmation/${data.order.id}`);
+
+        setTimeout(() => {
+          fetch("/api/cart/sync", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items: [] }),
+          }).catch(console.error);
+          localStorage.removeItem("cart-storage");
+        }, 1000);
+
+        return;
+      }
+
+      // ✅ Razorpay Flow
+      if (paymentMethod === "razorpay") {
+        await loadRazorpay();
+
+        const paymentRes = await fetch("/api/payment/create-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount: total }),
+        });
+
+        const paymentData = await paymentRes.json();
+        if (!paymentRes.ok) throw new Error("Failed to initialize payment");
+
+        const options = {
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+          amount: paymentData.order.amount,
+          currency: "INR",
+          name: "BlendRas",
+          description: "Order Payment",
+          order_id: paymentData.order.id,
+
+          handler: async function (response: any) {
+            try {
+              const orderRes = await fetch("/api/orders/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  items: items.map((item) => ({
+                    productId: item.productId,
+                    variantKey: item.variantKey,
+                    title: item.title,
+                    price: item.price,
+                    quantity: item.quantity,
+                    image: item.image,
+                  })),
+                  total,
+                  paymentMethod: "razorpay",
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpayOrderId: response.razorpay_order_id,
+                }),
+              });
+
+              const data = await orderRes.json();
+              if (!orderRes.ok) throw new Error(data.error || "Failed to create order");
+
+              // ✅ CHANGED: localStorage instead of sessionStorage (persists across Razorpay redirect)
+              localStorage.setItem("lastOrder", JSON.stringify(data.order));
+              router.replace(`/order-confirmation/${data.order.id}`);
+
+              setTimeout(() => {
+                fetch("/api/cart/sync", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ items: [] }),
+                }).catch(console.error);
+                localStorage.removeItem("cart-storage");
+              }, 1000);
+
+            } catch (err: any) {
+              toast.error(err.message || "Order creation failed");
+              setLoading(false);
+            }
+          },
+
+          modal: {
+            ondismiss: function () {
+              setLoading(false);
+            },
+          },
+
+          theme: { color: "#254fda" },
+        };
+
+        const razor = new (window as any).Razorpay(options);
+        razor.open();
+      }
+
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Payment failed");
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] lg:py-10 py-5">
@@ -380,7 +377,7 @@ const handlePlaceOrder = async () => {
                   </CardHeader>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-<CardContent className="space-y-4 pt-0">
+                  <CardContent className="space-y-4 pt-0">
                     {/* First Name & Last Name */}
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
@@ -395,9 +392,7 @@ const handlePlaceOrder = async () => {
                           }
                           placeholder="John"
                           className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
-                            errors.firstName
-                              ? "border-red-500 focus-visible:border-red-500"
-                              : ""
+                            errors.firstName ? "border-red-500 focus-visible:border-red-500" : ""
                           }`}
                         />
                         {errors.firstName && (
@@ -605,69 +600,66 @@ const handlePlaceOrder = async () => {
             </Collapsible>
 
             {/* Payment Method */}
-{/* Payment Method */}
-<Card className="rounded-2xl shadow-md p-6 w-full relative bg-[#fff]">
-  <CardHeader className="lg:px-6 px-0">
-    <div className="flex items-center gap-3 px-0">
-      <div className="h-10 w-10 rounded-full bg-[#fff2e5] flex items-center justify-center">
-        <CreditCard className="h-5 w-5 text-[#ff8000]" />
-      </div>
-      <div>
-        <CardTitle className="text-lg text-[#000]">Payment Method</CardTitle>
-        <p className="text-sm text-[#6a7181]">All transactions are secure</p>
-      </div>
-    </div>
-  </CardHeader>
-  <CardContent className="lg:px-6 px-0">
-    <div className="space-y-3">
+            <Card className="rounded-2xl shadow-md p-6 w-full relative bg-[#fff]">
+              <CardHeader className="lg:px-6 px-0">
+                <div className="flex items-center gap-3 px-0">
+                  <div className="h-10 w-10 rounded-full bg-[#fff2e5] flex items-center justify-center">
+                    <CreditCard className="h-5 w-5 text-[#ff8000]" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg text-[#000]">Payment Method</CardTitle>
+                    <p className="text-sm text-[#6a7181]">All transactions are secure</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="lg:px-6 px-0">
+                <div className="space-y-3">
+                  {/* Razorpay Option */}
+                  <div
+                    className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                      paymentMethod === "razorpay"
+                        ? "border-[#254fda] bg-[#254fda0d]"
+                        : "border-[#e2e4e9] hover:border-[#254fda]"
+                    }`}
+                    onClick={() => setPaymentMethod(prev => prev === "razorpay" ? "" : "razorpay")}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
+                        paymentMethod === "razorpay" ? "border-[#254fda] bg-[#254fda]" : "border-gray-300"
+                      }`}>
+                        {paymentMethod === "razorpay" && <div className="w-2 h-2 rounded-full bg-white" />}
+                      </div>
+                      <label className="cursor-pointer font-medium text-[#000]">Pay Online</label>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Badge variant="secondary" className="text-xs text-[#000]">UPI</Badge>
+                      <Badge variant="secondary" className="text-xs text-[#000]">Card</Badge>
+                      <Badge variant="secondary" className="text-xs text-[#000]">NetBanking</Badge>
+                    </div>
+                  </div>
 
-      {/* ✅ Razorpay Option */}
-      <div
-        className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
-          paymentMethod === "razorpay"
-            ? "border-[#254fda] bg-[#254fda0d]"
-            : "border-[#e2e4e9] hover:border-[#254fda]"
-        }`}
-        onClick={() => setPaymentMethod(prev => prev === "razorpay" ? "" : "razorpay")}
-      >
-        <div className="flex items-center gap-3">
-          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
-            paymentMethod === "razorpay" ? "border-[#254fda] bg-[#254fda]" : "border-gray-300"
-          }`}>
-            {paymentMethod === "razorpay" && <div className="w-2 h-2 rounded-full bg-white" />}
-          </div>
-          <label className="cursor-pointer font-medium text-[#000]">Pay Online</label>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <Badge variant="secondary" className="text-xs text-[#000]">UPI</Badge>
-          <Badge variant="secondary" className="text-xs text-[#000]">Card</Badge>
-          <Badge variant="secondary" className="text-xs text-[#000]">NetBanking</Badge>
-        </div>
-      </div>
-
-      {/* ✅ COD Option */}
-      <div
-        className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
-          paymentMethod === "cod"
-            ? "border-[#254fda] bg-[#28af600d]"
-            : "border-[#e2e4e9] hover:border-[#254fda]"
-        }`}
-        onClick={() => setPaymentMethod(prev => prev === "cod" ? "" : "cod")}
-      >
-        <div className="flex items-center gap-3">
-          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
-            paymentMethod === "cod" ? "border-[#254fda] bg-[#254fda]" : "border-gray-300"
-          }`}>
-            {paymentMethod === "cod" && <div className="w-2 h-2 rounded-full bg-white" />}
-          </div>
-          <label className="cursor-pointer font-medium text-[#000]">Cash on Delivery</label>
-        </div>
-        <Badge variant="outline" className="text-xs text-[#000]">+₹30</Badge>
-      </div>
-
-    </div>
-  </CardContent>
-</Card>
+                  {/* COD Option */}
+                  <div
+                    className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                      paymentMethod === "cod"
+                        ? "border-[#254fda] bg-[#28af600d]"
+                        : "border-[#e2e4e9] hover:border-[#254fda]"
+                    }`}
+                    onClick={() => setPaymentMethod(prev => prev === "cod" ? "" : "cod")}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
+                        paymentMethod === "cod" ? "border-[#254fda] bg-[#254fda]" : "border-gray-300"
+                      }`}>
+                        {paymentMethod === "cod" && <div className="w-2 h-2 rounded-full bg-white" />}
+                      </div>
+                      <label className="cursor-pointer font-medium text-[#000]">Cash on Delivery</label>
+                    </div>
+                    <Badge variant="outline" className="text-xs text-[#000]">+₹30</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Right Column - Order Summary */}
@@ -677,7 +669,6 @@ const handlePlaceOrder = async () => {
                 <CardTitle className="text-xl md:text-2xl font-bold text-[hsl(240_15%_10%)]">Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* ✅ Dynamic Products from Cart */}
                 {items.map((item) => (
                   <div key={item.id} className="flex gap-4">
                     <div className="w-20 h-20 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
@@ -748,7 +739,7 @@ const handlePlaceOrder = async () => {
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-[hsl(240_8%_45%)] ">Tax</span>
+                    <span className="text-[hsl(240_8%_45%)]">Tax</span>
                     <span className="font-semibold text-[hsl(240_15%_10%)]">₹{tax.toFixed(2)}</span>
                   </div>
                   {discount > 0 && (
@@ -767,16 +758,16 @@ const handlePlaceOrder = async () => {
                 </div>
 
                 <Button
-  onClick={handlePlaceOrder}
-  disabled={!paymentMethod} // ✅ Disable if nothing selected
-  className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
->
-{!paymentMethod
-  ? "Select Payment Method"
-  : paymentMethod === "cod"
-  ? `Place Order ₹${total.toLocaleString()}`
-  : `Pay ₹${total.toLocaleString()}`}
-</Button>
+                  onClick={handlePlaceOrder}
+                  disabled={!paymentMethod}
+                  className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                >
+                  {!paymentMethod
+                    ? "Select Payment Method"
+                    : paymentMethod === "cod"
+                    ? `Place Order ₹${total.toLocaleString()}`
+                    : `Pay ₹${total.toLocaleString()}`}
+                </Button>
 
                 {/* Trust Badges */}
                 <div className="flex items-center justify-center gap-4 pt-2 text-xs text-[#6a7181]">

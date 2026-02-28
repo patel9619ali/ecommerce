@@ -49,50 +49,41 @@ const OrderConfirmation = () => {
   const router = useRouter();
   const { setLoading } = useLoading();
 
-  const [orderId, setOrderId] = useState('');
+  // ✅ Read directly from params — no useState needed, avoids race condition
+  const raw = params?.orderId;
+  const orderId = (Array.isArray(raw) ? raw[0] : raw) ?? '';
+
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoadingOrder, setIsLoadingOrder] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasFetched = useRef(false);
   const estimatedDelivery = getEstimatedDelivery();
 
-  // ✅ Step 1: Safely resolve orderId from params (empty on first render in prod)
-  useEffect(() => {
-    const raw = params?.orderId;
-    const id = (Array.isArray(raw) ? raw[0] : raw) ?? '';
-    if (id) setOrderId(id);
-  }, [params]);
-
- 
-
-  // ✅ Step 3: Fetch order only when orderId is available
   useEffect(() => {
     if (!orderId) return;
     if (hasFetched.current) return;
     hasFetched.current = true;
 
-    // ✅ Check sessionStorage FIRST — this is the key fix
-    // After payment redirect, order is cached here to avoid DB race condition
+    // ✅ Check localStorage FIRST — persists across Razorpay redirects unlike sessionStorage
     try {
-      const cached = sessionStorage.getItem('lastOrder');
+      const cached = localStorage.getItem('lastOrder');
       if (cached) {
         const parsed = JSON.parse(cached);
         if (parsed?.id === orderId) {
           setOrder(parsed);
           setIsLoadingOrder(false);
-          sessionStorage.removeItem('lastOrder');
-          return; // ✅ Done — no API call needed
+          localStorage.removeItem('lastOrder'); // clean up after reading
+          return;
         }
       }
     } catch (e) {
       console.error('❌ Cache parse error:', e);
     }
 
-    // ✅ Fetch from API with retry (handles DB write delay)
+    // ✅ Fetch from API with absolute URL + retry for DB write delay
     const fetchOrder = async (attempt = 0): Promise<void> => {
       try {
-        const baseUrl = window.location.origin; // 👈 absolute URL for production
-        const res = await fetch(`${baseUrl}/api/orders/${orderId}`, {
+        const res = await fetch(`${window.location.origin}/api/orders/${orderId}`, {
           cache: 'no-store',
         });
 
@@ -103,7 +94,11 @@ const OrderConfirmation = () => {
         }
 
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Order not found');
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Order not found');
+        }
+
         if (!data.order) throw new Error('Order data missing');
         setOrder(data.order);
       } catch (err: any) {
