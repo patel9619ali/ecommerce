@@ -91,24 +91,19 @@ const OrderConfirmation = () => {
     // ✅ Fetch from API with retry (handles DB write delay)
     const fetchOrder = async (attempt = 0): Promise<void> => {
       try {
-        const res = await fetch(`/api/orders/${orderId}`, {
+        const baseUrl = window.location.origin; // 👈 absolute URL for production
+        const res = await fetch(`${baseUrl}/api/orders/${orderId}`, {
           cache: 'no-store',
         });
 
-        // ✅ If order not found yet, retry up to 4 times with increasing delay
-        // This handles the race condition where DB write hasn't completed yet
         if (res.status === 404 && attempt < 4) {
-          const delay = (attempt + 1) * 800; // 800ms, 1600ms, 2400ms, 3200ms
+          const delay = (attempt + 1) * 800;
           await new Promise((r) => setTimeout(r, delay));
           return fetchOrder(attempt + 1);
         }
 
         const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.error || 'Order not found');
-        }
-
+        if (!res.ok) throw new Error(data.error || 'Order not found');
         if (!data.order) throw new Error('Order data missing');
         setOrder(data.order);
       } catch (err: any) {
