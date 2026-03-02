@@ -1,6 +1,7 @@
 "use client";
 import { SpinnerCustom } from "@/components/Loader/SpinningLoader";
 import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 import {
   CheckCircle,
   Package,
@@ -44,11 +45,10 @@ const getEstimatedDelivery = () => {
 };
 
 const OrderConfirmation = () => {
-  const params = useParams();
   const router = useRouter();
 
-  const raw = params?.orderId;
-  const orderId = (Array.isArray(raw) ? raw[0] : raw) ?? '';
+  const pathname = usePathname();
+  const orderId = pathname.split("/").pop() || "";
 
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoadingOrder, setIsLoadingOrder] = useState(true);
@@ -62,27 +62,6 @@ useEffect(() => {
 
   const loadOrder = async () => {
     try {
-      // If invalid param, stop loading properly
-      if (!orderId.startsWith("ORD-")) {
-        setError("Invalid order ID");
-        setIsLoadingOrder(false);
-        return;
-      }
-
-      // 1️⃣ Try localStorage first
-      const cached = localStorage.getItem("lastOrder");
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed?.id === orderId) {
-          if (!cancelled) {
-            setOrder(parsed);
-            setIsLoadingOrder(false);
-          }
-          localStorage.removeItem("lastOrder");
-        }
-      }
-
-      // 2️⃣ Fetch from API
       const res = await fetch(`/api/orders/${orderId}`, {
         cache: "no-store",
       });
