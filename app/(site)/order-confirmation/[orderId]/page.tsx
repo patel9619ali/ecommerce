@@ -56,22 +56,21 @@ const OrderConfirmation = () => {
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoadingOrder, setIsLoadingOrder] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const hasFetched = useRef(false);
+  const hasFetched = useRef<string>(''); // store the orderId we already fetched
   const estimatedDelivery = getEstimatedDelivery();
 
 useEffect(() => {
   if (!orderId) return;
-  
-  // ✅ Guard: only run for valid ORD- prefixed IDs, ignore extension garbage
   if (!orderId.startsWith('ORD-')) {
     setIsLoadingOrder(false);
     return;
   }
   
-  if (hasFetched.current) return;
-  hasFetched.current = true;
+  // ✅ Prevent double-fetch even across remounts
+  if (hasFetched.current === orderId) return;
+  hasFetched.current = orderId;
 
-  // ✅ Check localStorage FIRST
+  // check localStorage...
   try {
     const cached = localStorage.getItem('lastOrder');
     if (cached) {
@@ -84,7 +83,7 @@ useEffect(() => {
       }
     }
   } catch (e) {
-    console.error('❌ Cache parse error:', e);
+    console.error('Cache parse error:', e);
   }
 
   const fetchOrder = async (attempt = 0): Promise<void> => {
@@ -94,8 +93,7 @@ useEffect(() => {
       });
 
       if (res.status === 404 && attempt < 4) {
-        const delay = (attempt + 1) * 800;
-        await new Promise((r) => setTimeout(r, delay));
+        await new Promise((r) => setTimeout(r, (attempt + 1) * 800));
         return fetchOrder(attempt + 1);
       }
 
