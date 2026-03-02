@@ -56,55 +56,56 @@ const OrderConfirmation = () => {
   const hasFetched = useRef<string>('');
   const estimatedDelivery = getEstimatedDelivery();
 
-  useEffect(() => {
-    if (!orderId) return;
-    if (!orderId.startsWith('ORD-')) {
-      setIsLoadingOrder(false);
-      return;
-    }
-    if (hasFetched.current === orderId) return;
-    hasFetched.current = orderId;
+useEffect(() => {
+  if (!orderId) return;
 
-    try {
-      const cached = localStorage.getItem('lastOrder');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed?.id === orderId) {
-          setOrder(parsed);
-          setIsLoadingOrder(false);
-          localStorage.removeItem('lastOrder');
-          return;
-        }
-      }
-    } catch (e) {
-      console.error('Cache parse error:', e);
-    }
-
-    const fetchOrder = async (attempt = 0): Promise<void> => {
-      try {
-        const res = await fetch(`${window.location.origin}/api/orders/${orderId}`, {
-          cache: 'no-store',
-        });
-
-        if (res.status === 404 && attempt < 4) {
-          await new Promise((r) => setTimeout(r, (attempt + 1) * 800));
-          return fetchOrder(attempt + 1);
-        }
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Order not found');
-        if (!data.order) throw new Error('Order data missing');
-        setOrder(data.order);
-      } catch (err: any) {
-        console.error('❌ Fetch error:', err);
-        setError(err.message);
-      } finally {
+  // 1️⃣ FIRST: Try localStorage immediately
+  try {
+    const cached = localStorage.getItem("lastOrder");
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (parsed?.id === orderId) {
+        setOrder(parsed);
         setIsLoadingOrder(false);
-      }
-    };
+        localStorage.removeItem("lastOrder");
 
-    fetchOrder();
-  }, [orderId]);
+        // 🔥 Fetch in background to revalidate
+        fetch(`/api/orders/${orderId}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data?.order) {
+              setOrder(data.order);
+            }
+          })
+          .catch(() => {});
+        
+        return;
+      }
+    }
+  } catch (e) {
+    console.error("Cache error", e);
+  }
+
+  // 2️⃣ If no cache → fetch normally
+  const fetchOrder = async () => {
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, {
+        cache: "no-store",
+      });
+
+      if (!res.ok) throw new Error("Order not found");
+
+      const data = await res.json();
+      setOrder(data.order);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoadingOrder(false);
+    }
+  };
+
+  fetchOrder();
+}, [orderId]);
 
   const subtotal =
     order?.items.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
