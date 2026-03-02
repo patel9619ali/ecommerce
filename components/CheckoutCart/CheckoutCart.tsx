@@ -246,6 +246,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
 
         // ✅ CHANGED: localStorage instead of sessionStorage (persists across Razorpay redirect)
         localStorage.setItem("lastOrder", JSON.stringify(data.order));
+        setLoading(false); // 👈 reset before navigating
         router.replace(`/order-confirmation/${data.order.id}`);
 
         setTimeout(() => {
@@ -307,6 +308,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
 
               // ✅ CHANGED: localStorage instead of sessionStorage (persists across Razorpay redirect)
               localStorage.setItem("lastOrder", JSON.stringify(data.order));
+              setLoading(false); // 👈 reset before navigating
               router.replace(`/order-confirmation/${data.order.id}`);
 
               setTimeout(() => {

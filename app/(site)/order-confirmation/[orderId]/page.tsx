@@ -58,7 +58,9 @@ const OrderConfirmation = () => {
   const [error, setError] = useState<string | null>(null);
   const hasFetched = useRef<string>(''); // store the orderId we already fetched
   const estimatedDelivery = getEstimatedDelivery();
-
+  useEffect(() => {
+    setLoading(false);
+  }, []);
 useEffect(() => {
   if (!orderId) return;
   if (!orderId.startsWith('ORD-')) {
