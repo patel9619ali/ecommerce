@@ -59,36 +59,33 @@ const OrderConfirmation = () => {
 useEffect(() => {
   if (!orderId) return;
 
-  // 1️⃣ FIRST: Try localStorage immediately
-  try {
-    const cached = localStorage.getItem("lastOrder");
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      if (parsed?.id === orderId) {
-        setOrder(parsed);
-        setIsLoadingOrder(false);
-        localStorage.removeItem("lastOrder");
-
-        // 🔥 Fetch in background to revalidate
-        fetch(`/api/orders/${orderId}`)
-          .then(res => res.json())
-          .then(data => {
-            if (data?.order) {
-              setOrder(data.order);
-            }
-          })
-          .catch(() => {});
-        
-        return;
-      }
-    }
-  } catch (e) {
-    console.error("Cache error", e);
+  // 🔥 IMPORTANT FIX
+  if (!orderId.startsWith("ORD-")) {
+    return;
   }
 
-  // 2️⃣ If no cache → fetch normally
-  const fetchOrder = async () => {
+  let cancelled = false;
+
+  const loadOrder = async () => {
     try {
+      // 1️⃣ Try localStorage first
+      const cached = localStorage.getItem("lastOrder");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed?.id === orderId) {
+          if (!cancelled) {
+            setOrder(parsed);
+            setIsLoadingOrder(false);
+          }
+          localStorage.removeItem("lastOrder");
+
+          // background revalidate
+          fetch(`/api/orders/${orderId}`).catch(() => {});
+          return;
+        }
+      }
+
+      // 2️⃣ Normal fetch
       const res = await fetch(`/api/orders/${orderId}`, {
         cache: "no-store",
       });
@@ -96,15 +93,26 @@ useEffect(() => {
       if (!res.ok) throw new Error("Order not found");
 
       const data = await res.json();
-      setOrder(data.order);
+
+      if (!cancelled) {
+        setOrder(data.order);
+      }
     } catch (err: any) {
-      setError(err.message);
+      if (!cancelled) {
+        setError(err.message || "Failed to fetch");
+      }
     } finally {
-      setIsLoadingOrder(false);
+      if (!cancelled) {
+        setIsLoadingOrder(false);
+      }
     }
   };
 
-  fetchOrder();
+  loadOrder();
+
+  return () => {
+    cancelled = true;
+  };
 }, [orderId]);
 
   const subtotal =
