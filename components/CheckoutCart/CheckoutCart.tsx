@@ -3,30 +3,26 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import {
   MapPin,
   CreditCard,
-  Wallet,
-  Building2,
   ShieldCheck,
   Lock,
   CheckCircle2,
   ChevronDown,
   Tag,
   Truck,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CartProduct, useCartStore } from "@/store/useCartStore";
 import MobileCheckoutBar from "../Cart/MobileCheckoutBar";
-import { useLoading } from "@/context/LoadingContext";
 import { toast } from "sonner";
 
 interface CheckoutCartProps {
@@ -36,11 +32,15 @@ interface CheckoutCartProps {
 }
 
 const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps) => {
-  const { setLoading } = useLoading();
   const router = useRouter();
   const { resetCart } = useCartStore();
   const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
   const [savedAddressId, setSavedAddressId] = useState<string | null>(null);
+
+  // ✅ Local button loading states — no global loader
+  const [isSavingAddress, setIsSavingAddress] = useState(false);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
@@ -115,29 +115,13 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
 
   const validateAddress = () => {
     const newErrors: Record<string, string> = {};
-
-    if (!firstName || firstName.length < 2) {
-      newErrors.firstName = "First name must be at least 2 characters";
-    }
-    if (!lastName || lastName.length < 2) {
-      newErrors.lastName = "Last name must be at least 2 characters";
-    }
-    if (!phone || !/^[6-9]\d{9}$/.test(phone)) {
-      newErrors.phone = "Please enter a valid 10-digit phone number";
-    }
-    if (!address || address.length < 5) {
-      newErrors.address = "Address must be at least 5 characters";
-    }
-    if (!city || city.length < 2) {
-      newErrors.city = "City is required";
-    }
-    if (!state || state.length < 2) {
-      newErrors.state = "State is required";
-    }
-    if (!pincode || !/^\d{6}$/.test(pincode)) {
-      newErrors.pincode = "PIN code must be 6 digits";
-    }
-
+    if (!firstName || firstName.length < 2) newErrors.firstName = "First name must be at least 2 characters";
+    if (!lastName || lastName.length < 2) newErrors.lastName = "Last name must be at least 2 characters";
+    if (!phone || !/^[6-9]\d{9}$/.test(phone)) newErrors.phone = "Please enter a valid 10-digit phone number";
+    if (!address || address.length < 5) newErrors.address = "Address must be at least 5 characters";
+    if (!city || city.length < 2) newErrors.city = "City is required";
+    if (!state || state.length < 2) newErrors.state = "State is required";
+    if (!pincode || !/^\d{6}$/.test(pincode)) newErrors.pincode = "PIN code must be 6 digits";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -164,36 +148,22 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
 
   const handleSaveAddress = async () => {
     setHasAttemptedSave(true);
-
-    if (!validateAddress()) {
-      return;
-    }
+    if (!validateAddress()) return;
 
     try {
-      setLoading(true);
+      setIsSavingAddress(true);
 
       const response = await fetch("/api/address", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          firstName,
-          lastName,
-          phone,
-          address,
-          building,
-          apartment,
-          landmark,
-          city,
-          state,
-          pincode,
+          firstName, lastName, phone, address,
+          building, apartment, landmark, city, state, pincode,
         }),
       });
 
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to save address");
-      }
+      if (!response.ok) throw new Error(data.error || "Failed to save address");
 
       setAddressSaved(true);
       setAddressOpen(false);
@@ -203,7 +173,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
       console.error("Address save error:", error);
       toast.error(error.message || "Failed to save address");
     } finally {
-      setLoading(false);
+      setIsSavingAddress(false);
     }
   };
 
@@ -213,14 +183,13 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
       setAddressOpen(true);
       return;
     }
-
     if (!paymentMethod) {
       toast.error("Please select a payment method");
       return;
     }
 
     try {
-      setLoading(true);
+      setIsPlacingOrder(true);
 
       // ✅ COD Flow
       if (paymentMethod === "cod") {
@@ -244,12 +213,9 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
         const data = await orderRes.json();
         if (!orderRes.ok) throw new Error(data.error || "Failed to create order");
 
-        // ✅ CHANGED: localStorage instead of sessionStorage (persists across Razorpay redirect)
         localStorage.setItem("lastOrder", JSON.stringify(data.order));
-        setLoading(false); // 👈 reset before navigating
-        await new Promise(r => setTimeout(r, 100));
-        router.replace(`/order-confirmation/${data.order.id}`);
 
+        // Clear cart in background
         setTimeout(() => {
           fetch("/api/cart/sync", {
             method: "POST",
@@ -257,8 +223,9 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
             body: JSON.stringify({ items: [] }),
           }).catch(console.error);
           localStorage.removeItem("cart-storage");
-        }, 1000);
+        }, 500);
 
+        router.push(`/order-confirmation/${data.order.id}`);
         return;
       }
 
@@ -307,11 +274,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
               const data = await orderRes.json();
               if (!orderRes.ok) throw new Error(data.error || "Failed to create order");
 
-              // ✅ CHANGED: localStorage instead of sessionStorage (persists across Razorpay redirect)
               localStorage.setItem("lastOrder", JSON.stringify(data.order));
-              setLoading(false); // 👈 reset before navigating
-              await new Promise(r => setTimeout(r, 100));
-              router.replace(`/order-confirmation/${data.order.id}`);
 
               setTimeout(() => {
                 fetch("/api/cart/sync", {
@@ -320,17 +283,18 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
                   body: JSON.stringify({ items: [] }),
                 }).catch(console.error);
                 localStorage.removeItem("cart-storage");
-              }, 1000);
+              }, 500);
 
+              router.push(`/order-confirmation/${data.order.id}`);
             } catch (err: any) {
               toast.error(err.message || "Order creation failed");
-              setLoading(false);
+              setIsPlacingOrder(false);
             }
           },
 
           modal: {
             ondismiss: function () {
-              setLoading(false);
+              setIsPlacingOrder(false);
             },
           },
 
@@ -344,7 +308,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
     } catch (error: any) {
       console.error(error);
       toast.error(error.message || "Payment failed");
-      setLoading(false);
+      setIsPlacingOrder(false);
     }
   };
 
@@ -382,219 +346,126 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <CardContent className="space-y-4 pt-0">
-                    {/* First Name & Last Name */}
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="firstName">
-                          First Name *
-                        </Label>
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="firstName">First Name *</Label>
                         <Input
                           id="firstName"
                           value={firstName}
-                          onChange={(e) =>
-                            handleFieldChange("firstName", e.target.value, setFirstName)
-                          }
+                          onChange={(e) => handleFieldChange("firstName", e.target.value, setFirstName)}
                           placeholder="John"
-                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
-                            errors.firstName ? "border-red-500 focus-visible:border-red-500" : ""
-                          }`}
+                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${errors.firstName ? "border-red-500 focus-visible:border-red-500" : ""}`}
                         />
-                        {errors.firstName && (
-                          <p className="text-xs text-red-500 mt-1">{errors.firstName}</p>
-                        )}
+                        {errors.firstName && <p className="text-xs text-red-500 mt-1">{errors.firstName}</p>}
                       </div>
-
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="lastName">
-                          Last Name *
-                        </Label>
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="lastName">Last Name *</Label>
                         <Input
                           id="lastName"
                           value={lastName}
-                          onChange={(e) =>
-                            handleFieldChange("lastName", e.target.value, setLastName)
-                          }
+                          onChange={(e) => handleFieldChange("lastName", e.target.value, setLastName)}
                           placeholder="Doe"
-                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
-                            errors.lastName ? "border-red-500 focus-visible:border-red-500" : ""
-                          }`}
+                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${errors.lastName ? "border-red-500 focus-visible:border-red-500" : ""}`}
                         />
-                        {errors.lastName && (
-                          <p className="text-xs text-red-500 mt-1">{errors.lastName}</p>
-                        )}
+                        {errors.lastName && <p className="text-xs text-red-500 mt-1">{errors.lastName}</p>}
                       </div>
                     </div>
 
-                    {/* Phone */}
                     <div className="space-y-2">
-                      <Label className="text-[#020817] text-sm mb-1 block" htmlFor="phone">
-                        Phone Number *
-                      </Label>
+                      <Label className="text-[#020817] text-sm mb-1 block" htmlFor="phone">Phone Number *</Label>
                       <Input
                         id="phone"
                         value={phone}
-                        onChange={(e) =>
-                          handleFieldChange(
-                            "phone",
-                            e.target.value.replace(/\D/g, "").slice(0, 10),
-                            setPhone
-                          )
-                        }
+                        onChange={(e) => handleFieldChange("phone", e.target.value.replace(/\D/g, "").slice(0, 10), setPhone)}
                         placeholder="9876543210"
                         maxLength={10}
-                        className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
-                          errors.phone ? "border-red-500 focus-visible:border-red-500" : ""
-                        }`}
+                        className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${errors.phone ? "border-red-500 focus-visible:border-red-500" : ""}`}
                       />
-                      {errors.phone && (
-                        <p className="text-xs text-red-500 mt-1">{errors.phone}</p>
-                      )}
+                      {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
                     </div>
 
-                    {/* Street Address */}
                     <div className="space-y-2">
-                      <Label className="text-[#020817] text-sm mb-1 block" htmlFor="address">
-                        Street Address *
-                      </Label>
+                      <Label className="text-[#020817] text-sm mb-1 block" htmlFor="address">Street Address *</Label>
                       <Input
                         id="address"
                         value={address}
-                        onChange={(e) =>
-                          handleFieldChange("address", e.target.value, setAddress)
-                        }
+                        onChange={(e) => handleFieldChange("address", e.target.value, setAddress)}
                         placeholder="123 Main Street"
-                        className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
-                          errors.address ? "border-red-500 focus-visible:border-red-500" : ""
-                        }`}
+                        className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${errors.address ? "border-red-500 focus-visible:border-red-500" : ""}`}
                       />
-                      {errors.address && (
-                        <p className="text-xs text-red-500 mt-1">{errors.address}</p>
-                      )}
+                      {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address}</p>}
                     </div>
 
-                    {/* Building, Apartment, Landmark */}
                     <div className="grid sm:grid-cols-3 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="building">
-                          Building (Optional)
-                        </Label>
-                        <Input
-                          id="building"
-                          value={building}
-                          onChange={(e) => setBuilding(e.target.value)}
-                          placeholder="Tower A"
-                          className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
-                        />
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="building">Building (Optional)</Label>
+                        <Input id="building" value={building} onChange={(e) => setBuilding(e.target.value)} placeholder="Tower A" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]" />
                       </div>
-
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="apartment">
-                          Apartment (Optional)
-                        </Label>
-                        <Input
-                          id="apartment"
-                          value={apartment}
-                          onChange={(e) => setApartment(e.target.value)}
-                          placeholder="4B"
-                          className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
-                        />
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="apartment">Apartment (Optional)</Label>
+                        <Input id="apartment" value={apartment} onChange={(e) => setApartment(e.target.value)} placeholder="4B" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]" />
                       </div>
-
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="landmark">
-                          Landmark (Optional)
-                        </Label>
-                        <Input
-                          id="landmark"
-                          value={landmark}
-                          onChange={(e) => setLandmark(e.target.value)}
-                          placeholder="Near Mall"
-                          className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
-                        />
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="landmark">Landmark (Optional)</Label>
+                        <Input id="landmark" value={landmark} onChange={(e) => setLandmark(e.target.value)} placeholder="Near Mall" className="h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]" />
                       </div>
                     </div>
 
-                    {/* City, State, Pincode */}
                     <div className="grid sm:grid-cols-3 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="city">
-                          City *
-                        </Label>
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="city">City *</Label>
                         <Input
                           id="city"
                           value={city}
                           onChange={(e) => handleFieldChange("city", e.target.value, setCity)}
                           placeholder="Mumbai"
-                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
-                            errors.city ? "border-red-500 focus-visible:border-red-500" : ""
-                          }`}
+                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${errors.city ? "border-red-500 focus-visible:border-red-500" : ""}`}
                         />
-                        {errors.city && (
-                          <p className="text-xs text-red-500 mt-1">{errors.city}</p>
-                        )}
+                        {errors.city && <p className="text-xs text-red-500 mt-1">{errors.city}</p>}
                       </div>
-
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="state">
-                          State *
-                        </Label>
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="state">State *</Label>
                         <Input
                           id="state"
                           value={state}
                           onChange={(e) => handleFieldChange("state", e.target.value, setState)}
                           placeholder="Maharashtra"
-                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
-                            errors.state ? "border-red-500 focus-visible:border-red-500" : ""
-                          }`}
+                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${errors.state ? "border-red-500 focus-visible:border-red-500" : ""}`}
                         />
-                        {errors.state && (
-                          <p className="text-xs text-red-500 mt-1">{errors.state}</p>
-                        )}
+                        {errors.state && <p className="text-xs text-red-500 mt-1">{errors.state}</p>}
                       </div>
-
                       <div className="space-y-2">
-                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="pincode">
-                          PIN Code *
-                        </Label>
+                        <Label className="text-[#020817] text-sm mb-1 block" htmlFor="pincode">PIN Code *</Label>
                         <Input
                           id="pincode"
                           value={pincode}
-                          onChange={(e) =>
-                            handleFieldChange(
-                              "pincode",
-                              e.target.value.replace(/\D/g, "").slice(0, 6),
-                              setPincode
-                            )
-                          }
+                          onChange={(e) => handleFieldChange("pincode", e.target.value.replace(/\D/g, "").slice(0, 6), setPincode)}
                           placeholder="400001"
                           maxLength={6}
-                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${
-                            errors.pincode ? "border-red-500 focus-visible:border-red-500" : ""
-                          }`}
+                          className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${errors.pincode ? "border-red-500 focus-visible:border-red-500" : ""}`}
                         />
-                        {errors.pincode && (
-                          <p className="text-xs text-red-500 mt-1">{errors.pincode}</p>
-                        )}
+                        {errors.pincode && <p className="text-xs text-red-500 mt-1">{errors.pincode}</p>}
                       </div>
                     </div>
 
                     <Button
                       onClick={handleSaveAddress}
+                      disabled={isSavingAddress}
                       className="w-full mt-2 cursor-pointer !border-[#254fda] !bg-[#254fda] hover:!bg-[#1e40af] mb-5 !text-[#fff]"
                       variant="outline"
                     >
-                      <CheckCircle2 className="h-4 w-4 mr-2 !text-[#fff]" />
-                      {addressSaved ? "Update Address" : "Save Address"}
+                      {isSavingAddress ? (
+                        <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</>
+                      ) : (
+                        <><CheckCircle2 className="h-4 w-4 mr-2 !text-[#fff]" />{addressSaved ? "Update Address" : "Save Address"}</>
+                      )}
                     </Button>
                   </CardContent>
                 </CollapsibleContent>
               </Card>
               {addressSaved && !addressOpen && (
                 <Button
-                  onClick={() => {
-                    setAddressOpen(true);
-                    setAddressSaved(false);
-                  }}
+                  onClick={() => { setAddressOpen(true); setAddressSaved(false); }}
                   variant="outline"
                   className="w-full mt-2 cursor-pointer !border-[#254fda] !bg-[#254fda] hover:!bg-[#1e40af] mb-5 !text-[#fff]"
                 >
@@ -618,19 +489,12 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
               </CardHeader>
               <CardContent className="lg:px-6 px-0">
                 <div className="space-y-3">
-                  {/* Razorpay Option */}
                   <div
-                    className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                      paymentMethod === "razorpay"
-                        ? "border-[#254fda] bg-[#254fda0d]"
-                        : "border-[#e2e4e9] hover:border-[#254fda]"
-                    }`}
+                    className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${paymentMethod === "razorpay" ? "border-[#254fda] bg-[#254fda0d]" : "border-[#e2e4e9] hover:border-[#254fda]"}`}
                     onClick={() => setPaymentMethod(prev => prev === "razorpay" ? "" : "razorpay")}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
-                        paymentMethod === "razorpay" ? "border-[#254fda] bg-[#254fda]" : "border-gray-300"
-                      }`}>
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${paymentMethod === "razorpay" ? "border-[#254fda] bg-[#254fda]" : "border-gray-300"}`}>
                         {paymentMethod === "razorpay" && <div className="w-2 h-2 rounded-full bg-white" />}
                       </div>
                       <label className="cursor-pointer font-medium text-[#000]">Pay Online</label>
@@ -642,19 +506,12 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
                     </div>
                   </div>
 
-                  {/* COD Option */}
                   <div
-                    className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                      paymentMethod === "cod"
-                        ? "border-[#254fda] bg-[#28af600d]"
-                        : "border-[#e2e4e9] hover:border-[#254fda]"
-                    }`}
+                    className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${paymentMethod === "cod" ? "border-[#254fda] bg-[#28af600d]" : "border-[#e2e4e9] hover:border-[#254fda]"}`}
                     onClick={() => setPaymentMethod(prev => prev === "cod" ? "" : "cod")}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
-                        paymentMethod === "cod" ? "border-[#254fda] bg-[#254fda]" : "border-gray-300"
-                      }`}>
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${paymentMethod === "cod" ? "border-[#254fda] bg-[#254fda]" : "border-gray-300"}`}>
                         {paymentMethod === "cod" && <div className="w-2 h-2 rounded-full bg-white" />}
                       </div>
                       <label className="cursor-pointer font-medium text-[#000]">Cash on Delivery</label>
@@ -676,11 +533,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
                 {items.map((item) => (
                   <div key={item.id} className="flex gap-4">
                     <div className="w-20 h-20 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
-                      <img
-                        src={`${item.image}`}
-                        alt={item.title || "Product"}
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={`${item.image}`} alt={item.title || "Product"} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium text-[#21242c] line-clamp-2">{item.title}</h4>
@@ -694,7 +547,6 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
 
                 <Separator />
 
-                {/* Coupon */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2 text-[#000]">
                     <Tag className="h-4 w-4 text-[#000]" />
@@ -728,7 +580,6 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
 
                 <Separator />
 
-                {/* Price Breakdown */}
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-[#6a7181]">Subtotal</span>
@@ -763,17 +614,20 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
 
                 <Button
                   onClick={handlePlaceOrder}
-                  disabled={!paymentMethod}
+                  disabled={!paymentMethod || isPlacingOrder}
                   className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
-                  {!paymentMethod
-                    ? "Select Payment Method"
-                    : paymentMethod === "cod"
-                    ? `Place Order ₹${total.toLocaleString()}`
-                    : `Pay ₹${total.toLocaleString()}`}
+                  {isPlacingOrder ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" />Processing...</>
+                  ) : !paymentMethod ? (
+                    "Select Payment Method"
+                  ) : paymentMethod === "cod" ? (
+                    `Place Order ₹${total.toLocaleString()}`
+                  ) : (
+                    `Pay ₹${total.toLocaleString()}`
+                  )}
                 </Button>
 
-                {/* Trust Badges */}
                 <div className="flex items-center justify-center gap-4 pt-2 text-xs text-[#6a7181]">
                   <div className="flex items-center gap-1">
                     <ShieldCheck className="h-4 w-4 text-[#254fda]" />

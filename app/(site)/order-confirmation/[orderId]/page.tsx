@@ -1,6 +1,5 @@
 "use client";
 import { SpinnerCustom } from "@/components/Loader/SpinningLoader";
-import { useLoading } from "@/context/LoadingContext";
 import { motion } from "framer-motion";
 import {
   CheckCircle,
@@ -47,72 +46,65 @@ const getEstimatedDelivery = () => {
 const OrderConfirmation = () => {
   const params = useParams();
   const router = useRouter();
-  const { setLoading } = useLoading();
 
-  // ✅ Read directly from params — no useState needed, avoids race condition
   const raw = params?.orderId;
   const orderId = (Array.isArray(raw) ? raw[0] : raw) ?? '';
 
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoadingOrder, setIsLoadingOrder] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const hasFetched = useRef<string>(''); // store the orderId we already fetched
+  const hasFetched = useRef<string>('');
   const estimatedDelivery = getEstimatedDelivery();
+
   useEffect(() => {
-    setLoading(false);
-  }, []);
-useEffect(() => {
-  if (!orderId) return;
-  if (!orderId.startsWith('ORD-')) {
-    setIsLoadingOrder(false);
-    return;
-  }
-  
-  // ✅ Prevent double-fetch even across remounts
-  if (hasFetched.current === orderId) return;
-  hasFetched.current = orderId;
-
-  // check localStorage...
-  try {
-    const cached = localStorage.getItem('lastOrder');
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      if (parsed?.id === orderId) {
-        setOrder(parsed);
-        setIsLoadingOrder(false);
-        localStorage.removeItem('lastOrder');
-        return;
-      }
-    }
-  } catch (e) {
-    console.error('Cache parse error:', e);
-  }
-
-  const fetchOrder = async (attempt = 0): Promise<void> => {
-    try {
-      const res = await fetch(`${window.location.origin}/api/orders/${orderId}`, {
-        cache: 'no-store',
-      });
-
-      if (res.status === 404 && attempt < 4) {
-        await new Promise((r) => setTimeout(r, (attempt + 1) * 800));
-        return fetchOrder(attempt + 1);
-      }
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Order not found');
-      if (!data.order) throw new Error('Order data missing');
-      setOrder(data.order);
-    } catch (err: any) {
-      console.error('❌ Fetch error:', err);
-      setError(err.message);
-    } finally {
+    if (!orderId) return;
+    if (!orderId.startsWith('ORD-')) {
       setIsLoadingOrder(false);
+      return;
     }
-  };
+    if (hasFetched.current === orderId) return;
+    hasFetched.current = orderId;
 
-  fetchOrder();
-}, [orderId]);
+    try {
+      const cached = localStorage.getItem('lastOrder');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed?.id === orderId) {
+          setOrder(parsed);
+          setIsLoadingOrder(false);
+          localStorage.removeItem('lastOrder');
+          return;
+        }
+      }
+    } catch (e) {
+      console.error('Cache parse error:', e);
+    }
+
+    const fetchOrder = async (attempt = 0): Promise<void> => {
+      try {
+        const res = await fetch(`${window.location.origin}/api/orders/${orderId}`, {
+          cache: 'no-store',
+        });
+
+        if (res.status === 404 && attempt < 4) {
+          await new Promise((r) => setTimeout(r, (attempt + 1) * 800));
+          return fetchOrder(attempt + 1);
+        }
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Order not found');
+        if (!data.order) throw new Error('Order data missing');
+        setOrder(data.order);
+      } catch (err: any) {
+        console.error('❌ Fetch error:', err);
+        setError(err.message);
+      } finally {
+        setIsLoadingOrder(false);
+      }
+    };
+
+    fetchOrder();
+  }, [orderId]);
 
   const subtotal =
     order?.items.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
@@ -120,7 +112,7 @@ useEffect(() => {
   const tax = Math.round(subtotal * 0.08);
   const total = order?.amount || subtotal + shipping + tax;
 
-  if (!orderId || isLoadingOrder) {
+  if (isLoadingOrder) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[hsl(240_10%_98%)]">
         <div className="text-center">
@@ -169,10 +161,7 @@ useEffect(() => {
       <header className="border-b border-[hsl(240_10%_90%/0.6)] bg-[hsl(0_0%_100%/0.8)] backdrop-blur-xl sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 md:h-16 flex items-center justify-between">
           <button
-            onClick={() => {
-              setLoading(true);
-              router.push('/');
-            }}
+            onClick={() => router.push('/')}
             className="cursor-pointer flex items-center gap-1.5 text-sm font-medium text-[hsl(252_80%_60%)] hover:text-[hsl(252_80%_50%)] transition-colors font-['DM_Sans']"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -380,10 +369,7 @@ useEffect(() => {
           className="flex flex-col sm:flex-row gap-3 mt-8 justify-center"
         >
           <button
-            onClick={() => {
-              setLoading(true);
-              router.push('/');
-            }}
+            onClick={() => router.push('/')}
             className="cursor-pointer flex items-center justify-center gap-2 h-12 px-6 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
           >
             Continue Shopping
