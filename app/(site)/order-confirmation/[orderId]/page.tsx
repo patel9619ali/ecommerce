@@ -53,21 +53,22 @@ const OrderConfirmation = () => {
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoadingOrder, setIsLoadingOrder] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const hasFetched = useRef<string>('');
   const estimatedDelivery = getEstimatedDelivery();
 
 useEffect(() => {
   if (!orderId) return;
 
-  // 🔥 IMPORTANT FIX
-  if (!orderId.startsWith("ORD-")) {
-    return;
-  }
-
   let cancelled = false;
 
   const loadOrder = async () => {
     try {
+      // If invalid param, stop loading properly
+      if (!orderId.startsWith("ORD-")) {
+        setError("Invalid order ID");
+        setIsLoadingOrder(false);
+        return;
+      }
+
       // 1️⃣ Try localStorage first
       const cached = localStorage.getItem("lastOrder");
       if (cached) {
@@ -78,25 +79,24 @@ useEffect(() => {
             setIsLoadingOrder(false);
           }
           localStorage.removeItem("lastOrder");
-
-          // background revalidate
-          fetch(`/api/orders/${orderId}`).catch(() => {});
-          return;
         }
       }
 
-      // 2️⃣ Normal fetch
+      // 2️⃣ Fetch from API
       const res = await fetch(`/api/orders/${orderId}`, {
         cache: "no-store",
       });
 
-      if (!res.ok) throw new Error("Order not found");
-
       const data = await res.json();
 
+      if (!res.ok) throw new Error(data.error || "Order not found");
+
+      const orderData = data.order ?? data;
+
       if (!cancelled) {
-        setOrder(data.order);
+        setOrder(orderData);
       }
+
     } catch (err: any) {
       if (!cancelled) {
         setError(err.message || "Failed to fetch");
