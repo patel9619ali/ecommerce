@@ -13,6 +13,7 @@ import {
   Tag,
   Truck,
   Loader2,
+  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,6 +54,8 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
   const [pincode, setPincode] = useState("");
 
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [isWalletLoading, setIsWalletLoading] = useState(true);
   const [addressOpen, setAddressOpen] = useState(true);
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
@@ -65,6 +68,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
   const tax = subtotal * 0.08;
   const codCharge = paymentMethod === "cod" ? 30 : 0;
   const total = subtotal + shipping + tax + codCharge;
+  const hasWalletBalance = walletBalance >= total;
 
   const loadRazorpay = () =>
     new Promise((resolve) => {
@@ -102,6 +106,24 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
     };
 
     fetchAddress();
+  }, []);
+
+  useEffect(() => {
+    const fetchWallet = async () => {
+      try {
+        setIsWalletLoading(true);
+        const res = await fetch("/api/wallet");
+        if (!res.ok) return;
+        const data = await res.json();
+        setWalletBalance(data.walletBalance || 0);
+      } catch (error) {
+        console.error("Failed to fetch wallet:", error);
+      } finally {
+        setIsWalletLoading(false);
+      }
+    };
+
+    fetchWallet();
   }, []);
 
   const handleApplyCoupon = () => {
@@ -230,6 +252,46 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
       }
 
       // ✅ Razorpay Flow
+      if (paymentMethod === "wallet") {
+        if (!hasWalletBalance) {
+          throw new Error("Insufficient wallet balance");
+        }
+
+        const orderRes = await fetch("/api/orders/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: items.map((item) => ({
+              productId: item.productId,
+              variantKey: item.variantKey,
+              title: item.title,
+              price: item.price,
+              quantity: item.quantity,
+              image: item.image,
+            })),
+            total,
+            paymentMethod: "wallet",
+          }),
+        });
+
+        const data = await orderRes.json();
+        if (!orderRes.ok) throw new Error(data.error || "Failed to create order");
+
+        localStorage.setItem("lastOrder", JSON.stringify(data.order));
+
+        setTimeout(() => {
+          fetch("/api/cart/sync", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items: [] }),
+          }).catch(console.error);
+          localStorage.removeItem("cart-storage");
+        }, 500);
+
+        router.push(`/order-confirmation/${data.order.id}`);
+        return;
+      }
+
       if (paymentMethod === "razorpay") {
         await loadRazorpay();
 
@@ -313,7 +375,15 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
   };
 
   return (
-    <div className="bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] lg:py-10 py-5">
+    <div className="relative bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] lg:py-10 py-5">
+      {isPlacingOrder && (
+        <div className="fixed inset-0 z-[120] bg-black/20 backdrop-blur-[1px] flex items-center justify-center">
+          <div className="bg-white rounded-xl px-5 py-4 shadow-lg flex items-center gap-2 text-sm font-semibold text-[#21242c]">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Processing payment, please wait...
+          </div>
+        </div>
+      )}
       <main className="container mx-auto px-4">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Forms */}
@@ -518,6 +588,32 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
                     </div>
                     <Badge variant="outline" className="text-xs text-[#000]">+₹30</Badge>
                   </div>
+
+                  <div
+                    className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                      paymentMethod === "wallet" ? "border-[#254fda] bg-[#e5fff40d]" : "border-[#e2e4e9] hover:border-[#254fda]"
+                    } ${isWalletLoading ? "opacity-60 cursor-not-allowed" : ""}`}
+                    onClick={() => {
+                      if (isWalletLoading) return;
+                      setPaymentMethod((prev) => (prev === "wallet" ? "" : "wallet"));
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${paymentMethod === "wallet" ? "border-[#254fda] bg-[#254fda]" : "border-gray-300"}`}>
+                        {paymentMethod === "wallet" && <div className="w-2 h-2 rounded-full bg-white" />}
+                      </div>
+                      <label className="cursor-pointer font-medium text-[#000] flex items-center gap-2">
+                        <Wallet className="h-4 w-4 text-[#28af60]" />
+                        Wallet
+                      </label>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-[#6a7181]">Balance</p>
+                      <p className={`text-sm font-semibold ${hasWalletBalance ? "text-[#28af60]" : "text-red-600"}`}>
+                        â‚¹{walletBalance.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -614,7 +710,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
 
                 <Button
                   onClick={handlePlaceOrder}
-                  disabled={!paymentMethod || isPlacingOrder}
+                  disabled={!paymentMethod || isPlacingOrder || (paymentMethod === "wallet" && !hasWalletBalance)}
                   className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                   {isPlacingOrder ? (

@@ -61,3 +61,67 @@ export const sendEmailVerificationOtp = async (
     `,
   });
 };
+
+type OrderMailItem = {
+  title: string;
+  quantity: number;
+  price: number;
+};
+
+export const sendOrderPlacedEmailToCustomer = async (params: {
+  email: string;
+  customerName?: string | null;
+  orderId: string;
+  amount: number;
+  paymentMethod: string;
+  items: OrderMailItem[];
+}) => {
+  const { email, customerName, orderId, amount, paymentMethod, items } = params;
+  const itemHtml = items
+    .map((i) => `<li>${i.title} x ${i.quantity} - Rs ${i.price * i.quantity}</li>`)
+    .join("");
+
+  await resend.emails.send({
+    from: "BlendRas <support@blendras.in>",
+    to: email,
+    subject: `Order Confirmed: ${orderId}`,
+    html: `
+      <p>Hi ${customerName || "Customer"},</p>
+      <p>Your order <b>${orderId}</b> has been placed successfully.</p>
+      <p><b>Total:</b> Rs ${amount}</p>
+      <p><b>Payment:</b> ${paymentMethod}</p>
+      <p><b>Items:</b></p>
+      <ul>${itemHtml}</ul>
+      <p>Thank you for shopping with BlendRas.</p>
+    `,
+  });
+};
+
+export const sendOrderPlacedEmailToSeller = async (params: {
+  orderId: string;
+  customerEmail?: string | null;
+  amount: number;
+  paymentMethod: string;
+  items: OrderMailItem[];
+}) => {
+  const sellerEmail = process.env.SELLER_EMAIL || "support@blendras.in";
+  const { orderId, customerEmail, amount, paymentMethod, items } = params;
+  const itemHtml = items
+    .map((i) => `<li>${i.title} x ${i.quantity} - Rs ${i.price * i.quantity}</li>`)
+    .join("");
+
+  await resend.emails.send({
+    from: "BlendRas <support@blendras.in>",
+    to: sellerEmail,
+    subject: `New Order Received: ${orderId}`,
+    html: `
+      <p>New order received.</p>
+      <p><b>Order ID:</b> ${orderId}</p>
+      <p><b>Customer Email:</b> ${customerEmail || "N/A"}</p>
+      <p><b>Total:</b> Rs ${amount}</p>
+      <p><b>Payment:</b> ${paymentMethod}</p>
+      <p><b>Items:</b></p>
+      <ul>${itemHtml}</ul>
+    `,
+  });
+};
