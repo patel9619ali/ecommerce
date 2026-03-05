@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
 import { signup } from "@/actions/signup";
 import { FormError } from "@/components/auth/FormError";
 import { Eye, EyeOff,UserPlus } from "lucide-react";
@@ -17,6 +16,7 @@ import LoadingLink from "@/components/Loader/LoadingLink";
 
 type SignUpFormValues = {
   name: string;
+  phone: string;
   email: string;
   password: string;
 };
@@ -43,7 +43,7 @@ export default function SignUpPage() {
     setError(undefined);
 
     startTransition(() => {
-      signup(data).then((res) => {
+      signup({ ...data, phone: `+91${data.phone}` }).then((res) => {
         if (res?.error) {
           setError(res.error);
         }
@@ -83,6 +83,42 @@ export default function SignUpPage() {
             {errors.name && (
               <p className="text-xs text-[#ef4444] mt-1">
                 {errors.name.message}
+              </p>
+            )}
+          </div>
+
+          {/* EMAIL */}
+          <div className="space-y-2">
+            <Label htmlFor="phone" className="text-[#020817] text-sm mb-1 block">
+              Mobile Number <span className="text-[#ef4444]">*</span>
+            </Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748b] text-sm font-medium">
+                +91
+              </span>
+              <Input
+                id="phone"
+                type="tel"
+                disabled={isPending}
+                placeholder="9876543210"
+                maxLength={10}
+                {...register("phone", {
+                  required: "Mobile number is required",
+                  pattern: {
+                    value: /^[6-9]\d{9}$/,
+                    message: "Please enter a valid 10-digit mobile number",
+                  },
+                  onChange: (e) => {
+                    const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+                    e.target.value = digits;
+                  },
+                })}
+                className="h-11 pl-12 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000]"
+              />
+            </div>
+            {errors.phone && (
+              <p className="text-xs text-[#ef4444] mt-1">
+                {errors.phone.message}
               </p>
             )}
           </div>

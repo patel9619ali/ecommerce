@@ -39,6 +39,8 @@ const statusConfig = {
   processing: { label: "Processing", icon: Package, color: "hsl(28 90% 55%)" },
   shipped: { label: "Shipped", icon: Truck, color: "hsl(200 80% 50%)" },
   delivered: { label: "Delivered", icon: MapPin, color: "hsl(145 70% 45%)" },
+  cancelled: { label: "Cancelled", icon: Package, color: "hsl(0 75% 52%)" },
+  refunded: { label: "Refunded", icon: CheckCircle, color: "hsl(252 80% 60%)" },
 };
 
 const getEstimatedDelivery = (createdAt: string) => {
@@ -186,7 +188,8 @@ const MyOrders = () => {
           /* Orders List */
           <div className="space-y-4">
             {orders.map((order, index) => {
-              const statusInfo = statusConfig[order.status as keyof typeof statusConfig] || statusConfig.processing;
+              const key = order.status.toLowerCase() as keyof typeof statusConfig;
+              const statusInfo = statusConfig[key] || statusConfig.processing;
               const StatusIcon = statusInfo.icon;
               const estimatedDelivery = getEstimatedDelivery(order.createdAt);
 

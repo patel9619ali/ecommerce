@@ -1,8 +1,8 @@
 import { productQuery } from "./queries/product";
 import qs from "qs";
 import { cacheTag, cacheLife } from "next/cache";
-import { cache } from "react";
-export const getProducts = cache(async function getProducts() {
+
+export async function getProducts() {
   "use cache";
 
   cacheTag("homepage-products");
@@ -27,7 +27,7 @@ export const getProducts = cache(async function getProducts() {
   });
 
   return res.json();
-});
+}
 
 export async function getProductBySlug(slug: string) {
   "use cache";

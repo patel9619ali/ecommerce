@@ -35,6 +35,7 @@ const HamBurger = (
 const menuItems = [
   { label: "Home", href: "/", icon: "🏠" },
   { label: "Shop", href: "/products", icon: "🛍️" },
+  { label: "Wallet", href: "/wallet", icon: "Wallet" },
   { label: "My Orders", href: "/my-orders", icon: "📦" },
   { label: "About Us", href: "/about-us", icon: "ℹ️" },
   { label: "How It Works", href: "#", icon: "⚡" },
@@ -50,6 +51,7 @@ const quickLinks = [
 ];
 export function DesktopHeader() {
   const [loadedUserId, setLoadedUserId] = useState<string | null>(null);
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const cartItems = useCartStore((state) => state.items);
   const { openCart } = useCartStore();
   const resetCart = useCartStore((s) => s.resetCart);
@@ -119,6 +121,25 @@ useEffect(() => {
 
   loadWishlist(user.id);
 }, [user?.id, loadedUserId, loadWishlist]);
+
+useEffect(() => {
+  if (!user?.id) {
+    return;
+  }
+
+  const fetchWallet = async () => {
+    try {
+      const res = await fetch("/api/wallet", { cache: "no-store" });
+      if (!res.ok) return;
+      const data = await res.json();
+      setWalletBalance(data.walletBalance ?? 0);
+    } catch {
+      setWalletBalance(null);
+    }
+  };
+
+  fetchWallet();
+}, [user?.id]);
   return (
     <header className={cn(
       "w-full sticky top-0 z-50 bg-[#fff]"
@@ -147,6 +168,9 @@ useEffect(() => {
                     </SheetClose>
                       <h2 className="text-xl font-bold text-white">Blend<span className="opacity-80">Ras</span></h2>
                       <p className="text-white/70 text-sm mt-1">Blend Fresh, Live Healthy</p>
+                      {walletBalance !== null && (
+                        <p className="text-white text-sm mt-2">Wallet: Rs {walletBalance.toLocaleString()}</p>
+                      )}
                     </div>
 
                     {/* Navigation */}
@@ -240,3 +264,5 @@ useEffect(() => {
     </header>
   );
 }
+
+

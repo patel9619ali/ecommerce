@@ -5,17 +5,18 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import LoadingLink from "@/components/Loader/LoadingLink";
-import { Heart, User, Car } from "lucide-react";
+import { Heart, User, Wallet } from "lucide-react";
 import LogoutButton from "../LogOutButton/LogoutButton";
-import Link from "next/link";
 import { AvatarFallback,Avatar } from "../ui/avatar";
 
 type ProfileDropdownProps = {
-  user: any
+  user: {
+    name?: string | null;
+    email?: string | null;
+  };
 };
 
 export default function ProfileDropdown({ user }: ProfileDropdownProps) {
@@ -29,9 +30,9 @@ export default function ProfileDropdown({ user }: ProfileDropdownProps) {
           </div>
 
           <span className="pl-1 font-semibold text-sm text-[#000] !cursor-pointer !pointer-events-auto">
-            {user.name.length > 10
-              ? `${user.name.slice(0, 10)}...`
-              : user.name}
+            {(user.name || "User").length > 10
+              ? `${(user.name || "User").slice(0, 10)}...`
+              : (user.name || "User")}
           </span>
         </Button>
       </DropdownMenuTrigger>
@@ -41,11 +42,11 @@ export default function ProfileDropdown({ user }: ProfileDropdownProps) {
          <div className="p-4 bg-[linear-gradient(135deg,hsl(252,80%,60%),hsl(16,90%,58%))] text-white">
           <div className="flex items-center gap-3">
             <Avatar className="h-12 w-12 border-2 border-white/30">
-              <AvatarFallback className="bg-white/20 text-white text-lg font-bold">{user.name.slice(0,1)}</AvatarFallback>
+              <AvatarFallback className="bg-white/20 text-white text-lg font-bold">{(user.name || "U").slice(0,1)}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-semibold">{user.name}</p>
-              <p className="text-xs text-white/70">{user.email}</p>
+              <p className="font-semibold">{user.name || "User"}</p>
+              <p className="text-xs text-white/70">{user.email || ""}</p>
             </div>
           </div>
         </div>
@@ -82,6 +83,17 @@ export default function ProfileDropdown({ user }: ProfileDropdownProps) {
               <div>
                 <p className="font-medium text-sm">My Wishlist</p>
                 <p className="text-xs text-[#64748b]">Items you love</p>
+              </div>
+          </LoadingLink>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className="py-3 cursor-pointer hover:bg-gray-100 ">
+          <LoadingLink href="/wallet" className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-[#f1f5f9] flex items-center justify-center">
+                <Wallet className="h-4 w-4" style={{ color: 'hsl(152 65% 45%)' }} />
+              </div>
+              <div>
+                <p className="font-medium text-sm">My Wallet</p>
+                <p className="text-xs text-[#64748b]">Check your balance</p>
               </div>
           </LoadingLink>
         </DropdownMenuItem>

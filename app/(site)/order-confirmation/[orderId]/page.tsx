@@ -15,6 +15,15 @@ import {
   Ban,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface OrderItem {
   id: string;
@@ -60,6 +69,7 @@ const OrderConfirmation = () => {
   const [isLoadingOrder, setIsLoadingOrder] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
 
   const estimatedDelivery = getEstimatedDelivery();
 
@@ -171,6 +181,14 @@ const OrderConfirmation = () => {
   const shipping = 0;
   const tax = Math.round(subtotal * 0.08);
   const total = order?.amount || subtotal + shipping + tax;
+  const isCancelled = order?.status === "CANCELLED";
+  const isRefunded = order?.status === "REFUNDED";
+  const pageTitle = isCancelled ? "Order Cancelled" : isRefunded ? "Order Refunded" : "Order Confirmed";
+  const pageSubtitle = isCancelled
+    ? "Your order has been cancelled successfully."
+    : isRefunded
+      ? "Your refund request is completed."
+      : "Thank you for your purchase.";
 
   if (isLoadingOrder) {
     return (
@@ -232,17 +250,27 @@ const OrderConfirmation = () => {
           transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.1 }}
           className="flex justify-center mb-6"
         >
-          <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-[linear-gradient(135deg,hsl(152_65%_45%),hsl(160_70%_40%))] flex items-center justify-center">
-            <CheckCircle className="w-10 h-10 md:w-12 md:h-12 text-[hsl(0_0%_100%)]" />
+          <div
+            className={`w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center ${
+              isCancelled
+                ? "bg-[linear-gradient(135deg,hsl(0_75%_55%),hsl(0_70%_45%))]"
+                : "bg-[linear-gradient(135deg,hsl(152_65%_45%),hsl(160_70%_40%))]"
+            }`}
+          >
+            {isCancelled ? (
+              <Ban className="w-10 h-10 md:w-12 md:h-12 text-[hsl(0_0%_100%)]" />
+            ) : (
+              <CheckCircle className="w-10 h-10 md:w-12 md:h-12 text-[hsl(0_0%_100%)]" />
+            )}
           </div>
         </motion.div>
 
         <div className="text-center mb-8 md:mb-10">
           <h1 className="text-2xl md:text-4xl font-bold text-[hsl(240_15%_10%)] mb-2">
-            Order Confirmed
+            {pageTitle}
           </h1>
           <p className="text-sm md:text-base text-[hsl(240_8%_45%)]">
-            Thank you for your purchase.
+            {pageSubtitle}
           </p>
         </div>
 
@@ -382,7 +410,7 @@ const OrderConfirmation = () => {
           {canCancel && isCOD && (
             <button
               disabled={isProcessing}
-              onClick={() => handleCancel(false)}
+              onClick={() => setIsCancelDialogOpen(true)}
               className="cursor-pointer flex items-center justify-center gap-2 h-11 px-4 bg-red-50 border border-red-200 text-red-700 font-semibold text-sm rounded-xl disabled:opacity-60"
             >
               <Ban className="w-4 h-4" />
@@ -422,6 +450,37 @@ const OrderConfirmation = () => {
             </button>
           )}
         </div>
+
+        <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Cancel this order?</DialogTitle>
+              <DialogDescription>
+                This action cannot be undone. Your order status will be updated to cancelled.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsCancelDialogOpen(false)}
+                disabled={isProcessing}
+                className="cursor-pointer"
+              >
+                Keep Order
+              </Button>
+              <Button
+                onClick={async () => {
+                  setIsCancelDialogOpen(false);
+                  await handleCancel(false);
+                }}
+                disabled={isProcessing}
+                className="cursor-pointer bg-red-600 hover:bg-red-700 text-white"
+              >
+                {isProcessing ? "Cancelling..." : "Cancel Order"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

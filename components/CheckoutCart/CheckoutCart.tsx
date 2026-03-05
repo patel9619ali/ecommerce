@@ -35,7 +35,6 @@ interface CheckoutCartProps {
 const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps) => {
   const router = useRouter();
   const { resetCart } = useCartStore();
-  const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
   const [savedAddressId, setSavedAddressId] = useState<string | null>(null);
 
   // ✅ Local button loading states — no global loader
@@ -155,21 +154,34 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
   ) => {
     setter(value);
 
-    if (errors[field]) {
+    const isFieldNowValid = (() => {
+      switch (field) {
+        case "firstName":
+        case "lastName":
+        case "city":
+        case "state":
+          return value.trim().length >= 2;
+        case "phone":
+          return /^[6-9]\d{9}$/.test(value);
+        case "address":
+          return value.trim().length >= 5;
+        case "pincode":
+          return /^\d{6}$/.test(value);
+        default:
+          return true;
+      }
+    })();
+
+    if (errors[field] && isFieldNowValid) {
       setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[field];
         return newErrors;
       });
     }
-
-    if (hasAttemptedSave) {
-      setTimeout(() => validateAddress(), 0);
-    }
   };
 
   const handleSaveAddress = async () => {
-    setHasAttemptedSave(true);
     if (!validateAddress()) return;
 
     try {

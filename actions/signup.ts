@@ -15,20 +15,31 @@ export async function signup(values: unknown): Promise<AuthResponse> {
     return { error: "Invalid signup data" };
   }
 
-  const { name, email, password } = validatedFields.data;
+  const { name, phone, email, password } = validatedFields.data;
 
   const existingUser = await db.user.findUnique({
     where: { email },
   });
+  const existingPhoneUser = await db.user.findUnique({
+    where: { phone },
+  });
 
-    if (existingUser?.emailVerified) {
+  if (existingUser?.emailVerified) {
     return { error: "Email already exists" };
+  }
+  if (existingPhoneUser?.emailVerified) {
+    return { error: "Mobile number already exists" };
   }
 
   // ✅ If unverified user exists, delete them (allow re-signup)
   if (existingUser && !existingUser.emailVerified) {
     await db.user.delete({
       where: { email },
+    });
+  }
+  if (existingPhoneUser && !existingPhoneUser.emailVerified) {
+    await db.user.delete({
+      where: { id: existingPhoneUser.id },
     });
   }
 
@@ -38,6 +49,7 @@ export async function signup(values: unknown): Promise<AuthResponse> {
   await db.user.create({
     data: {
       name,
+      phone,
       email,
       password: hashedPassword,
       emailVerified: null, // ❌ NOT verified - can't login

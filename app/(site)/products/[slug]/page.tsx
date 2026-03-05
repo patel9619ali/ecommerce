@@ -1,4 +1,4 @@
-import { getProductBySlug, getProductLiveData } from "@/lib/api";
+import { getProductBySlug } from "@/lib/api";
 import { notFound } from "next/navigation";
 import ProductPageClient from "@/components/ProductPageClient";
 
@@ -26,7 +26,9 @@ export default async function ProductPage(props: Props) {
 
 
   if (variantFromUrl) {
-    const variantExists = product.variants.some((v: any) => v.sku === variantFromUrl);
+    const variantExists = product.variants.some(
+      (v: { sku: string }) => v.sku === variantFromUrl
+    );
     if (variantExists) {
       initialVariant = variantFromUrl;
     }
