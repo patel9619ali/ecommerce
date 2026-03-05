@@ -19,10 +19,10 @@ export default async function Home() {
   const {data} = products;
   return (
     <>
-      <BannerSection productData={data}/>
+      <BannerSection productData={data} bannerProductSlug="blend-ras" />
       {/* <InformativeSlider className={`hidden md:block`} productData={data}/> */}
       <DirectProductPageLinking/>
-      <MainImageAddToCart productData={data}/>
+      <MainImageAddToCart productData={data} featuredProductSlug="blend-ras" />
       <HomePageProduct productData={data}/>
       <MobileInformativeSlider className={`block md:hidden`} productData={data}/>
       {/* <DualSpecsScroll className={`hidden md:block`}/>
