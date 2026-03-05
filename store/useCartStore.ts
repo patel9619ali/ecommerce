@@ -37,6 +37,35 @@ type CartState = {
 let syncTimeout: NodeJS.Timeout | null = null;
 let isLoadingFromDB = false;
 let currentSyncVersion = 0;
+
+function mergeCartItems(localItems: CartProduct[], dbItems: CartProduct[]): CartProduct[] {
+  const map = new Map<string, CartProduct>();
+
+  for (const item of dbItems) {
+    const key = `${item.productId}::${item.variantKey}`;
+    map.set(key, { ...item, id: item.id || crypto.randomUUID() });
+  }
+
+  for (const item of localItems) {
+    const key = `${item.productId}::${item.variantKey}`;
+    const existing = map.get(key);
+
+    if (existing) {
+      map.set(key, {
+        ...existing,
+        quantity: existing.quantity + item.quantity,
+        title: existing.title || item.title,
+        slug: existing.slug || item.slug,
+        image: existing.image || item.image,
+      });
+    } else {
+      map.set(key, { ...item, id: item.id || crypto.randomUUID() });
+    }
+  }
+
+  return Array.from(map.values());
+}
+
 export const useCartStore = create<CartState>()(
   
   persist(
@@ -112,8 +141,8 @@ syncWithDatabase: () => {
   syncTimeout = setTimeout(async () => {
     if (isLoadingFromDB) return;
 
-    const { hydrated, items } = get();
-    if (!hydrated) return;
+    const { hydrated, items, userId } = get();
+    if (!hydrated || !userId) return;
 
     try {
       await fetch("/api/cart/sync", {
@@ -131,41 +160,63 @@ syncWithDatabase: () => {
       loadFromDatabase: async (userId: string) => {
         if (!userId || isLoadingFromDB) return;
 
+        const currentUserId = get().userId;
+
+        // Different signed-in user: clear persisted cart first
+        if (currentUserId && currentUserId !== userId) {
+          set({ items: [], userId, hydrated: false });
+        }
+
         isLoadingFromDB = true;
 
         try {
           const res = await fetch("/api/cart/get");
           const { cart } = await res.json();
 
-          if (cart?.items?.length) {
-            set({
-              items: cart.items.map((i: any) => ({
-                id: crypto.randomUUID(),
-                productId: i.productId,
-                variantKey: i.variantId,
-                slug: i.slug,
-                title: i.title,
-                price: i.price,
-                image: i.image,
-                quantity: i.quantity,
-                mrp: i.price,
-              })),
-              userId,
-              hydrated: true,
-            });
-          } else {
-            set({ items: [], userId, hydrated: true });
-          }
+          const dbItems: CartProduct[] = (cart?.items || []).map((i: {
+            productId: string;
+            variantId: string;
+            slug?: string | null;
+            title?: string;
+            price: number;
+            image: string;
+            quantity: number;
+          }) => ({
+            id: crypto.randomUUID(),
+            productId: i.productId,
+            variantKey: i.variantId,
+            slug: i.slug,
+            title: i.title,
+            price: i.price,
+            image: i.image,
+            quantity: i.quantity,
+            mrp: i.price,
+          }));
+
+          const localItems = get().items;
+          const mergedItems = mergeCartItems(localItems, dbItems);
+
+          set({
+            items: mergedItems,
+            userId,
+            hydrated: true,
+          });
+
+          // Push guest+db merged cart back to DB after login
+          get().syncWithDatabase();
+        } catch (error) {
+          console.error("Cart load failed:", error);
+          set({ userId, hydrated: true });
         } finally {
           isLoadingFromDB = false;
         }
       },
 
       resetCart: () => {
-        set((state) => ({
+        set(() => ({
           items: [],
           isCartOpen: false,
-          userId: state.userId, // ✅ Keep userId - user is still logged in!
+          userId: null,
           hydrated: true,
         }));
         

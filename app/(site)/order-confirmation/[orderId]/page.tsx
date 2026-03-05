@@ -452,7 +452,7 @@ const OrderConfirmation = () => {
         </div>
 
         <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="block p-0 overflow-hidden xs:rounded-[20px] rounded-none xs:max-w-lg max-w-full fixed xs:top-1/2 xs:-translate-y-1/2 top-0 translate-y-0 xs:bottom-[unset] bottom-[0] border-none [&>button]:hidden z-200">
             <DialogHeader>
               <DialogTitle>Cancel this order?</DialogTitle>
               <DialogDescription>

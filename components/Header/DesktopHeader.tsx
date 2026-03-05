@@ -1,7 +1,7 @@
 "use client";
 
 import { useCartStore } from "@/store/useCartStore";
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 
 import { ChevronRight, Globe, Heart, Search, ShoppingCart, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,7 @@ const menuItems = [
   { label: "My Orders", href: "/my-orders", icon: "📦" },
   { label: "About Us", href: "/about-us", icon: "ℹ️" },
   { label: "How It Works", href: "#", icon: "⚡" },
-  { label: "FAQs", href: "/faqs", icon: "❓" },
+  { label: "FAQs", href: "/faq", icon: "❓" },
   { label: "Contact Us", href: "/contact-us", icon: "📧" },
 ];
 
@@ -50,7 +50,7 @@ const quickLinks = [
   { label: "Return Policy", icon: "↩️" },
 ];
 export function DesktopHeader() {
-  const [loadedUserId, setLoadedUserId] = useState<string | null>(null);
+  const loadedUserIdRef = useRef<string | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const cartItems = useCartStore((state) => state.items);
   const { openCart } = useCartStore();
@@ -103,24 +103,27 @@ export function DesktopHeader() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
-  useEffect(() => {
+useEffect(() => {
   if (!user?.id) {
-    resetCart();
-    setLoadedUserId(null);
+    // Keep guest cart in local storage; clear only when a logged-in user logs out.
+    if (loadedUserIdRef.current) {
+      resetCart();
+      loadedUserIdRef.current = null;
+    }
     return;
   }
 
   // ✅ Prevent repeated DB calls for same user
-  if (loadedUserId === user.id) return;
+  if (loadedUserIdRef.current === user.id) return;
 
   loadFromDatabase(user.id);
-  setLoadedUserId(user.id);
-}, [user?.id, loadedUserId]);
+  loadedUserIdRef.current = user.id;
+}, [user?.id, loadFromDatabase, resetCart]);
 useEffect(() => {
-  if (!user?.id || loadedUserId !== user.id) return;
+  if (!user?.id || loadedUserIdRef.current !== user.id) return;
 
   loadWishlist(user.id);
-}, [user?.id, loadedUserId, loadWishlist]);
+}, [user?.id, loadWishlist]);
 
 useEffect(() => {
   if (!user?.id) {
