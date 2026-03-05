@@ -1,116 +1,182 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { Prisma } from "@prisma/client";
+import {
+  sendOrderPlacedEmailToCustomer,
+  sendOrderPlacedEmailToSeller,
+} from "@/lib/mail";
+
+type CheckoutItem = {
+  productId: string;
+  variantKey: string;
+  title: string;
+  price: number;
+  quantity: number;
+  image?: string;
+};
+
+type OrderWithItems = {
+  id: string;
+  amount: number;
+  paymentMethod: "COD" | "RAZORPAY" | "WALLET";
+  items: Array<{
+    title: string;
+    quantity: number;
+    price: number;
+  }>;
+};
+
+const getPaymentMethod = (paymentMethod?: string) => {
+  if (paymentMethod === "cod") return "COD";
+  if (paymentMethod === "razorpay") return "RAZORPAY";
+  if (paymentMethod === "wallet") return "WALLET";
+  return null;
+};
 
 export async function POST(request: Request) {
   try {
     const session = await auth();
-
-    if (!session?.user?.id) {
+    const userId = session?.user?.id;
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { items, total, paymentMethod } = await request.json();
+    const { items, total, paymentMethod, razorpayPaymentId } = await request.json();
+    const normalizedPaymentMethod = getPaymentMethod(paymentMethod);
 
-    // ✅ Validate input
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return NextResponse.json(
-        { error: "Cart is empty" },
-        { status: 400 }
-      );
+    if (!normalizedPaymentMethod) {
+      return NextResponse.json({ error: "Invalid payment method" }, { status: 400 });
     }
 
-    if (!total || typeof total !== "number") {
-      return NextResponse.json(
-        { error: "Invalid total amount" },
-        { status: 400 }
-      );
+    if (!Array.isArray(items) || items.length === 0) {
+      return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
 
-    // ✅ Generate unique order ID
-    const orderId = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    if (typeof total !== "number" || !Number.isFinite(total) || total <= 0) {
+      return NextResponse.json({ error: "Invalid total amount" }, { status: 400 });
+    }
 
-    // ✅ Create order in database
-    const order = await db.order.create({
-      data: {
-        id: orderId,
-        userId: session.user.id,
-        amount: Math.round(total),
-        status: paymentMethod === "cod" ? "pending" : "processing",
-        createdAt: new Date(),
-      },
-    });
+    const sanitizedItems = items as CheckoutItem[];
+    const orderId = `ORD-${Date.now()}-${Math.random().toString(36).slice(2, 10).toUpperCase()}`;
+    const roundedTotal = Math.round(total);
 
-    // ✅ Create order items WITH IMAGES
-    await Promise.all(
-      items.map((item: any) =>
-        db.orderItem.create({
+    if (normalizedPaymentMethod === "WALLET") {
+      const user = await db.user.findUnique({
+        where: { id: userId },
+        select: { walletBalance: true },
+      });
+
+      if (!user || user.walletBalance < roundedTotal) {
+        return NextResponse.json(
+          { error: "Insufficient wallet balance" },
+          { status: 400 }
+        );
+      }
+    }
+
+    const fullOrder = await db.$transaction(async (tx: Prisma.TransactionClient): Promise<OrderWithItems | null> => {
+      const order = await tx.order.create({
+        data: {
+          id: orderId,
+          userId,
+          amount: roundedTotal,
+          paymentMethod: normalizedPaymentMethod,
+          status: normalizedPaymentMethod === "COD" ? "PENDING" : "PROCESSING",
+          razorpayPaymentId: normalizedPaymentMethod === "RAZORPAY" ? razorpayPaymentId : null,
+          createdAt: new Date(),
+        },
+      });
+
+      await tx.orderItem.createMany({
+        data: sanitizedItems.map((item: CheckoutItem) => ({
+          id: `${orderId}-${item.productId}-${item.variantKey}`,
+          orderId: order.id,
+          productId: item.productId,
+          variantId: item.variantKey,
+          title: item.title,
+          price: item.price,
+          quantity: item.quantity,
+          image: item.image || "",
+        })),
+      });
+
+      if (normalizedPaymentMethod === "WALLET") {
+        await tx.user.update({
+          where: { id: userId },
+          data: { walletBalance: { decrement: roundedTotal } },
+        });
+
+        await tx.walletTransaction.create({
           data: {
-            id: `${orderId}-${item.productId}-${item.variantKey}`,
+            userId,
             orderId: order.id,
-            productId: item.productId,
-            variantId: item.variantKey,
-            title: item.title,
-            price: item.price,
-            quantity: item.quantity,
-            image: item.image || "", // ✅  Include image
+            type: "DEBIT",
+            amount: roundedTotal,
+            reason: "Order payment via wallet",
           },
-        })
-      )
-    );
+        });
+      }
 
-    // ✅ Fetch complete order with items
-    const fullOrder = await db.order.findUnique({
-      where: { id: order.id },
-      include: {
-        items: true,
-      },
+      return tx.order.findUnique({
+        where: { id: order.id },
+        include: { items: true },
+      });
     });
 
-    return NextResponse.json({
-      success: true,
-      order: fullOrder, // ✅ Return full order with items
-    });
+    const customerEmail = session.user.email;
+    if (fullOrder) {
+      const mailItems = fullOrder.items.map((item: OrderWithItems["items"][number]) => ({
+        title: item.title,
+        quantity: item.quantity,
+        price: item.price,
+      }));
+
+      await Promise.allSettled([
+        customerEmail
+          ? sendOrderPlacedEmailToCustomer({
+              email: customerEmail,
+              customerName: session.user.name,
+              orderId: fullOrder.id,
+              amount: fullOrder.amount,
+              paymentMethod: fullOrder.paymentMethod,
+              items: mailItems,
+            })
+          : Promise.resolve(),
+        sendOrderPlacedEmailToSeller({
+          orderId: fullOrder.id,
+          customerEmail: customerEmail ?? null,
+          amount: fullOrder.amount,
+          paymentMethod: fullOrder.paymentMethod,
+          items: mailItems,
+        }),
+      ]);
+    }
+
+    return NextResponse.json({ success: true, order: fullOrder });
   } catch (error: any) {
     console.error("Order creation error:", error);
-
-    if (error.code === "P1001" || error.message?.includes("Can't reach database")) {
-      return NextResponse.json(
-        { error: "Database connection failed" },
-        { status: 503 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: "Failed to create order" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
   }
 }
 
-// ✅ GET route to fetch user's orders
 export async function GET() {
   try {
     const session = await auth();
-
-    if (!session?.user?.id) {
+    const userId = session?.user?.id;
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const orders = await db.order.findMany({
-      where: { userId: session.user.id },
-      include: {
-        items: true,
-      },
+      where: { userId },
+      include: { items: true },
       orderBy: { createdAt: "desc" },
     });
 
     return NextResponse.json({ orders });
   } catch (error) {
     console.error("Fetch orders error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch orders" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
   }
 }

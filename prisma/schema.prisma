@@ -1,4 +1,45 @@
 // prisma/schema.prisma
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum RefundStatus {
+  REQUESTED
+  APPROVED
+  PROCESSED
+  COMPLETED
+  FAILED
+}
+
+enum PaymentMethod {
+  COD
+  RAZORPAY
+  WALLET
+}
+
+enum RefundDestination {
+  ORIGINAL_SOURCE
+  WALLET
+}
+
+enum WalletTxnType {
+  CREDIT
+  DEBIT
+}
+
+enum DeliveryStatus {
+  PENDING
+  IN_TRANSIT
+  SUCCESS
+  FAILED
+}
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,29 +55,31 @@ enum UserRole {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  role          UserRole  @default(USER)
-  accounts      Account[]
-  carts         Cart[]
-  addresses     Address[]
-  orders        Order[]  // ✅ Added this line
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  wishlists Wishlist[]
+  id                    String                 @id @default(cuid())
+  name                  String?
+  email                 String                 @unique
+  emailVerified         DateTime?
+  image                 String?
+  password              String?
+  role                  UserRole               @default(USER)
+  accounts              Account[]
+  carts                 Cart[]
+  addresses             Address[]
+  orders                Order[]
+  walletBalance         Int                    @default(0) @map("wallet_balance")
+  walletTransactions    WalletTransaction[]
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  wishlists             Wishlist[]
   isTwoFactorEnabled    Boolean                @default(false)
   twoFactorConfirmation TwoFactorConfirmation?
 }
 
 model Wishlist {
-  id        String         @id @default(cuid())
-  userId    String         @map("user_id")
-  items     WishlistItem[]
-  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String         @id @default(cuid())
+  userId String         @map("user_id")
+  items  WishlistItem[]
+  user   User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId])
   @@map("wishlists")
@@ -119,7 +162,7 @@ model TwoFactorConfirmation {
 }
 
 model Cart {
-  id     String     @id @default(cuid()) 
+  id     String     @id @default(cuid())
   userId String     @map("user_id")
   items  CartItem[]
   user   User       @relation(fields: [userId], references: [id])
@@ -133,7 +176,7 @@ model CartItem {
   cartId    String @map("cart_id")
   productId String @map("product_id")
   variantId String @map("variant_id")
-  slug      String?   
+  slug      String?
   title     String
   price     Int
   quantity  Int
@@ -146,14 +189,27 @@ model CartItem {
 }
 
 model Order {
-  id        String      @id
-  userId    String      @map("user_id")
-  amount    Int
-  status    String
-  createdAt DateTime    @map("created_at")
-  items     OrderItem[]
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade) // ✅ Added relation
+  id                 String              @id
+  userId             String              @map("user_id")
+  amount             Int
+  status             OrderStatus
+  paymentMethod      PaymentMethod       @default(COD) @map("payment_method")
+  refundStatus       RefundStatus?
+  refundDestination  RefundDestination?  @map("refund_destination")
+  refundReason       String?             @map("refund_reason")
+  refundAmount       Int?                @map("refund_amount")
+  refundId           String?             @map("refund_id")
+  cancellationReason String?             @map("cancellation_reason")
+  cancelledAt        DateTime?           @map("cancelled_at")
+  deliveryId         String?             @map("delivery_id")
+  deliveryStatus     DeliveryStatus      @default(PENDING) @map("delivery_status")
+  deliveredAt        DateTime?           @map("delivered_at")
+  razorpayPaymentId  String?             @map("razorpay_payment_id")
+  createdAt          DateTime            @map("created_at")
+  items              OrderItem[]
+  walletTransactions WalletTransaction[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("orders")
 }
@@ -166,30 +222,46 @@ model OrderItem {
   title     String
   price     Int
   quantity  Int
-  image     String? // ✅ Added image field
+  image     String?
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@map("order_items")
 }
 
-// ✅ NEW: Address Model
+model WalletTransaction {
+  id        String        @id @default(cuid())
+  userId    String        @map("user_id")
+  orderId   String?       @map("order_id")
+  amount    Int
+  type      WalletTxnType
+  reason    String
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order Order? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([orderId])
+  @@map("wallet_transactions")
+}
+
 model Address {
-  id         String   @id @default(cuid())
-  userId     String   @unique @map("user_id") // ✅ Unique for UPSERT
-  firstName  String   @map("first_name")
-  lastName   String   @map("last_name")
-  phone      String
-  address    String
-  building   String?
-  apartment  String?
-  landmark   String?
-  city       String
-  state      String
-  pincode    String
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") // ✅ Added updatedAt
-  
+  id        String   @id @default(cuid())
+  userId    String   @unique @map("user_id")
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  phone     String
+  address   String
+  building  String?
+  apartment String?
+  landmark  String?
+  city      String
+  state     String
+  pincode   String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("addresses")
