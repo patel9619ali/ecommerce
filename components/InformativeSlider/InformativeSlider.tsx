@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion"
 const options: EmblaOptionsType = { align: 'end', loop: true }
 import { Product } from '@/data/types'
 import Link from 'next/link'
+import { buildProductPathWithVariant } from '@/lib/product-url'
 
 type InformativeSliderProps = {
   className?: string;
@@ -116,7 +117,16 @@ const InformativeSlider = ({ className,productData }: InformativeSliderProps) =>
                         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.5, delay: 0.3 }}  >
                           <Link
                             className="backdrop-blur-md bg-white/90 py-2 mx-auto text-center text-black inline-block w-[150px] px-3 my-3 hover:bg-gray-200 transition-colors duration-300 border-[#000] hover:font-[700] border-[1px] rounded-[4px]"
-                            href={`${process.env.NEXT_PUBLIC_APP_URL}/products/${productDataType?.slug}?variant=${variantData?.sku}`}
+                            href={buildProductPathWithVariant(
+                              {
+                                slug: productDataType?.slug,
+                                brandSlug:
+                                  productDataType?.brand?.slug || productDataType?.brand?.name,
+                                categorySlug:
+                                  productDataType?.category?.slug || productDataType?.category?.name,
+                              },
+                              variantData?.sku
+                            )}
                           >
                             Shop now
                           </Link>

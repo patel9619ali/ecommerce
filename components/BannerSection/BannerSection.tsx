@@ -8,6 +8,7 @@ import { ArrowRight, Sparkles, Star, Check } from "lucide-react";
 import { Product, Variant } from "@/data/types";
 import LoadingLink from "../Loader/LoadingLink";
 import { startTransition } from "react";
+import { isPortableJuicerCategory } from "@/lib/product-url";
 
 type BannerSectionProps = {
   productData?: Product[];
@@ -36,10 +37,9 @@ const BannerSection = ({
       if (bySlug) return bySlug;
     }
 
-    const juicerProduct = productData.find((p) => {
-      const text = `${p.title || ""} ${p.category?.name || ""}`.toLowerCase();
-      return text.includes("juicer");
-    });
+    const juicerProduct = productData.find((p) =>
+      isPortableJuicerCategory(p.category?.name || p.category?.slug)
+    );
 
     return juicerProduct || productData[0];
   }, [productData, bannerProductSlug]);
@@ -78,6 +78,8 @@ const BannerSection = ({
           id: `${product.id}-${activeVariant.sku}`,
           productId: String(product.id),
           slug: product.slug,
+          brandSlug: product.brand?.slug || product.brand?.name,
+          categorySlug: product.category?.slug || product.category?.name,
           title: product.title,
           variantKey: String(activeVariant.sku),
           price: Number(activeVariant.sellingPrice),

@@ -13,6 +13,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/UserProfile/Sidebar";
 import { BreadcrumbWithCustomSeparator } from "@/components/Breadcrumb/Breadcrumb";
+import { buildProductPathWithVariant } from "@/lib/product-url";
 
 const breadcrumbItems: any[] = [
   { label: 'Home', href: '/' },
@@ -42,6 +43,8 @@ export default function WishlistPage() {
         id: `${item.productId}-${item.variantId}`,
         productId: item.productId,
         slug: item.slug,
+        brandSlug: item.brandSlug,
+        categorySlug: item.categorySlug,
         title: item.title,
         price: Number(item.price), // ✅ Convert to number
         mrp: Number(item.mrp),     // ✅ Convert to number
@@ -135,7 +138,11 @@ export default function WishlistPage() {
                                 <ShoppingCart className="h-3.5 w-3.5 mr-1" /> Add to Cart
                               </Button>
                               <Button size="sm" variant="outline" asChild className="rounded-lg text-xs h-9 hover:bg-[linear-gradient(135deg,hsl(252,80%,60%),hsl(16,90%,58%))] shadow-[0_4px_12px_-2px_rgba(104,71,235,0.3)] hover:text-[#fff]">
-                                <LoadingLink href={`/products/${item.slug}?variant=${item.variantId}`}>
+                                <LoadingLink href={buildProductPathWithVariant({
+                                  slug: item.slug,
+                                  brandSlug: item.brandSlug,
+                                  categorySlug: item.categorySlug,
+                                }, item.variantId)}>
                                   View
                                 </LoadingLink>
                               </Button>

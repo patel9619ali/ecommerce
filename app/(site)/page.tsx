@@ -16,24 +16,24 @@ import DirectProductPageLinking from "@/components/DirectProductPageLinking";
 import HomePageProduct from "@/components/HomePageProduct";
 export default async function Home() {
   const products = await getProducts();
-  const {data} = products;
+  const { data } = products;
   return (
     <>
-      <BannerSection productData={data} bannerProductSlug="blend-ras" />
+      <BannerSection productData={data} />
       {/* <InformativeSlider className={`hidden md:block`} productData={data}/> */}
-      <DirectProductPageLinking/>
-      <MainImageAddToCart productData={data} featuredProductSlug="blend-ras" />
-      <HomePageProduct productData={data}/>
-      <MobileInformativeSlider className={`block md:hidden`} productData={data}/>
+      <DirectProductPageLinking productData={data} />
+      <MainImageAddToCart productData={data} />
+      <HomePageProduct productData={data} />
+      <MobileInformativeSlider className={`block md:hidden`} productData={data} />
       {/* <DualSpecsScroll className={`hidden md:block`}/>
       <MobileSpecs className={`block md:hidden`}/> */}
-      <Features/>
-      <HowItWorks/>
-      <ProductSpecs/>
-      <WhyChooseUsHoverImage className={`hidden md:block`}/>
-      <WhyChooseUsMobileHoverImage className={`block md:hidden`}/>
-      <Reviews/>
-      <FAQ className={{ wrapper: "block", alignMent: "start",widthHeading: "3xl",searchFunctionalityVisiblity:"block", modal:false }}/>
+      <Features />
+      <HowItWorks />
+      <ProductSpecs />
+      <WhyChooseUsHoverImage className={`hidden md:block`} />
+      <WhyChooseUsMobileHoverImage className={`block md:hidden`} />
+      <Reviews />
+      <FAQ className={{ wrapper: "block", alignMent: "start", widthHeading: "3xl", searchFunctionalityVisiblity: "block", modal: false }} />
     </>
   );
 }

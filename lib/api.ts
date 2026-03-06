@@ -1,6 +1,7 @@
 import { productQuery } from "./queries/product";
 import qs from "qs";
 import { cacheTag, cacheLife } from "next/cache";
+import { toRouteSegment } from "./product-url";
 
 export async function getProducts() {
   "use cache";
@@ -25,7 +26,7 @@ export async function getProducts() {
       tags: ["homepage-products"],
     },
   });
-
+  console.log(res,"resresres")
   return res.json();
 }
 
@@ -39,6 +40,8 @@ export async function getProductBySlug(slug: string) {
       slug: { $eq: slug }
     },
     populate: {
+      brand: true,
+      category: true,
       variant: {
         populate: {
           images: true,
@@ -73,6 +76,8 @@ const product = {
   rating: cmsProduct.rating,
   ratingCount: cmsProduct.ratingCount,
   slug: cmsProduct.slug,
+  brand: cmsProduct.brand,
+  category: cmsProduct.category,
   variants: (cmsProduct.variant || []).map((v: any) => ({
     id: v.id,
     sku: v.sku,
@@ -90,6 +95,24 @@ const product = {
 };
 
 return product;
+}
+
+export async function getProductByRoute(
+  brandSlug: string,
+  categorySlug: string,
+  slug: string
+) {
+  void brandSlug;
+  const product = await getProductBySlug(slug);
+  if (!product) return null;
+
+  const productCategory = toRouteSegment(
+    product.category?.slug || product.category?.name
+  );
+
+  if (productCategory !== toRouteSegment(categorySlug)) return null;
+
+  return product;
 }
 
 export async function getProductLiveData(slug: string) {
@@ -113,7 +136,7 @@ export async function getProductLiveData(slug: string) {
 
   const data = await res.json();
   const cmsProduct = data?.data?.[0];
-
+  console.log(cmsProduct,"cmsProduct")
   if (!cmsProduct) return null;
 
   return (cmsProduct.variant || []).map((v: any) => ({

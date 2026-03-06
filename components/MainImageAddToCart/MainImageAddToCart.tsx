@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { ProductGallery } from "./ProductGallery";
 import { BuyCartSection } from "./BuyCartSection";
 import { Product } from "@/data/types";
+import { isPortableJuicerCategory } from "@/lib/product-url";
 
 type Props = {
   productData?: Product[];
@@ -19,10 +20,9 @@ export const MainImageAddToCart = ({ productData, featuredProductSlug }: Props) 
       if (bySlug) return bySlug;
     }
 
-    const juicerProduct = productData.find((p) => {
-      const text = `${p.title || ""} ${p.category?.name || ""}`.toLowerCase();
-      return text.includes("juicer");
-    });
+    const juicerProduct = productData.find((p) =>
+      isPortableJuicerCategory(p.category?.name || p.category?.slug)
+    );
 
     return juicerProduct || productData[0];
   }, [productData, featuredProductSlug]);

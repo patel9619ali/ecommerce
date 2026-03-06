@@ -10,6 +10,8 @@ import { useLoading } from "@/context/LoadingContext";
 type Props = {
   productId: string;
   slug: string;
+  brandSlug?: string;
+  categorySlug?: string;
   title: string;
   variant: Variant;
 };
@@ -17,6 +19,8 @@ type Props = {
 export const BuyNow = ({
   productId,
   slug,
+  brandSlug,
+  categorySlug,
   title,
   variant,
 }: Props) => {
@@ -43,6 +47,8 @@ export const BuyNow = ({
           id: `${productId}-${variant.sku}`,
           productId,
           slug,
+          brandSlug,
+          categorySlug,
           title,
           variantKey: variant.sku,
           price: Number(variant.sellingPrice),

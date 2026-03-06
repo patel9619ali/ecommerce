@@ -3,9 +3,8 @@ import { getProducts } from "@/lib/api";
 
 const ProductPage = async () => {
   const product = await getProducts();
-
   return (
-    <MainProductPage product={product} />
+    <MainProductPage product={product} breadcrumbLabel="All Products" />
   );
 };
 

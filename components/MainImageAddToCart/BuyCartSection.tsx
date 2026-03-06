@@ -65,10 +65,24 @@ export const BuyCartSection = ({
       <p className="mt-6 text-[14px] text-black/80">Hurry, only 7 items left in stock!</p>
       <div className="mt-6">
         
-        <AddToCartButton productId={product?.id?.toString()} slug={product?.slug} title={product?.title} variant={selectedVariant} />
+        <AddToCartButton
+          productId={product?.id?.toString()}
+          slug={product?.slug}
+          brandSlug={product?.brand?.slug || product?.brand?.name}
+          categorySlug={product?.category?.slug || product?.category?.name}
+          title={product?.title}
+          variant={selectedVariant}
+        />
       </div>
       <div className="mt-4">
-        <BuyNow productId={product?.id?.toString()} slug={product?.slug} title={product?.title} variant={selectedVariant} />
+        <BuyNow
+          productId={product?.id?.toString()}
+          slug={product?.slug}
+          brandSlug={product?.brand?.slug || product?.brand?.name}
+          categorySlug={product?.category?.slug || product?.category?.name}
+          title={product?.title}
+          variant={selectedVariant}
+        />
       </div>
       <div className="flex cursor-pointer items-center">
         <Share className="mt-6 w-6 h-6 cursor-pointer dark:text-black/60 hover:text-black/80  transition-colors duration-300 ease-out rotate-90" />
