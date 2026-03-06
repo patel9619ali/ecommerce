@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { ChevronRight, X } from "lucide-react";
+import { ChevronRight, Wallet, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import LoadingLink from "../Loader/LoadingLink";
@@ -11,7 +11,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 const menuItems = [
   { label: "Home", href: "/", icon: "Home" },
   { label: "Shop", href: "/products", icon: "Shop" },
-  { label: "Wallet", href: "/wallet", icon: "Wallet" },
+  { label: "Wallet", href: "/wallet", icon: <Wallet className="h-4 w-4" style={{ color: 'hsl(152 65% 45%)' }} /> },
   { label: "My Orders", href: "/my-orders", icon: "Orders" },
   { label: "About Us", href: "#", icon: "Info" },
   { label: "How It Works", href: "#", icon: "Guide" },

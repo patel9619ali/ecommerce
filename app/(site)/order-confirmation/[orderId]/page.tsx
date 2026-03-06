@@ -13,10 +13,13 @@ import {
   Wallet,
   RotateCcw,
   Ban,
+  Info,
+  X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -454,31 +457,48 @@ const OrderConfirmation = () => {
         <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
           <DialogContent className="block p-0 overflow-hidden xs:rounded-[20px] rounded-none xs:max-w-lg max-w-full fixed xs:top-1/2 xs:-translate-y-1/2 top-0 translate-y-0 xs:bottom-[unset] bottom-[0] border-none [&>button]:hidden z-200">
             <DialogHeader>
-              <DialogTitle>Cancel this order?</DialogTitle>
-              <DialogDescription>
-                This action cannot be undone. Your order status will be updated to cancelled.
-              </DialogDescription>
+              <DialogTitle className="hidden">Cancel this order?</DialogTitle>
+              <div className={`relative justify-end items-start relative h-[200px] flex xs:px-6 px-4 xs:py-5 py-2 bg-[#FF0000]`}>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                    <Info size={130} color="red" fill="white" />
+                </div>
+                <DialogClose
+                    className="text-white opacity-90 hover:opacity-100 cursor-pointer outline-none ring-0 focus:ring-0 focus-visible:ring-0 ring-offset-0 z-3">
+                    <X size={30} className="fill-[#053E54] xs:fill-white" />
+                </DialogClose>
+            </div>
             </DialogHeader>
-            <DialogFooter className="gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setIsCancelDialogOpen(false)}
-                disabled={isProcessing}
-                className="cursor-pointer"
-              >
-                Keep Order
-              </Button>
-              <Button
-                onClick={async () => {
-                  setIsCancelDialogOpen(false);
-                  await handleCancel(false);
-                }}
-                disabled={isProcessing}
-                className="cursor-pointer bg-red-600 hover:bg-red-700 text-white"
-              >
-                {isProcessing ? "Cancelling..." : "Cancel Order"}
-              </Button>
-            </DialogFooter>
+             <div className="bg-white h-full xs:px-6 px-4 py-6">
+                <div className="xs:pb-0 pb-0 flex flex-col justify-between xs:h-auto h-full">
+                    <div>
+                        <div className="relative text-center">
+                            <h2 className="text-[20px] font-bold bg-gradient-to-r from-[#FF181C] to-[#053E54] bg-clip-text text-transparent xs:mb-4 inline-block">Cancel?</h2>
+                        </div>
+                        <p className="text-[#666666] mt-2 xs:text-[18px] text-sm font-400 xs:text-start text-center">Are you sure, You want to cancel? . If you have any concern Please contact us at support@blendras.in.</p>
+                    </div>
+                    <div className="sticky bottom-0 pb-[20px] xs:mt-5 xs:[position:unset] xs:[bottom:unset] xs:pb-0">
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => setIsCancelDialogOpen(false)}
+                                disabled={isProcessing}
+                                className="w-full h-[40px] bg-[#FFE7E7] border border-[#FF0000] rounded-[20px] text-[#FF0000] font-semibold text-[16px] cursor-pointer uppercase"
+                            >
+                                Keep Order
+                            </button>
+                            <button
+                                 onClick={async () => {
+                                    setIsCancelDialogOpen(false);
+                                    await handleCancel(false);
+                                  }}
+                                  disabled={isProcessing}
+                                className="w-full h-[40px] bg-[#FFE7E7] border border-[#FF0000] rounded-[20px] text-[#FF0000] font-semibold text-[16px] cursor-pointer uppercase"
+                            >
+                                 {isProcessing ? "Cancelling..." : "Cancel Order"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
           </DialogContent>
         </Dialog>
       </main>

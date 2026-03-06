@@ -3,7 +3,7 @@
 import { useCartStore } from "@/store/useCartStore";
 import { useState, useEffect, useRef } from "react"
 
-import { ChevronRight, Globe, Heart, Search, ShoppingCart, User, X } from "lucide-react";
+import { ChevronRight, Globe, Heart, Search,Wallet, ShoppingCart, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -35,7 +35,7 @@ const HamBurger = (
 const menuItems = [
   { label: "Home", href: "/", icon: "🏠" },
   { label: "Shop", href: "/products", icon: "🛍️" },
-  { label: "Wallet", href: "/wallet", icon: "Wallet" },
+  { label: "Wallet", href: "/wallet", icon: <Wallet className="h-4 w-4" style={{ color: 'hsl(152 65% 45%)' }} /> },
   { label: "My Orders", href: "/my-orders", icon: "📦" },
   { label: "About Us", href: "/about-us", icon: "ℹ️" },
   { label: "How It Works", href: "#", icon: "⚡" },
