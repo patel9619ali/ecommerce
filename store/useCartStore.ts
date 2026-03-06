@@ -5,6 +5,8 @@ export type CartProduct = {
   id: string;
   productId: string;
   slug?: string;
+  brandSlug?: string;
+  categorySlug?: string;
   title?: string;
   variantKey: string;
   price: number;
@@ -56,6 +58,8 @@ function mergeCartItems(localItems: CartProduct[], dbItems: CartProduct[]): Cart
         quantity: existing.quantity + item.quantity,
         title: existing.title || item.title,
         slug: existing.slug || item.slug,
+        brandSlug: existing.brandSlug || item.brandSlug,
+        categorySlug: existing.categorySlug || item.categorySlug,
         image: existing.image || item.image,
       });
     } else {
@@ -177,6 +181,8 @@ syncWithDatabase: () => {
             productId: string;
             variantId: string;
             slug?: string | null;
+            brandSlug?: string | null;
+            categorySlug?: string | null;
             title?: string;
             price: number;
             image: string;
@@ -186,6 +192,8 @@ syncWithDatabase: () => {
             productId: i.productId,
             variantKey: i.variantId,
             slug: i.slug,
+            brandSlug: i.brandSlug,
+            categorySlug: i.categorySlug,
             title: i.title,
             price: i.price,
             image: i.image,

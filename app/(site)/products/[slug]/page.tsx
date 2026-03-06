@@ -1,52 +1,29 @@
 import { getProductBySlug } from "@/lib/api";
-import { notFound } from "next/navigation";
-import ProductPageClient from "@/components/ProductPageClient";
+import { buildProductPathWithVariant } from "@/lib/product-url";
+import { notFound, redirect } from "next/navigation";
 
 type Props = {
-  params: Promise<{ slug: string }>; 
-  searchParams: Promise<{ variant?: string }>; 
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ variant?: string }>;
 };
 
-export default async function ProductPage(props: Props) {
-  // ✅ Await params and searchParams
+export default async function LegacyProductPage(props: Props) {
   const params = await props.params;
   const searchParams = await props.searchParams;
-  
-  const { slug } = params;
-  const variantFromUrl = searchParams.variant;
 
-  // ✅ Fetch on server with ISR caching
-  const product = await getProductBySlug(slug);
+  const product = await getProductBySlug(params.slug);
   if (!product) {
     notFound();
   }
 
-  // Initial variant
-  let initialVariant = product?.variants[0]?.sku;  // ✅ Changed from .key
-
-
-  if (variantFromUrl) {
-    const variantExists = product.variants.some(
-      (v: { sku: string }) => v.sku === variantFromUrl
-    );
-    if (variantExists) {
-      initialVariant = variantFromUrl;
-    }
-  }
-
-  return (
-    <ProductPageClient 
-      product={product}  
-      initialVariant={initialVariant} 
-    />
+  redirect(
+    buildProductPathWithVariant(
+      {
+        slug: product.slug,
+        brandSlug: product.brand?.slug || product.brand?.name,
+        categorySlug: product.category?.slug || product.category?.name,
+      },
+      searchParams.variant
+    )
   );
-}
-
-// ✅ Generate static params for popular products (optional)
-export async function generateStaticParams() {
-  return [
-    { slug: 'blend-ras' },
-    { slug: 'xl-jar-945-m-l' },
-    { slug: 'jetsetter-insulated-tote' },
-  ];
 }

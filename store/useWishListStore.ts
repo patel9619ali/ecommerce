@@ -6,6 +6,8 @@ export type WishlistProduct = {
   productId: string;
   variantId: string;
   slug: string;
+  brandSlug?: string;
+  categorySlug?: string;
   title: string;
   price: number;
   mrp: number;
@@ -115,6 +117,8 @@ export const useWishlistStore = create<WishlistState>()(
                 productId: i.productId,
                 variantId: i.variantId,
                 slug: i.slug,
+                brandSlug: i.brandSlug,
+                categorySlug: i.categorySlug,
                 title: i.title,
                 price: i.price,
                 mrp: i.mrp,

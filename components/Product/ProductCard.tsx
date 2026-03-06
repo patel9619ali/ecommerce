@@ -7,6 +7,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import Image from "next/image";
 import { WishlistButton } from "../WishList/WishlistButton";
 import LoadingLink from "../Loader/LoadingLink";
+import { buildProductPathWithVariant } from "@/lib/product-url";
 
 interface Product {
   id: number;
@@ -24,6 +25,8 @@ interface Product {
   category: string;
   color: string;
   colorHex?: string;
+  brandSlug?: string;
+  categorySlug?: string;
 }
 
 interface ProductCardProps {
@@ -68,7 +71,17 @@ const ProductCard = ({ product }: ProductCardProps) => {
   }, [isHovered, emblaApi, isMobile, product.images.length]);
 
   return (
-    <LoadingLink href={`/products/${product.slug}?variant=${product.variantId}`} className="block">
+    <LoadingLink
+      href={buildProductPathWithVariant(
+        {
+          slug: product.slug,
+          brandSlug: product.brandSlug,
+          categorySlug: product.categorySlug,
+        },
+        product.variantId
+      )}
+      className="block"
+    >
       <div className="group relative bg-[hsl(0,0%,100%)] rounded-lg overflow-hidden border border-[hsl(260,15%,90%)] hover:shadow-xl transition-shadow duration-300" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
         {/* Image Carousel */}
         <div className="relative aspect-[3/4] overflow-hidden" ref={emblaRef}>
@@ -132,7 +145,19 @@ const ProductCard = ({ product }: ProductCardProps) => {
           />
         </button> */}
         <div className="absolute top-0 right-0">
-          <WishlistButton productId={product.productId} variantId={product.variantId} slug={product.slug} title={`${product.name} - ${product.color}`} price={product.price} mrp={product.originalPrice} image={product.images[0]} colorName={product.color} colorHex={product.colorHex} />
+          <WishlistButton
+            productId={product.productId}
+            variantId={product.variantId}
+            slug={product.slug}
+            brandSlug={product.brandSlug}
+            categorySlug={product.categorySlug}
+            title={`${product.name} - ${product.color}`}
+            price={product.price}
+            mrp={product.originalPrice}
+            image={product.images[0]}
+            colorName={product.color}
+            colorHex={product.colorHex}
+          />
 
         </div>
 

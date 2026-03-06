@@ -49,7 +49,12 @@ const quickLinks = [
   { label: "Shipping Policy", icon: "🚚" },
   { label: "Return Policy", icon: "↩️" },
 ];
-export function DesktopHeader() {
+type DesktopHeaderProps = {
+  brandName?: string;
+  brandLogoUrl?: string | null;
+};
+
+export function DesktopHeader({ brandName, brandLogoUrl }: DesktopHeaderProps) {
   const loadedUserIdRef = useRef<string | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const cartItems = useCartStore((state) => state.items);
@@ -143,6 +148,11 @@ useEffect(() => {
 
   fetchWallet();
 }, [user?.id]);
+  const safeBrandName = brandName || "BlendRas";
+  const brandParts = safeBrandName.split(" ");
+  const firstPart = brandParts[0] || "Blend";
+  const secondPart = brandParts.slice(1).join(" ") || "";
+
   return (
     <header className={cn(
       "w-full sticky top-0 z-50 bg-[#fff]"
@@ -169,7 +179,10 @@ useEffect(() => {
                         <X fill="#fff40" size={30} className="bg-[#fff] rounded-full p-1"/>
                       </button>
                     </SheetClose>
-                      <h2 className="text-xl font-bold text-white">Blend<span className="opacity-80">Ras</span></h2>
+                      <h2 className="text-xl font-bold text-white">
+                        {firstPart}
+                        {secondPart ? <span className="opacity-80"> {secondPart}</span> : null}
+                      </h2>
                       <p className="text-white/70 text-sm mt-1">Blend Fresh, Live Healthy</p>
                       {walletBalance !== null && (
                         <p className="text-white text-sm mt-2">Wallet: Rs {walletBalance.toLocaleString()}</p>
@@ -226,8 +239,19 @@ useEffect(() => {
 
         {/* Center: Logo */}
         <h3 className="text-2xl lg:text-3xl font-bold tracking-tight">
-          <LoadingLink href={`/`}><span className="text-gradient">Blend</span>
-            <span className="text-foreground">Ras</span>
+          <LoadingLink href={`/`} className="flex items-center gap-2">
+            {brandLogoUrl ? (
+              <img
+                src={brandLogoUrl}
+                alt={safeBrandName}
+                className="h-8 w-auto object-contain"
+              />
+            ) : (
+              <>
+                <span className="text-gradient">{firstPart}</span>
+                {secondPart ? <span className="text-foreground">{secondPart}</span> : null}
+              </>
+            )}
           </LoadingLink>
         </h3>
         {/* Right: Actions */}
@@ -267,5 +291,6 @@ useEffect(() => {
     </header>
   );
 }
+
 
 

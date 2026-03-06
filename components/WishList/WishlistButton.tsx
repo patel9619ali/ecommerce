@@ -12,6 +12,8 @@ type WishlistButtonProps = {
   productId: string;
   variantId: string;
   slug: string;
+  brandSlug?: string;
+  categorySlug?: string;
   title: string;
   price: number;
   mrp: number;
@@ -25,6 +27,8 @@ export function WishlistButton({
   productId,
   variantId,
   slug,
+  brandSlug,
+  categorySlug,
   title,
   price,
   mrp,
@@ -56,6 +60,8 @@ export function WishlistButton({
       productId,
       variantId,
       slug,
+      brandSlug,
+      categorySlug,
       title,
       price,
       mrp,
