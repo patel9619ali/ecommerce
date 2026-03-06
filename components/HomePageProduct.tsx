@@ -245,11 +245,11 @@ const HomePageProduct = ({
           return (
             <div key={section.key} className="space-y-8">
               <div className="flex items-center justify-between gap-4">
-                <h2 className="text-3xl lg:text-5xl font-bold text-gradient mb-0">{section.title}</h2>
+                <h2 className="text-[20px] lg:text-5xl font-bold text-gradient mb-0">{section.title}</h2>
                 {shouldShowViewAll && (
                   <LoadingLink
                     href={categoryPath}
-                    className="text-sm font-semibold text-[#4f46e5] hover:text-[#312e81]"
+                    className="text-[18px] lg:text-[26px] font-semibold text-[#4f46e5] hover:text-[#312e81]"
                   >
                     View All
                   </LoadingLink>

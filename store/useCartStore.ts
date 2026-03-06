@@ -17,10 +17,7 @@ export type CartProduct = {
 
 type CartState = {
   items: CartProduct[];
-
-  // 🔹 UI ONLY (NOT persisted)
   isCartOpen: boolean;
-
   hydrated: boolean;
   userId: string | null;
 
@@ -34,6 +31,7 @@ type CartState = {
   loadFromDatabase: (userId: string) => Promise<void>;
   syncWithDatabase: () => void;
   resetCart: () => void;
+  setHydrated: (value: boolean) => void;
 };
 
 let syncTimeout: NodeJS.Timeout | null = null;
@@ -71,12 +69,10 @@ function mergeCartItems(localItems: CartProduct[], dbItems: CartProduct[]): Cart
 }
 
 export const useCartStore = create<CartState>()(
-  
   persist(
     (set, get) => ({
       items: [],
-      isCartOpen: false, // 👈 UI-only
-
+      isCartOpen: false,
       hydrated: false,
       userId: null,
 
@@ -86,87 +82,81 @@ export const useCartStore = create<CartState>()(
       addItem: (item, openCart = true) => {
         set((state) => {
           const existing = state.items.find(
-            (i) =>
-              i.productId === item.productId &&
-              i.variantKey === item.variantKey
+            (i) => i.productId === item.productId && i.variantKey === item.variantKey
           );
 
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.productId === item.productId &&
-                i.variantKey === item.variantKey
+                i.productId === item.productId && i.variantKey === item.variantKey
                   ? { ...i, quantity: i.quantity + item.quantity }
                   : i
               ),
-              isCartOpen: openCart, // ✅ open sheet
+              isCartOpen: openCart,
             };
           }
 
           return {
             items: [...state.items, { ...item, id: crypto.randomUUID() }],
-            isCartOpen: openCart, // ✅ open sheet
+            isCartOpen: openCart,
           };
         });
 
         get().syncWithDatabase();
       },
 
-updateQuantity: (productId, variantKey, qty) => {
-  if (qty < 1) return;
+      updateQuantity: (productId, variantKey, qty) => {
+        if (qty < 1) return;
 
-  set((state) => ({
-    items: state.items.map((i) =>
-      i.productId === productId && i.variantKey === variantKey
-        ? { ...i, quantity: qty }
-        : i
-    ),
-  }));
-
-  get().syncWithDatabase();
-},
-
-      removeItem: (productId, variantKey) => {
         set((state) => ({
-          items: state.items.filter(
-            (i) =>
-              !(i.productId === productId && i.variantKey === variantKey)
+          items: state.items.map((i) =>
+            i.productId === productId && i.variantKey === variantKey
+              ? { ...i, quantity: qty }
+              : i
           ),
         }));
 
         get().syncWithDatabase();
       },
 
-syncWithDatabase: () => {
-  if (syncTimeout) clearTimeout(syncTimeout);
+      removeItem: (productId, variantKey) => {
+        set((state) => ({
+          items: state.items.filter(
+            (i) => !(i.productId === productId && i.variantKey === variantKey)
+          ),
+        }));
 
-  const myVersion = ++currentSyncVersion;
+        get().syncWithDatabase();
+      },
 
-  syncTimeout = setTimeout(async () => {
-    if (isLoadingFromDB) return;
+      syncWithDatabase: () => {
+        if (syncTimeout) clearTimeout(syncTimeout);
 
-    const { hydrated, items, userId } = get();
-    if (!hydrated || !userId) return;
+        const myVersion = ++currentSyncVersion;
 
-    try {
-      await fetch("/api/cart/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items, version: myVersion }),
-      });
-    } catch (e) {
-      console.error("Cart sync failed", e);
-    }
-  }, 400);
-},
+        syncTimeout = setTimeout(async () => {
+          if (isLoadingFromDB) return;
 
+          const { hydrated, items, userId } = get();
+          if (!hydrated || !userId) return;
+
+          try {
+            await fetch("/api/cart/sync", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ items, version: myVersion }),
+            });
+          } catch (e) {
+            console.error("Cart sync failed", e);
+          }
+        }, 400);
+      },
 
       loadFromDatabase: async (userId: string) => {
         if (!userId || isLoadingFromDB) return;
 
         const currentUserId = get().userId;
 
-        // Different signed-in user: clear persisted cart first
         if (currentUserId && currentUserId !== userId) {
           set({ items: [], userId, hydrated: false });
         }
@@ -177,29 +167,31 @@ syncWithDatabase: () => {
           const res = await fetch("/api/cart/get");
           const { cart } = await res.json();
 
-          const dbItems: CartProduct[] = (cart?.items || []).map((i: {
-            productId: string;
-            variantId: string;
-            slug?: string | null;
-            brandSlug?: string | null;
-            categorySlug?: string | null;
-            title?: string;
-            price: number;
-            image: string;
-            quantity: number;
-          }) => ({
-            id: crypto.randomUUID(),
-            productId: i.productId,
-            variantKey: i.variantId,
-            slug: i.slug,
-            brandSlug: i.brandSlug,
-            categorySlug: i.categorySlug,
-            title: i.title,
-            price: i.price,
-            image: i.image,
-            quantity: i.quantity,
-            mrp: i.price,
-          }));
+          const dbItems: CartProduct[] = (cart?.items || []).map(
+            (i: {
+              productId: string;
+              variantId: string;
+              slug?: string | null;
+              brandSlug?: string | null;
+              categorySlug?: string | null;
+              title?: string;
+              price: number;
+              image: string;
+              quantity: number;
+            }) => ({
+              id: crypto.randomUUID(),
+              productId: i.productId,
+              variantKey: i.variantId,
+              slug: i.slug,
+              brandSlug: i.brandSlug,
+              categorySlug: i.categorySlug,
+              title: i.title,
+              price: i.price,
+              image: i.image,
+              quantity: i.quantity,
+              mrp: i.price,
+            })
+          );
 
           const localItems = get().items;
           const mergedItems = mergeCartItems(localItems, dbItems);
@@ -210,7 +202,6 @@ syncWithDatabase: () => {
             hydrated: true,
           });
 
-          // Push guest+db merged cart back to DB after login
           get().syncWithDatabase();
         } catch (error) {
           console.error("Cart load failed:", error);
@@ -227,20 +218,25 @@ syncWithDatabase: () => {
           userId: null,
           hydrated: true,
         }));
-        
+      },
+
+      setHydrated: (value) => {
+        set({ hydrated: value });
       },
     }),
     {
       name: "cart-storage",
       storage: createJSONStorage(() => localStorage),
-
-      // 🚨 THIS IS THE KEY FIX
       partialize: (state) => ({
         items: state.items,
-        hydrated: state.hydrated,
         userId: state.userId,
-        // ❌ isCartOpen NOT persisted
       }),
+      onRehydrateStorage: () => {
+        return (state) => {
+          if (!state) return;
+          state.hydrated = true;
+        };
+      },
     }
   )
 );
