@@ -17,7 +17,7 @@ export default function CheckoutPage() {
     setLoading(true);
 
     if (status === "unauthenticated") {
-      router.push("/auth/signin?callbackUrl=/checkout");
+      router.push("/sign-in?callbackUrl=/checkout");
       return;
     }
 

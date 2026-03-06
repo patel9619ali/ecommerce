@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { useCartStore } from "@/store/useCartStore";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { AnimatePresence,motion } from "framer-motion";
 import CartHeader from "@/components/Cart/CartHeader";
 import CartItem from "@/components/Cart/CartItem";
@@ -17,15 +16,8 @@ import { ArrowRight } from "lucide-react";
 export default function CartPage() {
     const { setLoading } = useLoading();
   const router = useRouter();
-  const { status } = useSession();
 
   const { items, updateQuantity, removeItem, hydrated } = useCartStore();
-
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/signin?callbackUrl=/cart");
-    }
-  }, [status, router]);
 
   if (!hydrated) {
     return (

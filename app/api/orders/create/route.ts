@@ -101,6 +101,23 @@ export async function POST(request: Request) {
         })),
       });
 
+      const wishlist = await tx.wishlist.findUnique({
+        where: { userId },
+        select: { id: true },
+      });
+
+      if (wishlist && sanitizedItems.length > 0) {
+        await tx.wishlistItem.deleteMany({
+          where: {
+            wishlistId: wishlist.id,
+            OR: sanitizedItems.map((item: CheckoutItem) => ({
+              productId: item.productId,
+              variantId: item.variantKey,
+            })),
+          },
+        });
+      }
+
       if (normalizedPaymentMethod === "WALLET") {
         await tx.user.update({
           where: { id: userId },

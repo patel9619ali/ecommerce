@@ -23,6 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CartProduct, useCartStore } from "@/store/useCartStore";
+import { useWishlistStore } from "@/store/useWishListStore";
 import MobileCheckoutBar from "../Cart/MobileCheckoutBar";
 import { toast } from "sonner";
 
@@ -35,6 +36,7 @@ interface CheckoutCartProps {
 const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps) => {
   const router = useRouter();
   const { resetCart } = useCartStore();
+  const { removeItem: removeFromWishlist } = useWishlistStore();
   const [savedAddressId, setSavedAddressId] = useState<string | null>(null);
 
   // ✅ Local button loading states — no global loader
@@ -68,6 +70,12 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
   const codCharge = paymentMethod === "cod" ? 30 : 0;
   const total = subtotal + shipping + tax + codCharge;
   const hasWalletBalance = walletBalance >= total;
+
+  const removePurchasedFromWishlist = () => {
+    for (const item of items) {
+      removeFromWishlist(item.productId, item.variantKey);
+    }
+  };
 
   const loadRazorpay = () =>
     new Promise((resolve) => {
@@ -248,6 +256,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
         if (!orderRes.ok) throw new Error(data.error || "Failed to create order");
 
         localStorage.setItem("lastOrder", JSON.stringify(data.order));
+        removePurchasedFromWishlist();
 
         // Clear cart in background
         setTimeout(() => {
@@ -290,6 +299,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
         if (!orderRes.ok) throw new Error(data.error || "Failed to create order");
 
         localStorage.setItem("lastOrder", JSON.stringify(data.order));
+        removePurchasedFromWishlist();
 
         setTimeout(() => {
           fetch("/api/cart/sync", {
@@ -349,6 +359,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
               if (!orderRes.ok) throw new Error(data.error || "Failed to create order");
 
               localStorage.setItem("lastOrder", JSON.stringify(data.order));
+              removePurchasedFromWishlist();
 
               setTimeout(() => {
                 fetch("/api/cart/sync", {
