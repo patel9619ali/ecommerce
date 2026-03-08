@@ -35,7 +35,7 @@ export default async function ProductPage(props: Props) {
   }
 
   const products = await getProducts();
-
+  console.log(products,"products");
   return (
     <>
       <ProductPageClient product={product} initialVariant={initialVariant} />

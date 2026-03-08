@@ -24,6 +24,7 @@ type OrderWithItems = {
     title: string;
     quantity: number;
     price: number;
+    variantId: string;
   }>;
 };
 
@@ -147,31 +148,58 @@ export async function POST(request: Request) {
         title: item.title,
         quantity: item.quantity,
         price: item.price,
+        variantId: item.variantId,
       }));
+
+      const [customerProfile, customerAddress] = await Promise.all([
+        db.user.findUnique({
+          where: { id: userId },
+          select: { name: true, email: true, phone: true },
+        }),
+        db.address.findUnique({
+          where: { userId },
+          select: {
+            firstName: true,
+            lastName: true,
+            phone: true,
+            address: true,
+            building: true,
+            apartment: true,
+            landmark: true,
+            city: true,
+            state: true,
+            pincode: true,
+          },
+        }),
+      ]);
 
       await Promise.allSettled([
         customerEmail
           ? sendOrderPlacedEmailToCustomer({
               email: customerEmail,
-              customerName: session.user.name,
+              customerName: customerProfile?.name ?? session.user.name,
               orderId: fullOrder.id,
               amount: fullOrder.amount,
               paymentMethod: fullOrder.paymentMethod,
               items: mailItems,
+              address: customerAddress,
             })
           : Promise.resolve(),
         sendOrderPlacedEmailToSeller({
           orderId: fullOrder.id,
-          customerEmail: customerEmail ?? null,
+          customerEmail: customerProfile?.email ?? customerEmail ?? null,
+          customerName: customerProfile?.name ?? session.user.name ?? null,
+          customerPhone: customerProfile?.phone ?? customerAddress?.phone ?? null,
           amount: fullOrder.amount,
           paymentMethod: fullOrder.paymentMethod,
           items: mailItems,
+          address: customerAddress,
         }),
       ]);
     }
 
     return NextResponse.json({ success: true, order: fullOrder });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Order creation error:", error);
     return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
   }

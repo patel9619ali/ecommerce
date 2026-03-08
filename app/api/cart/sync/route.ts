@@ -3,6 +3,16 @@ import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
+type SyncCartItem = {
+  productId: string;
+  variantKey: string;
+  title: string;
+  price: number;
+  quantity: number;
+  image: string;
+  slug?: string | null;
+};
+
 export async function POST(req: Request) {
   const session = await auth();
 
@@ -11,29 +21,40 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { items } = await req.json();
+  const { items, version } = await req.json();
   if (!Array.isArray(items)) {
     return NextResponse.json({ success: true });
   }
+  const safeItems = items as SyncCartItem[];
 
   await db.$transaction(async (tx) => {
     const cart = await tx.cart.upsert({
       where: { userId },
-      create: { userId }, // ✅ now strictly string
+      create: { userId, syncVersion: 0 },
       update: {},
     });
+
+    const incomingVersion =
+      typeof version === "number" && Number.isFinite(version)
+        ? Math.floor(version)
+        : cart.syncVersion + 1;
+
+    // Ignore stale writes when requests complete out of order.
+    if (incomingVersion < cart.syncVersion) {
+      return;
+    }
 
     await tx.cartItem.deleteMany({
       where: {
         cartId: cart.id,
-        NOT: items.map((i: any) => ({
+        NOT: safeItems.map((i) => ({
           productId: i.productId,
           variantId: i.variantKey,
         })),
       },
     });
 
-    for (const item of items) {
+    for (const item of safeItems) {
       await tx.cartItem.upsert({
         where: {
           cartId_productId_variantId: {
@@ -62,8 +83,12 @@ export async function POST(req: Request) {
         },
       });
     }
+
+    await tx.cart.update({
+      where: { id: cart.id },
+      data: { syncVersion: incomingVersion },
+    });
   });
 
   return NextResponse.json({ success: true });
 }
-

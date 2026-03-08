@@ -29,11 +29,11 @@ export default function ProfileDropdown({ user }: ProfileDropdownProps) {
             <User size={10} />
           </div>
 
-          <span className="pl-1 font-semibold text-sm text-[#000] !cursor-pointer !pointer-events-auto">
+          {/* <span className="pl-1 font-semibold text-sm text-[#000] !cursor-pointer !pointer-events-auto">
             {(user.name || "User").length > 10
               ? `${(user.name || "User").slice(0, 10)}...`
               : (user.name || "User")}
-          </span>
+          </span> */}
         </Button>
       </DropdownMenuTrigger>
 

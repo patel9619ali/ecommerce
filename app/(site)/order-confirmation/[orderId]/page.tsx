@@ -13,15 +13,13 @@ import {
   Wallet,
   RotateCcw,
   Ban,
-  Info,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -48,8 +46,21 @@ interface Order {
   refundDestination?: "ORIGINAL_SOURCE" | "WALLET" | null;
   refundReason?: string | null;
   refundAmount?: number | null;
+  cancellationReason?: string | null;
+  cancellationComment?: string | null;
+  cancelledAt?: string | null;
   items: OrderItem[];
 }
+
+const CANCEL_REASONS = [
+  "Incorrect size ordered",
+  "Product not required anymore",
+  "Cash issue",
+  "Ordered by mistake",
+  "Want to change style/color",
+  "Delayed delivery",
+  "Duplicate order",
+];
 
 const getEstimatedDelivery = () => {
   const today = new Date();
@@ -63,6 +74,11 @@ const getEstimatedDelivery = () => {
 
 const CANCELLABLE_STATUSES = new Set(["PENDING", "PROCESSING"]);
 
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (error instanceof Error && error.message) return error.message;
+  return fallback;
+};
+
 const OrderConfirmation = () => {
   const router = useRouter();
   const pathname = usePathname();
@@ -73,6 +89,10 @@ const OrderConfirmation = () => {
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [selectedCancelReason, setSelectedCancelReason] = useState<string>("");
+  const [cancelComment, setCancelComment] = useState("");
+  const [cancelReasonError, setCancelReasonError] = useState<string | null>(null);
+  const [cancelRefundToWallet, setCancelRefundToWallet] = useState<boolean>(false);
 
   const estimatedDelivery = getEstimatedDelivery();
 
@@ -114,7 +134,7 @@ const OrderConfirmation = () => {
   const activeStepIndex = order ? (statusToStep[order.status] ?? 0) : 0;
   const progressPercent = (activeStepIndex / (progressSteps.length - 1)) * 100;
 
-  const loadOrder = async () => {
+  const loadOrder = useCallback(async () => {
     if (!orderId) return;
     try {
       setIsLoadingOrder(true);
@@ -123,19 +143,32 @@ const OrderConfirmation = () => {
       if (!res.ok) throw new Error(data.error || "Order not found");
       setOrder(data.order);
       setError(null);
-    } catch (err: any) {
-      setError(err.message || "Failed to load order");
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, "Failed to load order"));
     } finally {
       setIsLoadingOrder(false);
     }
-  };
+  }, [orderId]);
 
   useEffect(() => {
     loadOrder();
-  }, [orderId]);
+  }, [loadOrder]);
 
-  const handleCancel = async (refundToWallet: boolean) => {
+  const openCancelDialog = (refundToWallet: boolean) => {
+    setCancelRefundToWallet(refundToWallet);
+    setSelectedCancelReason("");
+    setCancelComment("");
+    setCancelReasonError(null);
+    setIsCancelDialogOpen(true);
+  };
+
+  const handleCancel = async () => {
     if (!order) return;
+    if (!selectedCancelReason) {
+      setCancelReasonError("Please select a cancellation reason.");
+      return;
+    }
+
     setIsProcessing(true);
     try {
       const res = await fetch("/api/orders/cancel", {
@@ -143,15 +176,18 @@ const OrderConfirmation = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           orderId: order.id,
-          reason: "Cancelled by customer",
-          refundToWallet,
+          reason: selectedCancelReason,
+          comment: cancelComment,
+          refundToWallet: cancelRefundToWallet,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to cancel order");
+
+      setIsCancelDialogOpen(false);
       await loadOrder();
-    } catch (err: any) {
-      alert(err.message || "Failed to cancel order");
+    } catch (error: unknown) {
+      alert(getErrorMessage(error, "Failed to cancel order"));
     } finally {
       setIsProcessing(false);
     }
@@ -173,8 +209,8 @@ const OrderConfirmation = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to request refund");
       await loadOrder();
-    } catch (err: any) {
-      alert(err.message || "Failed to request refund");
+    } catch (error: unknown) {
+      alert(getErrorMessage(error, "Failed to request refund"));
     } finally {
       setIsProcessing(false);
     }
@@ -276,6 +312,16 @@ const OrderConfirmation = () => {
             {pageSubtitle}
           </p>
         </div>
+
+        {isCancelled && order.cancellationReason && (
+          <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200">
+            <p className="text-sm font-semibold text-red-700">Cancellation Reason</p>
+            <p className="text-sm text-red-700 mt-1">{order.cancellationReason}</p>
+            {order.cancellationComment && (
+              <p className="text-xs text-red-600 mt-2">Comment: {order.cancellationComment}</p>
+            )}
+          </div>
+        )}
 
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 md:mb-10">
           <div className="flex items-center gap-2.5 bg-white border rounded-xl px-4 py-3 shadow-sm">
@@ -393,7 +439,7 @@ const OrderConfirmation = () => {
             <>
               <button
                 disabled={isProcessing}
-                onClick={() => handleCancel(true)}
+                onClick={() => openCancelDialog(true)}
                 className="cursor-pointer flex items-center justify-center gap-2 h-11 px-4 bg-[#ecfdf3] border border-[#a7f3d0] text-[#166534] font-semibold text-sm rounded-xl disabled:opacity-60"
               >
                 <Wallet className="w-4 h-4" />
@@ -401,7 +447,7 @@ const OrderConfirmation = () => {
               </button>
               <button
                 disabled={isProcessing}
-                onClick={() => handleCancel(false)}
+                onClick={() => openCancelDialog(false)}
                 className="cursor-pointer flex items-center justify-center gap-2 h-11 px-4 bg-red-50 border border-red-200 text-red-700 font-semibold text-sm rounded-xl disabled:opacity-60"
               >
                 <Ban className="w-4 h-4" />
@@ -413,7 +459,7 @@ const OrderConfirmation = () => {
           {canCancel && isCOD && (
             <button
               disabled={isProcessing}
-              onClick={() => setIsCancelDialogOpen(true)}
+              onClick={() => openCancelDialog(false)}
               className="cursor-pointer flex items-center justify-center gap-2 h-11 px-4 bg-red-50 border border-red-200 text-red-700 font-semibold text-sm rounded-xl disabled:opacity-60"
             >
               <Ban className="w-4 h-4" />
@@ -455,50 +501,78 @@ const OrderConfirmation = () => {
         </div>
 
         <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
-          <DialogContent className="block p-0 overflow-hidden xs:rounded-[20px] rounded-none xs:max-w-lg max-w-full fixed xs:top-1/2 xs:-translate-y-1/2 top-0 translate-y-0 xs:bottom-[unset] bottom-[0] border-none [&>button]:hidden z-200">
-            <DialogHeader>
-              <DialogTitle className="hidden">Cancel this order?</DialogTitle>
-              <div className={`relative justify-end items-start relative h-[200px] flex xs:px-6 px-4 xs:py-5 py-2 bg-[#FF0000]`}>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
-                    <Info size={130} color="red" fill="white" />
-                </div>
-                <DialogClose
-                    className="text-white opacity-90 hover:opacity-100 cursor-pointer outline-none ring-0 focus:ring-0 focus-visible:ring-0 ring-offset-0 z-3">
-                    <X size={30} className="fill-[#053E54] xs:fill-white" />
+          <DialogContent className="max-w-xl p-0 overflow-hidden border-none">
+            <DialogHeader className="px-5 pt-5 pb-3 border-b bg-[hsl(240_10%_98%)]">
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-lg font-bold text-[hsl(240_15%_10%)]">
+                  Reason for Cancellation
+                </DialogTitle>
+                <DialogClose className="cursor-pointer text-[hsl(240_8%_45%)]">
+                  <X className="w-5 h-5" />
                 </DialogClose>
-            </div>
+              </div>
+              <p className="text-sm text-[hsl(240_8%_45%)]">
+                Please tell us the reason. This helps improve our service.
+              </p>
             </DialogHeader>
-             <div className="bg-white h-full xs:px-6 px-4 py-6">
-                <div className="xs:pb-0 pb-0 flex flex-col justify-between xs:h-auto h-full">
-                    <div>
-                        <div className="relative text-center">
-                            <h2 className="text-[20px] font-bold bg-gradient-to-r from-[#FF181C] to-[#053E54] bg-clip-text text-transparent xs:mb-4 inline-block">Cancel?</h2>
-                        </div>
-                        <p className="text-[#666666] mt-2 xs:text-[18px] text-sm font-400 xs:text-start text-center">Are you sure, You want to cancel? . If you have any concern Please contact us at support@blendras.in.</p>
-                    </div>
-                    <div className="sticky bottom-0 pb-[20px] xs:mt-5 xs:[position:unset] xs:[bottom:unset] xs:pb-0">
-                        <div className="flex gap-4">
-                            <button
-                                onClick={() => setIsCancelDialogOpen(false)}
-                                disabled={isProcessing}
-                                className="w-full h-[40px] bg-[#FFE7E7] border border-[#FF0000] rounded-[20px] text-[#FF0000] font-semibold text-[16px] cursor-pointer uppercase"
-                            >
-                                Keep Order
-                            </button>
-                            <button
-                                 onClick={async () => {
-                                    setIsCancelDialogOpen(false);
-                                    await handleCancel(false);
-                                  }}
-                                  disabled={isProcessing}
-                                className="w-full h-[40px] bg-[#FFE7E7] border border-[#FF0000] rounded-[20px] text-[#FF0000] font-semibold text-[16px] cursor-pointer uppercase"
-                            >
-                                 {isProcessing ? "Cancelling..." : "Cancel Order"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
+
+            <div className="px-5 py-4 space-y-4 max-h-[60vh] overflow-y-auto">
+              <div className="space-y-2">
+                {CANCEL_REASONS.map((reason) => (
+                  <label key={reason} className="flex items-start gap-2.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="cancel-reason"
+                      value={reason}
+                      checked={selectedCancelReason === reason}
+                      onChange={() => {
+                        setSelectedCancelReason(reason);
+                        setCancelReasonError(null);
+                      }}
+                      className="mt-1"
+                    />
+                    <span className="text-sm text-[hsl(240_15%_10%)]">{reason}</span>
+                  </label>
+                ))}
+                {cancelReasonError && (
+                  <p className="text-xs text-red-600">{cancelReasonError}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="cancel-comment" className="block text-sm font-medium text-[hsl(240_15%_10%)] mb-1.5">
+                  Additional Comments (Optional)
+                </label>
+                <textarea
+                  id="cancel-comment"
+                  value={cancelComment}
+                  onChange={(e) => setCancelComment(e.target.value)}
+                  rows={3}
+                  maxLength={300}
+                  placeholder="Tell us more..."
+                  className="w-full border border-[hsl(240_10%_85%)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[hsl(252_80%_60%)]"
+                />
+              </div>
             </div>
+
+            <DialogFooter className="px-5 py-4 border-t bg-white flex flex-row justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsCancelDialogOpen(false)}
+                disabled={isProcessing}
+              >
+                Keep Order
+              </Button>
+              <Button
+                type="button"
+                onClick={handleCancel}
+                disabled={isProcessing}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                {isProcessing ? "Cancelling..." : "Cancel Order"}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </main>

@@ -165,6 +165,7 @@ model TwoFactorConfirmation {
 model Cart {
   id     String     @id @default(cuid())
   userId String     @map("user_id")
+  syncVersion Int   @default(0) @map("sync_version")
   items  CartItem[]
   user   User       @relation(fields: [userId], references: [id])
 
@@ -201,6 +202,7 @@ model Order {
   refundAmount       Int?                @map("refund_amount")
   refundId           String?             @map("refund_id")
   cancellationReason String?             @map("cancellation_reason")
+  cancellationComment String?            @map("cancellation_comment")
   cancelledAt        DateTime?           @map("cancelled_at")
   deliveryId         String?             @map("delivery_id")
   deliveryStatus     DeliveryStatus      @default(PENDING) @map("delivery_status")
