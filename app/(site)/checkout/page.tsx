@@ -1,7 +1,7 @@
 // app/(site)/checkout/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useCartStore } from "@/store/useCartStore";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -34,13 +34,11 @@ export default function CheckoutPage() {
 
   if (status === "loading") return null;
 
-  const total = items.reduce((s, i) => s + i.price * i.quantity, 0);
   const totalItems = items.reduce((s, i) => s + i.quantity, 0);
 
   return (
     <CheckoutCart
       items={items}
-      total={total}
       itemCount={totalItems}
     />
   );

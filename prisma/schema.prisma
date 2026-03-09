@@ -201,6 +201,7 @@ model Order {
   refundReason       String?             @map("refund_reason")
   refundAmount       Int?                @map("refund_amount")
   refundId           String?             @map("refund_id")
+  refundProofImages  String[]            @default([]) @map("refund_proof_images")
   cancellationReason String?             @map("cancellation_reason")
   cancellationComment String?            @map("cancellation_comment")
   cancelledAt        DateTime?           @map("cancelled_at")
@@ -251,7 +252,9 @@ model WalletTransaction {
 
 model Address {
   id        String   @id @default(cuid())
-  userId    String   @unique @map("user_id")
+  userId    String   @map("user_id")
+  label     String   @default("HOME")
+  isDefault Boolean  @default(false) @map("is_default")
   firstName String   @map("first_name")
   lastName  String   @map("last_name")
   phone     String
@@ -267,5 +270,6 @@ model Address {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, isDefault])
   @@map("addresses")
 }

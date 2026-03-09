@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { items, total, paymentMethod, razorpayPaymentId } = await request.json();
+    const { items, total, paymentMethod, razorpayPaymentId, selectedAddressId } = await request.json();
     const normalizedPaymentMethod = getPaymentMethod(paymentMethod);
 
     if (!normalizedPaymentMethod) {
@@ -156,9 +156,14 @@ export async function POST(request: Request) {
           where: { id: userId },
           select: { name: true, email: true, phone: true },
         }),
-        db.address.findUnique({
-          where: { userId },
+        db.address.findFirst({
+          where: selectedAddressId
+            ? { userId, id: selectedAddressId }
+            : { userId },
+          orderBy: [{ isDefault: "desc" }, { updatedAt: "desc" }],
           select: {
+            label: true,
+            isDefault: true,
             firstName: true,
             lastName: true,
             phone: true,

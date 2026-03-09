@@ -13,7 +13,7 @@ export async function GET() {
 
     const addresses = await db.address.findMany({
       where: { userId: session.user.id },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ isDefault: "desc" }, { updatedAt: "desc" }],
     });
 
     return NextResponse.json({ addresses });
@@ -26,7 +26,7 @@ export async function GET() {
   }
 }
 
-// ✅ POST - Create or Update address (UPSERT)
+// ✅ POST - Create or update address
 export async function POST(request: Request) {
   try {
     const session = await auth();
@@ -34,7 +34,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const addressData = await request.json();
+    const payload = await request.json();
+    const { id, label = "HOME", isDefault = false, ...addressData } = payload || {};
 
     // ✅ Validate input
     const validation = CheckoutAddressSchema.safeParse(addressData);
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { 
+    const {
       firstName, 
       lastName, 
       phone, 
@@ -61,67 +62,87 @@ export async function POST(request: Request) {
       pincode 
     } = validation.data;
 
-    // ✅ Check if address exists for this user
-    const existingAddress = await db.address.findFirst({
-      where: { userId: session.user.id },
+    const userId = session.user.id;
+    const existingCount = await db.address.count({ where: { userId } });
+    const nextDefault = Boolean(isDefault) || existingCount === 0;
+    const normalizedLabel = ["HOME", "WORK", "OTHER"].includes(String(label).toUpperCase())
+      ? String(label).toUpperCase()
+      : "HOME";
+
+    const savedAddress = await db.$transaction(async (tx) => {
+      if (nextDefault) {
+        await tx.address.updateMany({
+          where: { userId },
+          data: { isDefault: false },
+        });
+      }
+
+      if (id) {
+        const existing = await tx.address.findFirst({
+          where: { id, userId },
+        });
+
+        if (!existing) {
+          throw new Error("Address not found or unauthorized");
+        }
+
+        return tx.address.update({
+          where: { id },
+          data: {
+            label: normalizedLabel,
+            isDefault: nextDefault,
+            firstName,
+            lastName,
+            phone,
+            address,
+            building: building || null,
+            apartment: apartment || null,
+            landmark: landmark || null,
+            city,
+            state,
+            pincode,
+          },
+        });
+      }
+
+      return tx.address.create({
+        data: {
+          userId,
+          label: normalizedLabel,
+          isDefault: nextDefault,
+          firstName,
+          lastName,
+          phone,
+          address,
+          building: building || null,
+          apartment: apartment || null,
+          landmark: landmark || null,
+          city,
+          state,
+          pincode,
+        },
+      });
     });
-
-    let savedAddress;
-
-    if (existingAddress) {
-      // ✅ UPDATE existing address
-      savedAddress = await db.address.update({
-        where: { id: existingAddress.id },
-        data: {
-          firstName,
-          lastName,
-          phone,
-          address,
-          building: building || null,
-          apartment: apartment || null,
-          landmark: landmark || null,
-          city,
-          state,
-          pincode,
-        },
-      });
-    } else {
-      // ✅ CREATE new address
-      savedAddress = await db.address.create({
-        data: {
-          userId: session.user.id,
-          firstName,
-          lastName,
-          phone,
-          address,
-          building: building || null,
-          apartment: apartment || null,
-          landmark: landmark || null,
-          city,
-          state,
-          pincode,
-        },
-      });
-    }
 
     return NextResponse.json({ 
       success: true, 
       address: savedAddress 
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Address save error:", error);
+    const err = error as { code?: string; message?: string };
 
-    if (error.code === "P1001" || error.message?.includes("Can't reach database")) {
+    if (err.code === "P1001" || err.message?.includes("Can't reach database")) {
       return NextResponse.json(
         { error: "Database connection failed" },
         { status: 503 }
       );
     }
 
-    if (error.code === "P2002") {
+    if (err.message === "Address not found or unauthorized") {
       return NextResponse.json(
-        { error: "Address already exists for this user" },
-        { status: 409 }
+        { error: "Address not found or unauthorized" },
+        { status: 404 }
       );
     }
 
@@ -155,13 +176,30 @@ export async function PUT(request: Request) {
       );
     }
 
-    // ✅ Update address (only if it belongs to current user)
-    const updated = await db.address.updateMany({
-      where: { 
-        id,
-        userId: session.user.id, // ✅ Security: only update own address
-      },
-      data: validation.data,
+    const { label, isDefault } = addressData || {};
+    const normalizedLabel = ["HOME", "WORK", "OTHER"].includes(String(label).toUpperCase())
+      ? String(label).toUpperCase()
+      : undefined;
+
+    const updated = await db.$transaction(async (tx) => {
+      if (isDefault === true) {
+        await tx.address.updateMany({
+          where: { userId: session.user.id },
+          data: { isDefault: false },
+        });
+      }
+
+      return tx.address.updateMany({
+        where: {
+          id,
+          userId: session.user.id,
+        },
+        data: {
+          ...validation.data,
+          ...(normalizedLabel ? { label: normalizedLabel } : {}),
+          ...(typeof isDefault === "boolean" ? { isDefault } : {}),
+        },
+      });
     });
 
     if (updated.count === 0) {

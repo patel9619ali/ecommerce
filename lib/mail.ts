@@ -14,6 +14,13 @@ const escapeHtml = (value?: string | null) =>
     .replace(/\"/g, "&quot;")
     .replace(/'/g, "&#39;");
 
+const formatRefundDestination = (destination?: string | null) => {
+  if (!destination) return null;
+  if (destination === "WALLET") return "Wallet";
+  if (destination === "ORIGINAL_SOURCE") return "Original payment method (UPI/Card/Bank)";
+  return destination;
+};
+
 type OrderMailAddress = {
   firstName?: string | null;
   lastName?: string | null;
@@ -87,6 +94,30 @@ const renderItemsTableHtml = (items: OrderMailItem[]) => {
         ${rows}
       </tbody>
     </table>
+  `;
+};
+
+const renderImageProofHtml = (imageUrls?: string[]) => {
+  if (!imageUrls?.length) {
+    return `<p style="margin:0;color:#666;font-size:13px;">No images uploaded.</p>`;
+  }
+
+  const fullUrls = imageUrls.map((url) =>
+    url.startsWith("http") ? url : `${baseUrl || ""}${url}`
+  );
+
+  return `
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      ${fullUrls
+        .map(
+          (src) => `
+            <a href="${escapeHtml(src)}" target="_blank" rel="noreferrer" style="display:block;width:120px;height:120px;border:1px solid #eee;border-radius:8px;overflow:hidden;">
+              <img src="${escapeHtml(src)}" alt="Refund proof" style="width:100%;height:100%;object-fit:cover;display:block;" />
+            </a>
+          `
+        )
+        .join("")}
+    </div>
   `;
 };
 
@@ -273,7 +304,7 @@ export const sendOrderCancelledEmailToCustomer = async (params: {
           <p style="margin:0 0 6px;"><b>Payment Method:</b> ${escapeHtml(paymentMethod)}</p>
           <p style="margin:0 0 6px;"><b>Reason:</b> ${escapeHtml(reason)}</p>
           ${comment ? `<p style="margin:0 0 6px;"><b>Comment:</b> ${escapeHtml(comment)}</p>` : ""}
-          ${refundDestination ? `<p style="margin:0;"><b>Refund:</b> ${escapeHtml(refundDestination)}</p>` : ""}
+          ${formatRefundDestination(refundDestination) ? `<p style="margin:0;"><b>Refund:</b> ${escapeHtml(formatRefundDestination(refundDestination))}</p>` : ""}
         </div>
 
         <h3 style="margin:0 0 8px;">Cancelled Items</h3>
@@ -330,7 +361,7 @@ export const sendOrderCancelledEmailToSeller = async (params: {
           <p style="margin:0 0 6px;"><b>Payment Method:</b> ${escapeHtml(paymentMethod)}</p>
           <p style="margin:0 0 6px;"><b>Reason:</b> ${escapeHtml(reason)}</p>
           ${comment ? `<p style="margin:0 0 6px;"><b>Comment:</b> ${escapeHtml(comment)}</p>` : ""}
-          ${refundDestination ? `<p style="margin:0 0 6px;"><b>Refund:</b> ${escapeHtml(refundDestination)}</p>` : ""}
+          ${formatRefundDestination(refundDestination) ? `<p style="margin:0 0 6px;"><b>Refund:</b> ${escapeHtml(formatRefundDestination(refundDestination))}</p>` : ""}
           <p style="margin:0 0 6px;"><b>Customer:</b> ${escapeHtml(customerName || "N/A")}</p>
           <p style="margin:0 0 6px;"><b>Email:</b> ${escapeHtml(customerEmail || "N/A")}</p>
           <p style="margin:0;"><b>Phone:</b> ${escapeHtml(customerPhone || "N/A")}</p>
@@ -343,6 +374,54 @@ export const sendOrderCancelledEmailToSeller = async (params: {
         <div style="background:#f6f8fa;border:1px solid #eaeef2;border-radius:8px;padding:12px;">
           ${renderAddressHtml(address)}
         </div>
+      </div>
+    `,
+  });
+};
+
+export const sendRefundRequestedEmailToSeller = async (params: {
+  orderId: string;
+  amount: number;
+  paymentMethod: string;
+  refundDestination?: string | null;
+  refundReason?: string | null;
+  customerEmail?: string | null;
+  customerName?: string | null;
+  customerPhone?: string | null;
+  proofImages?: string[];
+}) => {
+  const sellerEmail = process.env.SELLER_EMAIL || supportEmail;
+  const {
+    orderId,
+    amount,
+    paymentMethod,
+    refundDestination,
+    refundReason,
+    customerEmail,
+    customerName,
+    customerPhone,
+    proofImages,
+  } = params;
+
+  await resend.emails.send({
+    from: "BlendRas <support@blendras.in>",
+    to: sellerEmail,
+    subject: `Refund Request: ${orderId}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:680px;margin:0 auto;padding:16px;">
+        <h2 style="margin:0 0 8px;">Customer Requested Refund</h2>
+        <div style="background:#fff4f4;border:1px solid #ffd8d8;border-radius:8px;padding:12px;margin-bottom:16px;">
+          <p style="margin:0 0 6px;"><b>Order ID:</b> ${escapeHtml(orderId)}</p>
+          <p style="margin:0 0 6px;"><b>Total:</b> ${rupee(amount)}</p>
+          <p style="margin:0 0 6px;"><b>Payment Method:</b> ${escapeHtml(paymentMethod)}</p>
+          <p style="margin:0 0 6px;"><b>Refund To:</b> ${escapeHtml(formatRefundDestination(refundDestination) || "Not set")}</p>
+          <p style="margin:0 0 6px;"><b>Reason:</b> ${escapeHtml(refundReason || "Not provided")}</p>
+          <p style="margin:0 0 6px;"><b>Customer:</b> ${escapeHtml(customerName || "N/A")}</p>
+          <p style="margin:0 0 6px;"><b>Email:</b> ${escapeHtml(customerEmail || "N/A")}</p>
+          <p style="margin:0;"><b>Phone:</b> ${escapeHtml(customerPhone || "N/A")}</p>
+        </div>
+        <h3 style="margin:0 0 8px;">Refund Proof Images</h3>
+        ${renderImageProofHtml(proofImages)}
       </div>
     `,
   });

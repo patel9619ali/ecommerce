@@ -55,8 +55,9 @@ export async function POST(req: Request) {
       where: { id: userId },
       select: { name: true, email: true, phone: true },
     });
-    const customerAddress = await db.address.findUnique({
+    const customerAddress = await db.address.findFirst({
       where: { userId },
+      orderBy: [{ isDefault: "desc" }, { updatedAt: "desc" }],
       select: {
         firstName: true,
         lastName: true,
@@ -215,7 +216,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: "Order cancelled. Refund request submitted.",
+      message: "Order cancelled. Refund request submitted to your original payment method.",
       order: updated,
     });
   } catch (error) {

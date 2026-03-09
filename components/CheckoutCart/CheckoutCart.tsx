@@ -14,6 +14,7 @@ import {
   Truck,
   Loader2,
   Wallet,
+  LocateFixed,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,22 +23,49 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { CartProduct, useCartStore } from "@/store/useCartStore";
+import { CartProduct } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishListStore";
 import MobileCheckoutBar from "../Cart/MobileCheckoutBar";
 import { toast } from "sonner";
 
 interface CheckoutCartProps {
   items: CartProduct[];
-  total: number;
   itemCount: number;
 }
 
-const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps) => {
+type SavedAddress = {
+  id: string;
+  label: string;
+  isDefault: boolean;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  address: string;
+  building?: string | null;
+  apartment?: string | null;
+  landmark?: string | null;
+  city: string;
+  state: string;
+  pincode: string;
+};
+
+type RazorpayHandlerResponse = {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+};
+
+type RazorpayCheckout = {
+  open: () => void;
+};
+
+type RazorpayCheckoutConstructor = new (options: Record<string, unknown>) => RazorpayCheckout;
+
+const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
   const router = useRouter();
-  const { resetCart } = useCartStore();
   const { removeItem: removeFromWishlist } = useWishlistStore();
   const [savedAddressId, setSavedAddressId] = useState<string | null>(null);
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  const [addressLabel, setAddressLabel] = useState<"HOME" | "WORK" | "OTHER">("HOME");
 
   // ✅ Local button loading states — no global loader
   const [isSavingAddress, setIsSavingAddress] = useState(false);
@@ -61,6 +89,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const [addressSaved, setAddressSaved] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -85,27 +114,37 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
       document.body.appendChild(script);
     });
 
+  const applySavedAddress = (addr: SavedAddress) => {
+    setFirstName(addr.firstName);
+    setLastName(addr.lastName);
+    setPhone(addr.phone);
+    setAddress(addr.address);
+    setBuilding(addr.building || "");
+    setApartment(addr.apartment || "");
+    setLandmark(addr.landmark || "");
+    setCity(addr.city);
+    setState(addr.state);
+    setPincode(addr.pincode);
+    setAddressLabel((addr.label?.toUpperCase() as "HOME" | "WORK" | "OTHER") || "HOME");
+    setSavedAddressId(addr.id);
+    setAddressSaved(true);
+    setAddressOpen(false);
+  };
+
+  const refreshAddresses = async () => {
+    const res = await fetch("/api/address");
+    const data = await res.json();
+    const list: SavedAddress[] = data.addresses || [];
+    setSavedAddresses(list);
+    return list;
+  };
+
   useEffect(() => {
     const fetchAddress = async () => {
       try {
-        const res = await fetch("/api/address");
-        const data = await res.json();
-
-        if (data.addresses?.[0]) {
-          const addr = data.addresses[0];
-          setFirstName(addr.firstName);
-          setLastName(addr.lastName);
-          setPhone(addr.phone);
-          setAddress(addr.address);
-          setBuilding(addr.building || "");
-          setApartment(addr.apartment || "");
-          setLandmark(addr.landmark || "");
-          setCity(addr.city);
-          setState(addr.state);
-          setPincode(addr.pincode);
-          setSavedAddressId(addr.id);
-          setAddressSaved(true);
-          setAddressOpen(false);
+        const list = await refreshAddresses();
+        if (list[0]) {
+          applySavedAddress(list[0]);
         }
       } catch (error) {
         console.error("Failed to load address:", error);
@@ -199,6 +238,9 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          id: savedAddressId,
+          label: addressLabel,
+          isDefault: true,
           firstName, lastName, phone, address,
           building, apartment, landmark, city, state, pincode,
         }),
@@ -210,12 +252,64 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
       setAddressSaved(true);
       setAddressOpen(false);
       setSavedAddressId(data.address.id);
+      await refreshAddresses();
       toast.success("Address saved successfully!");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Address save error:", error);
-      toast.error(error.message || "Failed to save address");
+      toast.error(error instanceof Error ? error.message : "Failed to save address");
     } finally {
       setIsSavingAddress(false);
+    }
+  };
+
+  const handleUseCurrentLocation = async () => {
+    if (typeof window === "undefined" || !("geolocation" in navigator)) {
+      toast.error("Location is not supported on this device");
+      return;
+    }
+
+    try {
+      setIsDetectingLocation(true);
+
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        });
+      });
+
+      const { latitude, longitude } = position.coords;
+      const geocodeRes = await fetch(
+        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+      );
+
+      if (!geocodeRes.ok) {
+        throw new Error("Failed to detect address from your location");
+      }
+
+      const geoData = await geocodeRes.json();
+      const localityLine =
+        geoData.locality ||
+        geoData.city ||
+        geoData.principalSubdivision ||
+        "";
+
+      const localityInfo = [localityLine, geoData.localityInfo?.administrative?.[2]?.name]
+        .filter(Boolean)
+        .join(", ");
+
+      setAddress(localityInfo || `Lat ${latitude.toFixed(5)}, Lng ${longitude.toFixed(5)}`);
+      setCity(geoData.city || geoData.locality || "");
+      setState(geoData.principalSubdivision || "");
+      setPincode(geoData.postcode || "");
+      setAddressSaved(false);
+      setAddressOpen(true);
+      toast.success("Location updated. Please review and click Update Address.");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Unable to fetch current location");
+    } finally {
+      setIsDetectingLocation(false);
     }
   };
 
@@ -249,6 +343,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
             })),
             total,
             paymentMethod: "cod",
+            selectedAddressId: savedAddressId,
           }),
         });
 
@@ -292,6 +387,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
             })),
             total,
             paymentMethod: "wallet",
+            selectedAddressId: savedAddressId,
           }),
         });
 
@@ -334,7 +430,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
           description: "Order Payment",
           order_id: paymentData.order.id,
 
-          handler: async function (response: any) {
+          handler: async function (response: RazorpayHandlerResponse) {
             try {
               const orderRes = await fetch("/api/orders/create", {
                 method: "POST",
@@ -352,6 +448,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
                   paymentMethod: "razorpay",
                   razorpayPaymentId: response.razorpay_payment_id,
                   razorpayOrderId: response.razorpay_order_id,
+                  selectedAddressId: savedAddressId,
                 }),
               });
 
@@ -371,8 +468,8 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
               }, 500);
 
               router.push(`/order-confirmation/${data.order.id}`);
-            } catch (err: any) {
-              toast.error(err.message || "Order creation failed");
+            } catch (err: unknown) {
+              toast.error(err instanceof Error ? err.message : "Order creation failed");
               setIsPlacingOrder(false);
             }
           },
@@ -386,13 +483,14 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
           theme: { color: "#254fda" },
         };
 
-        const razor = new (window as any).Razorpay(options);
+        const Razorpay = (window as unknown as { Razorpay: RazorpayCheckoutConstructor }).Razorpay;
+        const razor = new Razorpay(options);
         razor.open();
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      toast.error(error.message || "Payment failed");
+      toast.error(error instanceof Error ? error.message : "Payment failed");
       setIsPlacingOrder(false);
     }
   };
@@ -439,6 +537,84 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <CardContent className="space-y-4 pt-0">
+                    {savedAddresses.length > 0 && (
+                      <div className="space-y-3">
+                        <p className="text-sm font-semibold text-[#020817]">Saved Addresses</p>
+                        <div className="grid sm:grid-cols-2 gap-3">
+                          {savedAddresses.map((addr) => (
+                            <div
+                              key={addr.id}
+                              className={`rounded-xl border p-3 ${
+                                savedAddressId === addr.id
+                                  ? "border-[#254fda] bg-[#254fda0d]"
+                                  : "border-[#e2e4e9]"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#edf2ff] text-[#254fda]">
+                                  {addr.label}
+                                </span>
+                                {addr.isDefault && (
+                                  <span className="text-[10px] text-[#28af60] font-semibold">Default</span>
+                                )}
+                              </div>
+                              <p className="text-sm font-semibold text-[#020817]">
+                                {addr.firstName} {addr.lastName}
+                              </p>
+                              <p className="text-xs text-[#6a7181] mt-1">{addr.phone}</p>
+                              <p className="text-xs text-[#6a7181] mt-1 line-clamp-3">
+                                {[addr.address, addr.building, addr.apartment, addr.landmark, addr.city, addr.state, addr.pincode]
+                                  .filter(Boolean)
+                                  .join(", ")}
+                              </p>
+                              <div className="flex items-center gap-2 mt-3">
+                                <Button
+                                  type="button"
+                                  onClick={() => applySavedAddress(addr)}
+                                  className="h-8 px-3 text-xs cursor-pointer !border-[#254fda] !bg-[#254fda] hover:!bg-[#1e40af] !text-white"
+                                  variant="outline"
+                                >
+                                  Deliver Here
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  onClick={() => {
+                                    applySavedAddress(addr);
+                                    setAddressOpen(true);
+                                    setAddressSaved(false);
+                                  }}
+                                  className="h-8 px-3 text-xs cursor-pointer"
+                                >
+                                  Edit
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <Label className="text-[#020817] text-sm mb-1 block">Address Label</Label>
+                      <div className="flex items-center gap-2">
+                        {(["HOME", "WORK", "OTHER"] as const).map((label) => (
+                          <button
+                            key={label}
+                            type="button"
+                            onClick={() => setAddressLabel(label)}
+                            className={`h-9 px-3 rounded-lg border text-xs font-semibold cursor-pointer ${
+                              addressLabel === label
+                                ? "border-[#254fda] bg-[#254fda0d] text-[#254fda]"
+                                : "border-[#e2e4e9] text-[#4b5563]"
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label className="text-[#020817] text-sm mb-1 block" htmlFor="firstName">First Name *</Label>
@@ -487,6 +663,19 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
                         className={`h-11 bg-[#ffffff] border-input focus-visible:border-[#254fda] focus-visible:ring-2 focus-visible:ring-[#254fda] focus-visible:ring-offset-0 placeholder:text-[#0f0f0] text-[#000] ${errors.address ? "border-red-500 focus-visible:border-red-500" : ""}`}
                       />
                       {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address}</p>}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={isDetectingLocation}
+                        onClick={handleUseCurrentLocation}
+                        className="h-9 mt-2 cursor-pointer border-[#254fda] text-[#254fda] hover:text-[#1e40af] hover:border-[#1e40af]"
+                      >
+                        {isDetectingLocation ? (
+                          <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Detecting location...</>
+                        ) : (
+                          <><LocateFixed className="h-4 w-4 mr-2" />Use my current location</>
+                        )}
+                      </Button>
                     </div>
 
                     <div className="grid sm:grid-cols-3 gap-4">
@@ -633,7 +822,7 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
                     <div className="text-right">
                       <p className="text-xs text-[#6a7181]">Balance</p>
                       <p className={`text-sm font-semibold ${hasWalletBalance ? "text-[#28af60]" : "text-red-600"}`}>
-                        â‚¹{walletBalance.toLocaleString()}
+                        {walletBalance.toLocaleString()} ₹
                       </p>
                     </div>
                   </div>
@@ -760,11 +949,12 @@ const CheckoutCart = ({ items, total: totalProp, itemCount }: CheckoutCartProps)
               </CardContent>
             </Card>
             <MobileCheckoutBar
+              isPlacingOrder={isPlacingOrder}
               total={total}
               itemCount={itemCount}
               onPayClick={handlePlaceOrder}
-              addressSaved={addressSaved}
               paymentMethod={paymentMethod}
+              hasWalletBalance={hasWalletBalance}
             />
           </div>
         </div>

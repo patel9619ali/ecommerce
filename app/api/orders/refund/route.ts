@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { razorpay } from "@/lib/razorpay";
+import { sendRefundRequestedEmailToSeller } from "@/lib/mail";
+
+const REFUNDABLE_STATUS = "DELIVERED";
 
 export async function POST(req: Request) {
   try {
@@ -10,7 +14,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { orderId, reason, refundToWallet = false } = await req.json();
+    const { orderId, reason, refundToWallet = false, proofImages = [] } = await req.json();
+    const normalizedProofImages = Array.isArray(proofImages)
+      ? proofImages
+          .filter((url) => typeof url === "string" && url.trim().length > 0)
+          .map((url) => url.trim())
+          .slice(0, 3)
+      : [];
     if (!orderId) {
       return NextResponse.json({ error: "Order ID required" }, { status: 400 });
     }
@@ -28,14 +38,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Refund already requested" }, { status: 400 });
     }
 
-    if (order.paymentMethod === "COD") {
-      if (order.status !== "DELIVERED") {
-        return NextResponse.json(
-          { error: "COD refund allowed only after delivered order" },
-          { status: 400 }
-        );
-      }
+    if (order.status === "CANCELLED" || order.status === "REFUNDED") {
+      return NextResponse.json(
+        { error: "Refund cannot be requested for this order status" },
+        { status: 400 }
+      );
+    }
 
+    if (order.status !== REFUNDABLE_STATUS) {
+      return NextResponse.json(
+        { error: "Refund is available only after the order is delivered" },
+        { status: 400 }
+      );
+    }
+
+    if (order.paymentMethod === "COD") {
       if (!order.deliveryId || order.deliveryStatus !== "SUCCESS") {
         return NextResponse.json(
           { error: "Delivery verification failed. COD refund cannot start." },
@@ -68,13 +85,32 @@ export async function POST(req: Request) {
             refundReason: reason || "COD refund requested",
             refundAmount: order.amount,
             refundId: `COD-WALLET-${Date.now()}`,
+            refundProofImages: normalizedProofImages,
           },
         });
       });
 
+      const customer = await db.user.findUnique({
+        where: { id: userId },
+        select: { name: true, email: true, phone: true },
+      });
+      await Promise.allSettled([
+        sendRefundRequestedEmailToSeller({
+          orderId: updatedCodRefund.id,
+          amount: updatedCodRefund.amount,
+          paymentMethod: updatedCodRefund.paymentMethod,
+          refundDestination: updatedCodRefund.refundDestination,
+          refundReason: updatedCodRefund.refundReason,
+          customerName: customer?.name,
+          customerEmail: customer?.email,
+          customerPhone: customer?.phone,
+          proofImages: normalizedProofImages,
+        }),
+      ]);
+
       return NextResponse.json({
         success: true,
-        message: "COD refund credited instantly to wallet",
+        message: "Refund credited to wallet",
         order: updatedCodRefund,
       });
     }
@@ -86,17 +122,8 @@ export async function POST(req: Request) {
       );
     }
 
-    if (order.status === "CANCELLED" || order.status === "REFUNDED") {
-      return NextResponse.json(
-        { error: "Refund cannot be requested for this order status" },
-        { status: 400 }
-      );
-    }
-
     if (refundToWallet) {
       const updated = await db.$transaction(async (tx) => {
-        const nextStatus = order.status === "DELIVERED" ? "REFUNDED" : order.status;
-
         await tx.user.update({
           where: { id: userId },
           data: { walletBalance: { increment: order.amount } },
@@ -115,15 +142,34 @@ export async function POST(req: Request) {
         return tx.order.update({
           where: { id: orderId },
           data: {
-            status: nextStatus,
+            status: "REFUNDED",
             refundStatus: "COMPLETED",
             refundDestination: "WALLET",
             refundReason: reason || "User requested refund",
             refundAmount: order.amount,
             refundId: `WALLET-${Date.now()}`,
+            refundProofImages: normalizedProofImages,
           },
         });
       });
+
+      const customer = await db.user.findUnique({
+        where: { id: userId },
+        select: { name: true, email: true, phone: true },
+      });
+      await Promise.allSettled([
+        sendRefundRequestedEmailToSeller({
+          orderId: updated.id,
+          amount: updated.amount,
+          paymentMethod: updated.paymentMethod,
+          refundDestination: updated.refundDestination,
+          refundReason: updated.refundReason,
+          customerName: customer?.name,
+          customerEmail: customer?.email,
+          customerPhone: customer?.phone,
+          proofImages: normalizedProofImages,
+        }),
+      ]);
 
       return NextResponse.json({
         success: true,
@@ -132,19 +178,72 @@ export async function POST(req: Request) {
       });
     }
 
-    const updated = await db.order.update({
+    if (order.paymentMethod !== "RAZORPAY") {
+      return NextResponse.json(
+        { error: "Refund to original payment method is available only for online payments" },
+        { status: 400 }
+      );
+    }
+
+    if (!order.razorpayPaymentId) {
+      return NextResponse.json(
+        { error: "No Razorpay payment found for this order" },
+        { status: 400 }
+      );
+    }
+
+    await db.order.update({
       where: { id: orderId },
       data: {
-        refundStatus: "REQUESTED",
+        refundStatus: "PROCESSED",
         refundDestination: "ORIGINAL_SOURCE",
         refundReason: reason || "User requested refund",
         refundAmount: order.amount,
+        refundProofImages: normalizedProofImages,
       },
     });
 
+    const refund = await razorpay.payments.refund(order.razorpayPaymentId, {
+      amount: order.amount * 100,
+      notes: {
+        orderId: order.id,
+      },
+    });
+
+    const updated = await db.order.update({
+      where: { id: orderId },
+      data: {
+        status: "REFUNDED",
+        refundStatus: "COMPLETED",
+        refundDestination: "ORIGINAL_SOURCE",
+        refundReason: reason || "User requested refund",
+        refundAmount: order.amount,
+        refundId: refund.id,
+        refundProofImages: normalizedProofImages,
+      },
+    });
+
+    const customer = await db.user.findUnique({
+      where: { id: userId },
+      select: { name: true, email: true, phone: true },
+    });
+    await Promise.allSettled([
+      sendRefundRequestedEmailToSeller({
+        orderId: updated.id,
+        amount: updated.amount,
+        paymentMethod: updated.paymentMethod,
+        refundDestination: updated.refundDestination,
+        refundReason: updated.refundReason,
+        customerName: customer?.name,
+        customerEmail: customer?.email,
+        customerPhone: customer?.phone,
+        proofImages: normalizedProofImages,
+      }),
+    ]);
+
     return NextResponse.json({
       success: true,
-      message: "Refund requested successfully",
+      message: "Refund started to your original payment method",
       order: updated,
     });
   } catch (error) {

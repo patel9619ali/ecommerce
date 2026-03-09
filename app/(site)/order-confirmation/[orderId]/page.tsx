@@ -14,6 +14,8 @@ import {
   RotateCcw,
   Ban,
   X,
+  ImagePlus,
+  Loader2,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -46,6 +48,7 @@ interface Order {
   refundDestination?: "ORIGINAL_SOURCE" | "WALLET" | null;
   refundReason?: string | null;
   refundAmount?: number | null;
+  refundProofImages?: string[];
   cancellationReason?: string | null;
   cancellationComment?: string | null;
   cancelledAt?: string | null;
@@ -60,6 +63,15 @@ const CANCEL_REASONS = [
   "Want to change style/color",
   "Delayed delivery",
   "Duplicate order",
+];
+
+const REFUND_REASONS = [
+  "Product damaged",
+  "Wrong product delivered",
+  "Quality not as expected",
+  "Missing items in package",
+  "Received too late",
+  "No longer needed",
 ];
 
 const getEstimatedDelivery = () => {
@@ -79,6 +91,12 @@ const getErrorMessage = (error: unknown, fallback: string) => {
   return fallback;
 };
 
+const getRefundDestinationLabel = (destination?: "ORIGINAL_SOURCE" | "WALLET" | null) => {
+  if (destination === "WALLET") return "Wallet";
+  if (destination === "ORIGINAL_SOURCE") return "Original payment method (UPI/Card/Bank)";
+  return "Not set";
+};
+
 const OrderConfirmation = () => {
   const router = useRouter();
   const pathname = usePathname();
@@ -93,6 +111,12 @@ const OrderConfirmation = () => {
   const [cancelComment, setCancelComment] = useState("");
   const [cancelReasonError, setCancelReasonError] = useState<string | null>(null);
   const [cancelRefundToWallet, setCancelRefundToWallet] = useState<boolean>(false);
+  const [isRefundDialogOpen, setIsRefundDialogOpen] = useState(false);
+  const [refundReason, setRefundReason] = useState("");
+  const [refundReasonError, setRefundReasonError] = useState<string | null>(null);
+  const [refundToWallet, setRefundToWallet] = useState(false);
+  const [refundProofImages, setRefundProofImages] = useState<string[]>([]);
+  const [isUploadingProof, setIsUploadingProof] = useState(false);
 
   const estimatedDelivery = getEstimatedDelivery();
 
@@ -112,10 +136,9 @@ const OrderConfirmation = () => {
   const canRefund = useMemo(() => {
     if (!order) return false;
     if (order.refundStatus) return false;
-    if (order.status === "CANCELLED" || order.status === "REFUNDED") return false;
+    if (order.status !== "DELIVERED") return false;
     if (isCodRefundEligible) return true;
-    if (!isPrepaid) return false;
-    return true;
+    return isPrepaid;
   }, [order, isPrepaid, isCodRefundEligible]);
 
   const progressSteps = [
@@ -162,6 +185,50 @@ const OrderConfirmation = () => {
     setIsCancelDialogOpen(true);
   };
 
+  const openRefundDialog = (nextRefundToWallet: boolean) => {
+    setRefundToWallet(nextRefundToWallet);
+    setRefundReason("");
+    setRefundReasonError(null);
+    setRefundProofImages([]);
+    setIsRefundDialogOpen(true);
+  };
+
+  const handleRefundProofUpload = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    const existingCount = refundProofImages.length;
+    const allowed = Math.max(0, 3 - existingCount);
+    if (allowed <= 0) {
+      alert("You can upload up to 3 images only.");
+      return;
+    }
+
+    const selectedFiles = Array.from(files).slice(0, allowed);
+
+    setIsUploadingProof(true);
+    try {
+      const uploaded: string[] = [];
+      for (const file of selectedFiles) {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await fetch("/api/uploads/refund-proof", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to upload image");
+        }
+        uploaded.push(data.url);
+      }
+      setRefundProofImages((prev) => [...prev, ...uploaded].slice(0, 3));
+    } catch (error: unknown) {
+      alert(getErrorMessage(error, "Failed to upload refund proof image"));
+    } finally {
+      setIsUploadingProof(false);
+    }
+  };
+
   const handleCancel = async () => {
     if (!order) return;
     if (!selectedCancelReason) {
@@ -193,8 +260,12 @@ const OrderConfirmation = () => {
     }
   };
 
-  const handleRefund = async (refundToWallet: boolean) => {
+  const handleRefund = async () => {
     if (!order) return;
+    if (!refundReason) {
+      setRefundReasonError("Please select a refund reason.");
+      return;
+    }
     setIsProcessing(true);
     try {
       const res = await fetch("/api/orders/refund", {
@@ -202,12 +273,14 @@ const OrderConfirmation = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           orderId: order.id,
-          reason: "Customer requested refund",
+          reason: refundReason,
           refundToWallet,
+          proofImages: refundProofImages,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to request refund");
+      setIsRefundDialogOpen(false);
       await loadOrder();
     } catch (error: unknown) {
       alert(getErrorMessage(error, "Failed to request refund"));
@@ -278,8 +351,28 @@ const OrderConfirmation = () => {
               Refund Status: {order.refundStatus}
             </p>
             <p className="text-xs text-yellow-700 mt-1">
-              Destination: {order.refundDestination === "WALLET" ? "Wallet" : "Original source"}
+              Destination: {getRefundDestinationLabel(order.refundDestination)}
             </p>
+            {order.refundDestination === "ORIGINAL_SOURCE" && order.paymentMethod === "RAZORPAY" && (
+              <p className="text-xs text-yellow-700 mt-1">
+                Razorpay merchants can track this in Dashboard {`>`} Payments {`>`} Refunds.
+              </p>
+            )}
+            {!!order.refundProofImages?.length && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {order.refundProofImages.map((img) => (
+                  <a
+                    key={img}
+                    href={img}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block w-16 h-16 rounded-md overflow-hidden border border-yellow-300 bg-white"
+                  >
+                    <img src={img} alt="Refund proof" className="w-full h-full object-cover" />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -451,7 +544,7 @@ const OrderConfirmation = () => {
                 className="cursor-pointer flex items-center justify-center gap-2 h-11 px-4 bg-red-50 border border-red-200 text-red-700 font-semibold text-sm rounded-xl disabled:opacity-60"
               >
                 <Ban className="w-4 h-4" />
-                Cancel + Refund to Original Source
+                Cancel + Refund to Payment Method
               </button>
             </>
           )}
@@ -471,7 +564,7 @@ const OrderConfirmation = () => {
             <>
               <button
                 disabled={isProcessing}
-                onClick={() => handleRefund(true)}
+                onClick={() => openRefundDialog(true)}
                 className="cursor-pointer flex items-center justify-center gap-2 h-11 px-4 bg-[#ecfdf3] border border-[#a7f3d0] text-[#166534] font-semibold text-sm rounded-xl disabled:opacity-60"
               >
                 <Wallet className="w-4 h-4" />
@@ -479,11 +572,11 @@ const OrderConfirmation = () => {
               </button>
               <button
                 disabled={isProcessing}
-                onClick={() => handleRefund(false)}
+                onClick={() => openRefundDialog(false)}
                 className="cursor-pointer flex items-center justify-center gap-2 h-11 px-4 bg-orange-50 border border-orange-200 text-orange-700 font-semibold text-sm rounded-xl disabled:opacity-60"
               >
                 <RotateCcw className="w-4 h-4" />
-                Refund to Original Source
+                Refund to Payment Method
               </button>
             </>
           )}
@@ -491,7 +584,7 @@ const OrderConfirmation = () => {
           {canRefund && isCOD && (
             <button
               disabled={isProcessing}
-              onClick={() => handleRefund(true)}
+              onClick={() => openRefundDialog(true)}
               className="cursor-pointer flex items-center justify-center gap-2 h-11 px-4 bg-[#ecfdf3] border border-[#a7f3d0] text-[#166534] font-semibold text-sm rounded-xl disabled:opacity-60"
             >
               <Wallet className="w-4 h-4" />
@@ -501,7 +594,7 @@ const OrderConfirmation = () => {
         </div>
 
         <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
-          <DialogContent className="max-w-xl p-0 overflow-hidden border-none">
+          <DialogContent className="max-w-xl p-0 overflow-hidden border-none bg-[#fff]">
             <DialogHeader className="px-5 pt-5 pb-3 border-b bg-[hsl(240_10%_98%)]">
               <div className="flex items-center justify-between">
                 <DialogTitle className="text-lg font-bold text-[hsl(240_15%_10%)]">
@@ -571,6 +664,110 @@ const OrderConfirmation = () => {
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
                 {isProcessing ? "Cancelling..." : "Cancel Order"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isRefundDialogOpen} onOpenChange={setIsRefundDialogOpen}>
+          <DialogContent className="max-w-xl p-0 overflow-hidden border-none bg-[#fff]">
+            <DialogHeader className="px-5 pt-5 pb-3 border-b bg-[hsl(240_10%_98%)]">
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-lg font-bold text-[hsl(240_15%_10%)]">
+                  Request Refund
+                </DialogTitle>
+                <DialogClose className="cursor-pointer text-[hsl(240_8%_45%)]">
+                  <X className="w-5 h-5" />
+                </DialogClose>
+              </div>
+              <p className="text-sm text-[hsl(240_8%_45%)]">
+                Tell us why you want a refund and upload proof images (optional).
+              </p>
+            </DialogHeader>
+
+            <div className="px-5 py-4 space-y-4 max-h-[60vh] overflow-y-auto">
+              <div className="space-y-2">
+                {REFUND_REASONS.map((reason) => (
+                  <label key={reason} className="flex items-start gap-2.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="refund-reason"
+                      value={reason}
+                      checked={refundReason === reason}
+                      onChange={() => {
+                        setRefundReason(reason);
+                        setRefundReasonError(null);
+                      }}
+                      className="mt-1"
+                    />
+                    <span className="text-sm text-[hsl(240_15%_10%)]">{reason}</span>
+                  </label>
+                ))}
+                {refundReasonError && <p className="text-xs text-red-600">{refundReasonError}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[hsl(240_15%_10%)] mb-1.5">
+                  Upload Images (optional, max 3)
+                </label>
+                <label className="h-11 px-3 rounded-lg border border-[hsl(240_10%_85%)] flex items-center gap-2 text-sm cursor-pointer w-fit">
+                  {isUploadingProof ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <ImagePlus className="w-4 h-4" />
+                      Choose Images
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    multiple
+                    onChange={(e) => handleRefundProofUpload(e.target.files)}
+                    className="hidden"
+                    disabled={isUploadingProof}
+                  />
+                </label>
+                {!!refundProofImages.length && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {refundProofImages.map((img, idx) => (
+                      <div key={`${img}-${idx}`} className="relative w-16 h-16 rounded-md overflow-hidden border">
+                        <img src={img} alt="Proof" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setRefundProofImages((prev) => prev.filter((_, i) => i !== idx))
+                          }
+                          className="absolute top-0 right-0 bg-black/70 text-white text-[10px] leading-none px-1 py-0.5"
+                        >
+                          x
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <DialogFooter className="px-5 py-4 border-t bg-white flex flex-row justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsRefundDialogOpen(false)}
+                disabled={isProcessing || isUploadingProof}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleRefund}
+                disabled={isProcessing || isUploadingProof}
+                className="bg-[hsl(252_80%_60%)] hover:bg-[hsl(252_80%_52%)] text-white"
+              >
+                {isProcessing ? "Submitting..." : "Submit Refund Request"}
               </Button>
             </DialogFooter>
           </DialogContent>
