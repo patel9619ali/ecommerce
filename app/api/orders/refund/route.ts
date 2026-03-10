@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { razorpay } from "@/lib/razorpay";
 import { sendRefundRequestedEmailToSeller } from "@/lib/mail";
+import { isWithinReturnWindow } from "@/lib/order-policy";
 
 const REFUNDABLE_STATUS = "DELIVERED";
 
@@ -52,8 +53,15 @@ export async function POST(req: Request) {
       );
     }
 
+    if (!isWithinReturnWindow(order.deliveredAt)) {
+      return NextResponse.json(
+        { error: "The 7-day return window for this order has expired" },
+        { status: 400 }
+      );
+    }
+
     if (order.paymentMethod === "COD") {
-      if (!order.deliveryId || order.deliveryStatus !== "SUCCESS") {
+      if (order.deliveryStatus && order.deliveryStatus !== "SUCCESS") {
         return NextResponse.json(
           { error: "Delivery verification failed. COD refund cannot start." },
           { status: 400 }

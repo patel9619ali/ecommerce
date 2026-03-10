@@ -6,6 +6,7 @@ import {
   sendOrderPlacedEmailToCustomer,
   sendOrderPlacedEmailToSeller,
 } from "@/lib/mail";
+import { getCheckoutAvailability } from "@/lib/stock";
 
 type CheckoutItem = {
   productId: string;
@@ -61,6 +62,30 @@ export async function POST(request: Request) {
     const sanitizedItems = items as CheckoutItem[];
     const orderId = `ORD-${Date.now()}-${Math.random().toString(36).slice(2, 10).toUpperCase()}`;
     const roundedTotal = Math.round(total);
+
+    const stockChecks = await getCheckoutAvailability(
+      sanitizedItems.map((item) => ({
+        productId: item.productId,
+        variantId: item.variantKey,
+        quantity: item.quantity,
+        title: item.title,
+      }))
+    );
+
+    const unavailable = stockChecks.find(
+      (item) => !item.exists || item.available < item.quantity
+    );
+
+    if (unavailable) {
+      return NextResponse.json(
+        {
+          error: unavailable.exists
+            ? `${unavailable.title} is only available in quantity ${unavailable.available}`
+            : `${unavailable.title} is no longer available`,
+        },
+        { status: 409 }
+      );
+    }
 
     if (normalizedPaymentMethod === "WALLET") {
       const user = await db.user.findUnique({

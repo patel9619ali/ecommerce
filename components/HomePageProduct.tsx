@@ -230,7 +230,7 @@ const HomePageProduct = ({
 
   return (
     <section id="products" className="py-24 bg-[linear-gradient(180deg,hsl(262,40%,98%)_0%,hsl(262,30%,95%)_100%)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
         <div className="text-center mb-8">
           <p className="text-sm font-semibold text-[hsl(320,85%,65%)] uppercase tracking-[0.2em] mb-0">Our Collection</p>
         </div>

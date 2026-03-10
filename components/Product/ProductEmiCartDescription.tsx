@@ -7,12 +7,13 @@ import { ProductBenefitsCarousel } from "./ProductBenefitsCarousel";
 import { ProductColorSelector } from "./ProductColorSelector";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/useCartStore";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "../ui/button";
 import { useLoading } from "@/context/LoadingContext";
 import { WishlistButton } from "../WishList/WishlistButton";
+import { toast } from "sonner";
 type Props = {
   product: Product;
   variant: Variant;
@@ -26,9 +27,30 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
   const { items, addItem } = useCartStore();
   const { setLoading } = useLoading();
   const [quantity, setQuantity] = useState(1);
+  const availableStock = Math.max(0, Number(variant?.stock ?? 0));
+
+  useEffect(() => {
+    if (availableStock <= 0) {
+      setQuantity(1);
+      return;
+    }
+
+    if (quantity > availableStock) {
+      setQuantity(availableStock);
+    }
+  }, [availableStock, quantity]);
+
   // ✅ Add to Cart - opens cart sheet
   const handleAddToCart = () => {
     if (!product || !variant) return;
+    if (availableStock < 1) {
+      toast.error("This variant is out of stock");
+      return;
+    }
+    if (quantity > availableStock) {
+      toast.error(`Only ${availableStock} item(s) left in stock`);
+      return;
+    }
 
       addItem(
     {
@@ -63,6 +85,10 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
   
   const handleBuyNow = () => {
     if (!product || !variant) return;
+    if (availableStock < 1) {
+      toast.error("This variant is out of stock");
+      return;
+    }
     setLoading(true);
     // 🔎 Check if this variant already exists in cart
     const exists = items.some(
@@ -164,22 +190,25 @@ export default function ProductEmiCartDescription({ product, variant,setVariantK
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setQuantity(quantity + 1)}
+                    onClick={() => setQuantity(Math.min(availableStock || 1, quantity + 1))}
+                    disabled={availableStock < 1 || quantity >= availableStock}
                     className="cursor-pointer rounded-l-none"
                   >
                     <Plus className="h-4 w-4 text-[#000]" />
                   </Button>
                 </div>
-                <span className="text-sm text-[#28af60] font-medium">In Stock</span>
+                <span className={`text-sm font-medium ${availableStock > 0 ? "text-[#28af60]" : "text-red-600"}`}>
+                  {availableStock > 0 ? `${availableStock} left in stock` : "Out of stock"}
+                </span>
               </div>
             </div>
 
             {/* Action Buttons */}
             <div className="pt-2 grid grid-cols-2 gap-3">
-              <Button className="cursor-pointer flex-1 h-12 text-[16px] !bg-[#ffffff99] text-[#000] hover:text-[#254fda] hover:bg-[#eafaf1] border border-[#aeb2bb] rounded-lg" variant="outline" onClick={handleAddToCart} >
+              <Button className="cursor-pointer flex-1 h-12 text-[16px] !bg-[#ffffff99] text-[#000] hover:text-[#254fda] hover:bg-[#eafaf1] border border-[#aeb2bb] rounded-lg" variant="outline" onClick={handleAddToCart} disabled={availableStock < 1} >
                 Add to Cart
               </Button>
-              <Button className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer" onClick={handleBuyNow} > Buy Now </Button>
+              <Button className="w-full h-13 bg-[linear-gradient(135deg,hsl(252_80%_60%),hsl(16_90%_58%))] text-[hsl(0_0%_100%)] font-bold text-sm md:text-base rounded-xl shadow-[0_8px_30px_-6px_hsl(252_80%_60%/0.35),0_4px_12px_-4px_hsl(16_90%_58%/0.15)] hover:shadow-[0_10px_40px_-8px_hsl(252_80%_60%/0.18),0_4px_16px_-4px_hsl(240_15%_10%/0.06)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex items-center justify-center gap-2 py-3 cursor-pointer" onClick={handleBuyNow} disabled={availableStock < 1} > Buy Now </Button>
             </div>
 
           <ProductBenefitsCarousel benefits={variant?.benefits} />

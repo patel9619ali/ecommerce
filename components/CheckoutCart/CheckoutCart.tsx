@@ -90,6 +90,8 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const [addressSaved, setAddressSaved] = useState(false);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [makeDefaultAddress, setMakeDefaultAddress] = useState(false);
+  const [activeAddressActionId, setActiveAddressActionId] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -126,9 +128,28 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
     setState(addr.state);
     setPincode(addr.pincode);
     setAddressLabel((addr.label?.toUpperCase() as "HOME" | "WORK" | "OTHER") || "HOME");
+    setMakeDefaultAddress(addr.isDefault);
     setSavedAddressId(addr.id);
     setAddressSaved(true);
     setAddressOpen(false);
+  };
+
+  const resetAddressForm = () => {
+    setSavedAddressId(null);
+    setFirstName("");
+    setLastName("");
+    setPhone("");
+    setAddress("");
+    setBuilding("");
+    setApartment("");
+    setLandmark("");
+    setCity("");
+    setState("");
+    setPincode("");
+    setAddressLabel("HOME");
+    setMakeDefaultAddress(savedAddresses.length === 0);
+    setAddressSaved(false);
+    setErrors({});
   };
 
   const refreshAddresses = async () => {
@@ -145,6 +166,8 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
         const list = await refreshAddresses();
         if (list[0]) {
           applySavedAddress(list[0]);
+        } else {
+          resetAddressForm();
         }
       } catch (error) {
         console.error("Failed to load address:", error);
@@ -240,7 +263,7 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
         body: JSON.stringify({
           id: savedAddressId,
           label: addressLabel,
-          isDefault: true,
+          isDefault: makeDefaultAddress,
           firstName, lastName, phone, address,
           building, apartment, landmark, city, state, pincode,
         }),
@@ -252,7 +275,11 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
       setAddressSaved(true);
       setAddressOpen(false);
       setSavedAddressId(data.address.id);
-      await refreshAddresses();
+      const list = await refreshAddresses();
+      const selected = list.find((item) => item.id === data.address.id);
+      if (selected) {
+        applySavedAddress(selected);
+      }
       toast.success("Address saved successfully!");
     } catch (error: unknown) {
       console.error("Address save error:", error);
@@ -280,29 +307,77 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
       });
 
       const { latitude, longitude } = position.coords;
-      const geocodeRes = await fetch(
-        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+      let addressLine = "";
+      let cityValue = "";
+      let stateValue = "";
+      let pinValue = "";
+      let landmarkValue = "";
+
+      const nominatimRes = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&addressdetails=1&zoom=18`
       );
 
-      if (!geocodeRes.ok) {
-        throw new Error("Failed to detect address from your location");
+      if (nominatimRes.ok) {
+        const nominatimData = await nominatimRes.json();
+        const addressData = nominatimData.address || {};
+
+        addressLine = [
+          addressData.house_number,
+          addressData.road || addressData.pedestrian || addressData.footway,
+          addressData.neighbourhood || addressData.suburb || addressData.quarter,
+        ]
+          .filter(Boolean)
+          .join(", ");
+
+        if (!addressLine && typeof nominatimData.display_name === "string") {
+          addressLine = nominatimData.display_name.split(",").slice(0, 3).join(", ").trim();
+        }
+
+        cityValue =
+          addressData.city ||
+          addressData.town ||
+          addressData.village ||
+          addressData.municipality ||
+          "";
+        stateValue = addressData.state || addressData.state_district || "";
+        pinValue = addressData.postcode || "";
+        landmarkValue =
+          addressData.neighbourhood ||
+          addressData.suburb ||
+          addressData.quarter ||
+          addressData.landmark ||
+          "";
       }
 
-      const geoData = await geocodeRes.json();
-      const localityLine =
-        geoData.locality ||
-        geoData.city ||
-        geoData.principalSubdivision ||
-        "";
+      if (!addressLine || !cityValue || !stateValue) {
+        const geocodeRes = await fetch(
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+        );
 
-      const localityInfo = [localityLine, geoData.localityInfo?.administrative?.[2]?.name]
-        .filter(Boolean)
-        .join(", ");
+        if (!geocodeRes.ok) {
+          throw new Error("Failed to detect address from your location");
+        }
 
-      setAddress(localityInfo || `Lat ${latitude.toFixed(5)}, Lng ${longitude.toFixed(5)}`);
-      setCity(geoData.city || geoData.locality || "");
-      setState(geoData.principalSubdivision || "");
-      setPincode(geoData.postcode || "");
+        const geoData = await geocodeRes.json();
+        addressLine =
+          addressLine ||
+          [
+            geoData.locality,
+            geoData.localityInfo?.administrative?.[2]?.name,
+            geoData.principalSubdivision,
+          ]
+            .filter(Boolean)
+            .join(", ");
+        cityValue = cityValue || geoData.city || geoData.locality || "";
+        stateValue = stateValue || geoData.principalSubdivision || "";
+        pinValue = pinValue || geoData.postcode || "";
+      }
+
+      setAddress(addressLine || `Lat ${latitude.toFixed(5)}, Lng ${longitude.toFixed(5)}`);
+      setLandmark((current) => current || landmarkValue);
+      setCity(cityValue);
+      setState(stateValue);
+      setPincode(pinValue);
       setAddressSaved(false);
       setAddressOpen(true);
       toast.success("Location updated. Please review and click Update Address.");
@@ -495,6 +570,78 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
     }
   };
 
+  const handleAddNewAddress = () => {
+    resetAddressForm();
+    setAddressOpen(true);
+  };
+
+  const handleSetDefaultAddress = async (addr: SavedAddress) => {
+    try {
+      setActiveAddressActionId(addr.id);
+      const response = await fetch("/api/address", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: addr.id,
+          label: addr.label,
+          isDefault: true,
+          firstName: addr.firstName,
+          lastName: addr.lastName,
+          phone: addr.phone,
+          address: addr.address,
+          building: addr.building || "",
+          apartment: addr.apartment || "",
+          landmark: addr.landmark || "",
+          city: addr.city,
+          state: addr.state,
+          pincode: addr.pincode,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to update default address");
+
+      const list = await refreshAddresses();
+      const selected = list.find((item) => item.id === addr.id);
+      if (selected) {
+        applySavedAddress(selected);
+      }
+      toast.success("Default address updated");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Failed to update default address");
+    } finally {
+      setActiveAddressActionId(null);
+    }
+  };
+
+  const handleRemoveAddress = async (addressId: string) => {
+    try {
+      setActiveAddressActionId(addressId);
+      const response = await fetch("/api/address", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: addressId }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to remove address");
+
+      const list = await refreshAddresses();
+      if (savedAddressId === addressId) {
+        if (list[0]) {
+          applySavedAddress(list[0]);
+        } else {
+          resetAddressForm();
+        }
+      }
+      toast.success("Address removed");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Failed to remove address");
+    } finally {
+      setActiveAddressActionId(null);
+    }
+  };
+
   return (
     <div className="relative bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] lg:py-10 py-5">
       {isPlacingOrder && (
@@ -539,7 +686,17 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
                   <CardContent className="space-y-4 pt-0">
                     {savedAddresses.length > 0 && (
                       <div className="space-y-3">
-                        <p className="text-sm font-semibold text-[#020817]">Saved Addresses</p>
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-sm font-semibold text-[#020817]">Saved Addresses</p>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleAddNewAddress}
+                            className="h-8 px-3 text-xs cursor-pointer border-dashed border-[#254fda] text-[#254fda]"
+                          >
+                            + Add New Address
+                          </Button>
+                        </div>
                         <div className="grid sm:grid-cols-2 gap-3">
                           {savedAddresses.map((addr) => (
                             <div
@@ -588,6 +745,26 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
                                 >
                                   Edit
                                 </Button>
+                                {!addr.isDefault && (
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => handleSetDefaultAddress(addr)}
+                                    disabled={activeAddressActionId === addr.id}
+                                    className="h-8 px-3 text-xs cursor-pointer"
+                                  >
+                                    {activeAddressActionId === addr.id ? "Saving..." : "Set Default"}
+                                  </Button>
+                                )}
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  onClick={() => handleRemoveAddress(addr.id)}
+                                  disabled={activeAddressActionId === addr.id}
+                                  className="h-8 px-3 text-xs cursor-pointer text-red-600 border-red-200 hover:text-red-700 hover:border-red-300"
+                                >
+                                  {activeAddressActionId === addr.id ? "Removing..." : "Remove"}
+                                </Button>
                               </div>
                             </div>
                           ))}
@@ -614,6 +791,16 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
                         ))}
                       </div>
                     </div>
+
+                    <label className="flex items-center gap-2 text-sm text-[#020817]">
+                      <input
+                        type="checkbox"
+                        checked={makeDefaultAddress}
+                        onChange={(e) => setMakeDefaultAddress(e.target.checked)}
+                        className="h-4 w-4 rounded border-[#cbd5e1]"
+                      />
+                      Make this my default address
+                    </label>
 
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">

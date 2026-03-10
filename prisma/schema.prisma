@@ -92,6 +92,8 @@ model WishlistItem {
   productId  String   @map("product_id")
   variantId  String   @map("variant_id")
   slug       String
+  brandSlug  String?  @map("brand_slug")
+  categorySlug String? @map("category_slug")
   title      String
   price      Int
   mrp        Int

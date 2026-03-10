@@ -10,7 +10,7 @@ const Reviews = () => {
       {/* Background */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
       
-      <div className="max-w-7xl mx-auto relative">
+      <div className="container mx-auto relative">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

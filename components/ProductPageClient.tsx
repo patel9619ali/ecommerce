@@ -57,13 +57,25 @@ const [liveVariants, setLiveVariants] = useState<any[] | null>(null);
       mergedVariants[0];
 
     useEffect(() => {
+      let isMounted = true;
+
       async function loadLiveData() {
-        const res = await fetch(`/api/product-live?slug=${product.slug}`);
+        const res = await fetch(`/api/product-live?slug=${product.slug}`, {
+          cache: "no-store",
+        });
         const live = await res.json();
-        setLiveVariants(live);
+        if (isMounted) {
+          setLiveVariants(live);
+        }
       }
 
       loadLiveData();
+      const intervalId = window.setInterval(loadLiveData, 15000);
+
+      return () => {
+        isMounted = false;
+        window.clearInterval(intervalId);
+      };
     }, [product.slug]);
   return (
     <section className="bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(240,232,231,1)_80%,rgba(240,232,231,1)_100%)] lg:py-10 py-5">

@@ -55,6 +55,8 @@ export async function POST(request: Request) {
             },
             update: {
               slug: item.slug,
+              brandSlug: item.brandSlug,
+              categorySlug: item.categorySlug,
               title: item.title,
               price: item.price,
               mrp: item.mrp,
@@ -67,6 +69,8 @@ export async function POST(request: Request) {
               productId: item.productId,
               variantId: item.variantId,
               slug: item.slug,
+              brandSlug: item.brandSlug,
+              categorySlug: item.categorySlug,
               title: item.title,
               price: item.price,
               mrp: item.mrp,

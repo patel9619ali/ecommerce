@@ -270,8 +270,6 @@ export const sendOrderCancelledEmailToCustomer = async (params: {
   orderId: string;
   amount: number;
   paymentMethod: string;
-  reason: string;
-  comment?: string | null;
   refundDestination?: string | null;
   items: OrderMailItem[];
   address?: OrderMailAddress | null;
@@ -282,8 +280,6 @@ export const sendOrderCancelledEmailToCustomer = async (params: {
     orderId,
     amount,
     paymentMethod,
-    reason,
-    comment,
     refundDestination,
     items,
     address,
@@ -302,8 +298,6 @@ export const sendOrderCancelledEmailToCustomer = async (params: {
           <p style="margin:0 0 6px;"><b>Order ID:</b> ${escapeHtml(orderId)}</p>
           <p style="margin:0 0 6px;"><b>Total:</b> ${rupee(amount)}</p>
           <p style="margin:0 0 6px;"><b>Payment Method:</b> ${escapeHtml(paymentMethod)}</p>
-          <p style="margin:0 0 6px;"><b>Reason:</b> ${escapeHtml(reason)}</p>
-          ${comment ? `<p style="margin:0 0 6px;"><b>Comment:</b> ${escapeHtml(comment)}</p>` : ""}
           ${formatRefundDestination(refundDestination) ? `<p style="margin:0;"><b>Refund:</b> ${escapeHtml(formatRefundDestination(refundDestination))}</p>` : ""}
         </div>
 

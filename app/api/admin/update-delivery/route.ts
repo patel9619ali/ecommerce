@@ -29,7 +29,12 @@ export async function POST(req: Request) {
         deliveryId,
         deliveryStatus: normalizedStatus,
         deliveredAt: normalizedStatus === "SUCCESS" ? new Date() : null,
-        status: normalizedStatus === "SUCCESS" ? "DELIVERED" : undefined,
+        status:
+          normalizedStatus === "SUCCESS"
+            ? "DELIVERED"
+            : normalizedStatus === "IN_TRANSIT"
+              ? "SHIPPED"
+              : undefined,
       },
     });
 

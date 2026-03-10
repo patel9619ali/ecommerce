@@ -27,6 +27,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { getReturnWindowDeadline, isWithinReturnWindow, RETURN_WINDOW_DAYS } from "@/lib/order-policy";
 
 interface OrderItem {
   id: string;
@@ -52,6 +53,7 @@ interface Order {
   cancellationReason?: string | null;
   cancellationComment?: string | null;
   cancelledAt?: string | null;
+  deliveredAt?: string | null;
   items: OrderItem[];
 }
 
@@ -123,23 +125,26 @@ const OrderConfirmation = () => {
   const isCOD = order?.paymentMethod === "COD";
   const isPrepaid = order?.paymentMethod === "RAZORPAY" || order?.paymentMethod === "WALLET";
   const canCancel = order ? CANCELLABLE_STATUSES.has(order.status) : false;
+  const returnDeadline = order ? getReturnWindowDeadline(order.deliveredAt) : null;
+  const isReturnWindowOpen = order ? isWithinReturnWindow(order.deliveredAt) : false;
   const isCodRefundEligible = useMemo(() => {
     if (!order) return false;
     return (
       order.paymentMethod === "COD" &&
       order.status === "DELIVERED" &&
-      !!order.deliveryId &&
-      order.deliveryStatus === "SUCCESS" &&
+      (!order.deliveryStatus || order.deliveryStatus === "SUCCESS") &&
+      isReturnWindowOpen &&
       !order.refundStatus
     );
-  }, [order]);
+  }, [order, isReturnWindowOpen]);
   const canRefund = useMemo(() => {
     if (!order) return false;
     if (order.refundStatus) return false;
     if (order.status !== "DELIVERED") return false;
+    if (!isReturnWindowOpen) return false;
     if (isCodRefundEligible) return true;
     return isPrepaid;
-  }, [order, isPrepaid, isCodRefundEligible]);
+  }, [order, isPrepaid, isCodRefundEligible, isReturnWindowOpen]);
 
   const progressSteps = [
     { icon: CheckCircle, label: "Confirmed" },
@@ -406,16 +411,6 @@ const OrderConfirmation = () => {
           </p>
         </div>
 
-        {isCancelled && order.cancellationReason && (
-          <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200">
-            <p className="text-sm font-semibold text-red-700">Cancellation Reason</p>
-            <p className="text-sm text-red-700 mt-1">{order.cancellationReason}</p>
-            {order.cancellationComment && (
-              <p className="text-xs text-red-600 mt-2">Comment: {order.cancellationComment}</p>
-            )}
-          </div>
-        )}
-
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 md:mb-10">
           <div className="flex items-center gap-2.5 bg-white border rounded-xl px-4 py-3 shadow-sm">
             <Package className="w-4 h-4 text-[hsl(252_80%_60%)]" />
@@ -528,6 +523,29 @@ const OrderConfirmation = () => {
         </div>
 
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-3">
+          {order.status === "DELIVERED" && !order.refundStatus && (
+            <div className="md:col-span-2 rounded-xl border border-[#dbeafe] bg-[#eff6ff] p-4">
+              <p className="text-sm font-semibold text-[#1d4ed8]">
+                Returns are available for {RETURN_WINDOW_DAYS} days after delivery.
+              </p>
+              <p className="text-xs text-[#1e40af] mt-1">
+                {returnDeadline
+                  ? isReturnWindowOpen
+                    ? `Return window closes on ${returnDeadline.toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}.`
+                    : `Return window closed on ${returnDeadline.toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}.`
+                  : "Return window will appear after delivery is confirmed."}
+              </p>
+            </div>
+          )}
+
           {canCancel && isPrepaid && (
             <>
               <button

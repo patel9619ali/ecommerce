@@ -62,7 +62,11 @@ export const BuyCartSection = ({
           </div>
         ))}
       </div> */}
-      <p className="mt-6 text-[14px] text-black/80">Hurry, only 7 items left in stock!</p>
+      <p className={`mt-6 text-[14px] ${selectedVariant.stock > 0 ? "text-black/80" : "text-red-600"}`}>
+        {selectedVariant.stock > 0
+          ? `Hurry, only ${selectedVariant.stock} item${selectedVariant.stock === 1 ? "" : "s"} left in stock!`
+          : "Currently out of stock"}
+      </p>
       <div className="mt-6">
         
         <AddToCartButton

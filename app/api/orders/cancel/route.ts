@@ -93,8 +93,6 @@ export async function POST(req: Request) {
               orderId: updatedOrder.id,
               amount: updatedOrder.amount,
               paymentMethod: updatedOrder.paymentMethod,
-              reason: safeReason,
-              comment: safeComment,
               refundDestination: updatedOrder.refundDestination,
               items: mailItems,
               address: customerAddress,

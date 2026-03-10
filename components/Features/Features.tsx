@@ -51,7 +51,7 @@ const Features = () => {
         <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-accent/10 rounded-full blur-3xl" />
       </div>
       
-      <div className="max-w-7xl mx-auto relative">
+      <div className="container mx-auto relative">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

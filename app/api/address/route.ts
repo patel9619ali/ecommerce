@@ -218,3 +218,58 @@ export async function PUT(request: Request) {
     );
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await request.json();
+
+    if (!id || typeof id !== "string") {
+      return NextResponse.json({ error: "Address ID required" }, { status: 400 });
+    }
+
+    const userId = session.user.id;
+
+    const existing = await db.address.findFirst({
+      where: { id, userId },
+      select: { id: true, isDefault: true },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Address not found or unauthorized" }, { status: 404 });
+    }
+
+    await db.$transaction(async (tx) => {
+      await tx.address.delete({
+        where: { id },
+      });
+
+      if (existing.isDefault) {
+        const nextDefault = await tx.address.findFirst({
+          where: { userId },
+          orderBy: [{ updatedAt: "desc" }],
+          select: { id: true },
+        });
+
+        if (nextDefault) {
+          await tx.address.update({
+            where: { id: nextDefault.id },
+            data: { isDefault: true },
+          });
+        }
+      }
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Address delete error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete address" },
+      { status: 500 }
+    );
+  }
+}
