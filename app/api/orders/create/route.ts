@@ -167,73 +167,80 @@ export async function POST(request: Request) {
       });
     });
 
-    const customerEmail = session.user.email;
     if (fullOrder) {
-      await syncCmsStockDeltas(
-        sanitizedItems.map((item) => ({
-          productId: item.productId,
-          variantId: item.variantKey,
-          quantity: -item.quantity,
-        }))
-      );
+      const customerEmail = session.user.email;
 
-      const mailItems = fullOrder.items.map((item: OrderWithItems["items"][number]) => ({
-        title: item.title,
-        quantity: item.quantity,
-        price: item.price,
-        variantId: item.variantId,
-      }));
+      void (async () => {
+        try {
+          await syncCmsStockDeltas(
+            sanitizedItems.map((item) => ({
+              productId: item.productId,
+              variantId: item.variantKey,
+              quantity: -item.quantity,
+            }))
+          );
 
-      const [customerProfile, customerAddress] = await Promise.all([
-        db.user.findUnique({
-          where: { id: userId },
-          select: { name: true, email: true, phone: true },
-        }),
-        db.address.findFirst({
-          where: selectedAddressId
-            ? { userId, id: selectedAddressId }
-            : { userId },
-          orderBy: [{ isDefault: "desc" }, { updatedAt: "desc" }],
-          select: {
-            label: true,
-            isDefault: true,
-            firstName: true,
-            lastName: true,
-            phone: true,
-            address: true,
-            building: true,
-            apartment: true,
-            landmark: true,
-            city: true,
-            state: true,
-            pincode: true,
-          },
-        }),
-      ]);
+          const mailItems = fullOrder.items.map((item: OrderWithItems["items"][number]) => ({
+            title: item.title,
+            quantity: item.quantity,
+            price: item.price,
+            variantId: item.variantId,
+          }));
 
-      await Promise.allSettled([
-        customerEmail
-          ? sendOrderPlacedEmailToCustomer({
-              email: customerEmail,
-              customerName: customerProfile?.name ?? session.user.name,
+          const [customerProfile, customerAddress] = await Promise.all([
+            db.user.findUnique({
+              where: { id: userId },
+              select: { name: true, email: true, phone: true },
+            }),
+            db.address.findFirst({
+              where: selectedAddressId
+                ? { userId, id: selectedAddressId }
+                : { userId },
+              orderBy: [{ isDefault: "desc" }, { updatedAt: "desc" }],
+              select: {
+                label: true,
+                isDefault: true,
+                firstName: true,
+                lastName: true,
+                phone: true,
+                address: true,
+                building: true,
+                apartment: true,
+                landmark: true,
+                city: true,
+                state: true,
+                pincode: true,
+              },
+            }),
+          ]);
+
+          await Promise.allSettled([
+            customerEmail
+              ? sendOrderPlacedEmailToCustomer({
+                  email: customerEmail,
+                  customerName: customerProfile?.name ?? session.user.name,
+                  orderId: fullOrder.id,
+                  amount: fullOrder.amount,
+                  paymentMethod: fullOrder.paymentMethod,
+                  items: mailItems,
+                  address: customerAddress,
+                })
+              : Promise.resolve(),
+            sendOrderPlacedEmailToSeller({
               orderId: fullOrder.id,
+              customerEmail: customerProfile?.email ?? customerEmail ?? null,
+              customerName: customerProfile?.name ?? session.user.name ?? null,
+              customerPhone: customerProfile?.phone ?? customerAddress?.phone ?? null,
               amount: fullOrder.amount,
               paymentMethod: fullOrder.paymentMethod,
               items: mailItems,
               address: customerAddress,
-            })
-          : Promise.resolve(),
-        sendOrderPlacedEmailToSeller({
-          orderId: fullOrder.id,
-          customerEmail: customerProfile?.email ?? customerEmail ?? null,
-          customerName: customerProfile?.name ?? session.user.name ?? null,
-          customerPhone: customerProfile?.phone ?? customerAddress?.phone ?? null,
-          amount: fullOrder.amount,
-          paymentMethod: fullOrder.paymentMethod,
-          items: mailItems,
-          address: customerAddress,
-        }),
-      ]);
+            }),
+          ]);
+        } catch (sideEffectError) {
+          console.error("Post-order side effect failed:", sideEffectError);
+        }
+      })();
     }
 
     return NextResponse.json({ success: true, order: fullOrder });

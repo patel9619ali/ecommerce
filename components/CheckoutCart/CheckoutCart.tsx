@@ -297,6 +297,11 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
       return;
     }
 
+    if (!window.isSecureContext) {
+      toast.error("Location access requires HTTPS or localhost");
+      return;
+    }
+
     try {
       setIsDetectingLocation(true);
 
@@ -368,16 +373,17 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
           }),
         });
 
-        const data = await orderRes.json();
-        if (!orderRes.ok) throw new Error(data.error || "Failed to create order");
+      const data = await orderRes.json();
+      if (!orderRes.ok) throw new Error(data.error || "Failed to create order");
 
-        localStorage.setItem("lastOrder", JSON.stringify(data.order));
-        removePurchasedFromWishlist();
+      localStorage.setItem("lastOrder", JSON.stringify(data.order));
+      removePurchasedFromWishlist();
+      router.push(`/order-confirmation/${data.order.id}`);
+      setTimeout(() => {
         clearCart();
         localStorage.removeItem("cart-storage");
-
-        router.push(`/order-confirmation/${data.order.id}`);
-        return;
+      }, 150);
+      return;
       }
 
       // ✅ Razorpay Flow
@@ -404,16 +410,17 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
           }),
         });
 
-        const data = await orderRes.json();
-        if (!orderRes.ok) throw new Error(data.error || "Failed to create order");
+      const data = await orderRes.json();
+      if (!orderRes.ok) throw new Error(data.error || "Failed to create order");
 
-        localStorage.setItem("lastOrder", JSON.stringify(data.order));
-        removePurchasedFromWishlist();
+      localStorage.setItem("lastOrder", JSON.stringify(data.order));
+      removePurchasedFromWishlist();
+      router.push(`/order-confirmation/${data.order.id}`);
+      setTimeout(() => {
         clearCart();
         localStorage.removeItem("cart-storage");
-
-        router.push(`/order-confirmation/${data.order.id}`);
-        return;
+      }, 150);
+      return;
       }
 
       if (paymentMethod === "razorpay") {
@@ -463,10 +470,11 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
 
               localStorage.setItem("lastOrder", JSON.stringify(data.order));
               removePurchasedFromWishlist();
-              clearCart();
-              localStorage.removeItem("cart-storage");
-
               router.push(`/order-confirmation/${data.order.id}`);
+              setTimeout(() => {
+                clearCart();
+                localStorage.removeItem("cart-storage");
+              }, 150);
             } catch (err: unknown) {
               toast.error(err instanceof Error ? err.message : "Order creation failed");
               setIsPlacingOrder(false);
