@@ -125,15 +125,14 @@ const OrderConfirmation = () => {
   const isCOD = order?.paymentMethod === "COD";
   const isPrepaid = order?.paymentMethod === "RAZORPAY" || order?.paymentMethod === "WALLET";
   const canCancel = order ? CANCELLABLE_STATUSES.has(order.status) : false;
-  const fallbackDeliveredAt = order?.status === "DELIVERED" ? order.createdAt : null;
-  const returnDeadline = order ? getReturnWindowDeadline(order.deliveredAt, fallbackDeliveredAt) : null;
-  const isReturnWindowOpen = order ? isWithinReturnWindow(order.deliveredAt, new Date(), fallbackDeliveredAt) : false;
+  const effectiveDeliveredAt = order?.deliveredAt || (order?.status === "DELIVERED" ? order.createdAt : null);
+  const returnDeadline = order ? getReturnWindowDeadline(effectiveDeliveredAt) : null;
+  const isReturnWindowOpen = order ? isWithinReturnWindow(effectiveDeliveredAt) : false;
   const isCodRefundEligible = useMemo(() => {
     if (!order) return false;
     return (
       order.paymentMethod === "COD" &&
       order.status === "DELIVERED" &&
-      (!order.deliveryStatus || order.deliveryStatus === "SUCCESS") &&
       isReturnWindowOpen &&
       !order.refundStatus
     );

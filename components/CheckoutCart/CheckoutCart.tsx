@@ -94,6 +94,7 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
   const [makeDefaultAddress, setMakeDefaultAddress] = useState(false);
   const [activeAddressActionId, setActiveAddressActionId] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const successRedirectKey = "checkout_success_redirect";
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const discount = appliedCoupon ? Math.round(subtotal * 0.1) : 0;
@@ -377,6 +378,7 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
       if (!orderRes.ok) throw new Error(data.error || "Failed to create order");
 
       localStorage.setItem("lastOrder", JSON.stringify(data.order));
+      window.sessionStorage.setItem(successRedirectKey, `/order-confirmation/${data.order.id}`);
       removePurchasedFromWishlist();
       router.push(`/order-confirmation/${data.order.id}`);
       setTimeout(() => {
@@ -414,6 +416,7 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
       if (!orderRes.ok) throw new Error(data.error || "Failed to create order");
 
       localStorage.setItem("lastOrder", JSON.stringify(data.order));
+      window.sessionStorage.setItem(successRedirectKey, `/order-confirmation/${data.order.id}`);
       removePurchasedFromWishlist();
       router.push(`/order-confirmation/${data.order.id}`);
       setTimeout(() => {
@@ -469,6 +472,7 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
               if (!orderRes.ok) throw new Error(data.error || "Failed to create order");
 
               localStorage.setItem("lastOrder", JSON.stringify(data.order));
+              window.sessionStorage.setItem(successRedirectKey, `/order-confirmation/${data.order.id}`);
               removePurchasedFromWishlist();
               router.push(`/order-confirmation/${data.order.id}`);
               setTimeout(() => {

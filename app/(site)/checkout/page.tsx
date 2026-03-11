@@ -12,6 +12,7 @@ export default function CheckoutPage() {
   const { items } = useCartStore();
   const { setLoading } = useLoading();
   const router = useRouter();
+  const successRedirectKey = "checkout_success_redirect";
 
   useEffect(() => {
     setLoading(true);
@@ -28,6 +29,17 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (status === "authenticated" && items.length === 0) {
+      const redirectTarget =
+        typeof window !== "undefined"
+          ? window.sessionStorage.getItem(successRedirectKey)
+          : null;
+
+      if (redirectTarget) {
+        window.sessionStorage.removeItem(successRedirectKey);
+        router.replace(redirectTarget);
+        return;
+      }
+
       router.push("/");
     }
   }, [items, status, router]);
