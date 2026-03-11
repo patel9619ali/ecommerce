@@ -2,6 +2,8 @@ import qs from "qs";
 import { db } from "@/lib/db";
 
 type CmsVariantStock = {
+  id: string;
+  documentId?: string | null;
   sku: string;
   stock: number;
   sellingPrice: number;
@@ -54,6 +56,8 @@ async function fetchCmsProductStock(
     productId: String(product.id),
     slug: product.slug,
     variants: (product.variant || []).map((variant: any) => ({
+      id: String(variant.id),
+      documentId: variant.documentId || null,
       sku: String(variant.sku),
       stock: Number(variant.stock) || 0,
       sellingPrice: Number(variant.sellingPrice) || 0,
@@ -144,4 +148,69 @@ export async function getCheckoutAvailability(
       exists: Boolean(variant),
     };
   });
+}
+
+async function updateCmsVariantStock(variant: CmsVariantStock, nextStock: number) {
+  const identifiers = [variant.id, variant.documentId].filter(Boolean) as string[];
+  const payload = JSON.stringify({
+    data: {
+      stock: Math.max(0, nextStock),
+    },
+  });
+
+  for (const identifier of identifiers) {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/variants/${identifier}`, {
+      method: "PUT",
+      headers: {
+        ...cmsHeaders(),
+        "Content-Type": "application/json",
+      },
+      body: payload,
+    });
+
+    if (response.ok) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export async function syncCmsStockDeltas(
+  items: Array<{ productId: string; variantId: string; quantity: number }>
+) {
+  const grouped = new Map<string, number>();
+
+  for (const item of items) {
+    const key = `${item.productId}::${item.variantId}`;
+    grouped.set(key, (grouped.get(key) || 0) + item.quantity);
+  }
+
+  const byProduct = new Map<string, Array<{ variantId: string; quantity: number }>>();
+  for (const [key, quantity] of grouped.entries()) {
+    const [productId, variantId] = key.split("::");
+    const current = byProduct.get(productId) || [];
+    current.push({ variantId, quantity });
+    byProduct.set(productId, current);
+  }
+
+  for (const [productId, variants] of byProduct.entries()) {
+    const product = await fetchCmsProductStockById(productId);
+    if (!product) continue;
+
+    for (const item of variants) {
+      const variant = product.variants.find((entry) => entry.sku === item.variantId);
+      if (!variant) continue;
+
+      try {
+        await updateCmsVariantStock(variant, variant.stock + item.quantity);
+      } catch (error) {
+        console.error("CMS stock sync failed", {
+          productId,
+          variantId: item.variantId,
+          error,
+        });
+      }
+    }
+  }
 }

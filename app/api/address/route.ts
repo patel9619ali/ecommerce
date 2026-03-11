@@ -65,9 +65,13 @@ export async function POST(request: Request) {
     const userId = session.user.id;
     const existingCount = await db.address.count({ where: { userId } });
     const nextDefault = Boolean(isDefault) || existingCount === 0;
-    const normalizedLabel = ["HOME", "WORK", "OTHER"].includes(String(label).toUpperCase())
-      ? String(label).toUpperCase()
-      : "HOME";
+    const requestedLabel = String(label).toUpperCase();
+    const normalizedLabel =
+      requestedLabel === "WORK"
+        ? "OFFICE"
+        : ["HOME", "OFFICE", "OTHER"].includes(requestedLabel)
+          ? requestedLabel
+          : "HOME";
 
     const savedAddress = await db.$transaction(async (tx) => {
       if (nextDefault) {
@@ -177,9 +181,13 @@ export async function PUT(request: Request) {
     }
 
     const { label, isDefault } = addressData || {};
-    const normalizedLabel = ["HOME", "WORK", "OTHER"].includes(String(label).toUpperCase())
-      ? String(label).toUpperCase()
-      : undefined;
+    const requestedLabel = String(label).toUpperCase();
+    const normalizedLabel =
+      requestedLabel === "WORK"
+        ? "OFFICE"
+        : ["HOME", "OFFICE", "OTHER"].includes(requestedLabel)
+          ? requestedLabel
+          : undefined;
 
     const updated = await db.$transaction(async (tx) => {
       if (isDefault === true) {

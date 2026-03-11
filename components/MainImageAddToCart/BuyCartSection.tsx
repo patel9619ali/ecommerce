@@ -17,6 +17,7 @@ export const BuyCartSection = ({
   if (!product || !selectedVariant) {
     return null;
   }
+  console.log("Selected Variant:", selectedVariant);
   return (
     <section className="w-full">
       <h3 className="lg:text-[32px] text-black/80 text-[28px] font-bold">BlendRas Portable Juicer</h3>

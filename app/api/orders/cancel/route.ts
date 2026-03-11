@@ -5,6 +5,7 @@ import {
   sendOrderCancelledEmailToCustomer,
   sendOrderCancelledEmailToSeller,
 } from "@/lib/mail";
+import { syncCmsStockDeltas } from "@/lib/stock";
 
 const CANCELLABLE_STATUSES = new Set(["PENDING", "PROCESSING"]);
 
@@ -78,6 +79,11 @@ export async function POST(req: Request) {
       price: item.price,
       variantId: item.variantId,
     }));
+    const cmsRestoreItems = order.items.map((item) => ({
+      productId: item.productId,
+      variantId: item.variantId,
+      quantity: item.quantity,
+    }));
 
     const sendCancellationEmails = async (updatedOrder: {
       id: string;
@@ -124,6 +130,7 @@ export async function POST(req: Request) {
           cancelledAt: new Date(),
         },
       });
+      await syncCmsStockDeltas(cmsRestoreItems);
       await sendCancellationEmails({
         id: updated.id,
         amount: updated.amount,
@@ -176,6 +183,7 @@ export async function POST(req: Request) {
           },
         });
       });
+      await syncCmsStockDeltas(cmsRestoreItems);
 
       await sendCancellationEmails({
         id: updated.id,
@@ -204,6 +212,7 @@ export async function POST(req: Request) {
         refundAmount: order.amount,
       },
     });
+    await syncCmsStockDeltas(cmsRestoreItems);
 
     await sendCancellationEmails({
       id: updated.id,

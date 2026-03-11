@@ -6,7 +6,7 @@ import {
   sendOrderPlacedEmailToCustomer,
   sendOrderPlacedEmailToSeller,
 } from "@/lib/mail";
-import { getCheckoutAvailability } from "@/lib/stock";
+import { getCheckoutAvailability, syncCmsStockDeltas } from "@/lib/stock";
 
 type CheckoutItem = {
   productId: string;
@@ -169,6 +169,14 @@ export async function POST(request: Request) {
 
     const customerEmail = session.user.email;
     if (fullOrder) {
+      await syncCmsStockDeltas(
+        sanitizedItems.map((item) => ({
+          productId: item.productId,
+          variantId: item.variantKey,
+          quantity: -item.quantity,
+        }))
+      );
+
       const mailItems = fullOrder.items.map((item: OrderWithItems["items"][number]) => ({
         title: item.title,
         quantity: item.quantity,

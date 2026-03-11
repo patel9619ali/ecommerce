@@ -23,7 +23,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { CartProduct } from "@/store/useCartStore";
+import { CartProduct, useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishListStore";
 import MobileCheckoutBar from "../Cart/MobileCheckoutBar";
 import { toast } from "sonner";
@@ -63,9 +63,10 @@ type RazorpayCheckoutConstructor = new (options: Record<string, unknown>) => Raz
 const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
   const router = useRouter();
   const { removeItem: removeFromWishlist } = useWishlistStore();
+  const { clearCart } = useCartStore();
   const [savedAddressId, setSavedAddressId] = useState<string | null>(null);
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
-  const [addressLabel, setAddressLabel] = useState<"HOME" | "WORK" | "OTHER">("HOME");
+  const [addressLabel, setAddressLabel] = useState<"HOME" | "OFFICE" | "OTHER">("HOME");
 
   // ✅ Local button loading states — no global loader
   const [isSavingAddress, setIsSavingAddress] = useState(false);
@@ -127,7 +128,8 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
     setCity(addr.city);
     setState(addr.state);
     setPincode(addr.pincode);
-    setAddressLabel((addr.label?.toUpperCase() as "HOME" | "WORK" | "OTHER") || "HOME");
+    const normalizedLabel = addr.label?.toUpperCase() === "WORK" ? "OFFICE" : addr.label?.toUpperCase();
+    setAddressLabel((normalizedLabel as "HOME" | "OFFICE" | "OTHER") || "HOME");
     setMakeDefaultAddress(addr.isDefault);
     setSavedAddressId(addr.id);
     setAddressSaved(true);
@@ -307,77 +309,21 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
       });
 
       const { latitude, longitude } = position.coords;
-      let addressLine = "";
-      let cityValue = "";
-      let stateValue = "";
-      let pinValue = "";
-      let landmarkValue = "";
-
-      const nominatimRes = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&addressdetails=1&zoom=18`
+      const geocodeRes = await fetch(
+        `/api/address/current-location?lat=${latitude}&lng=${longitude}`,
+        { cache: "no-store" }
       );
+      const geoData = await geocodeRes.json();
 
-      if (nominatimRes.ok) {
-        const nominatimData = await nominatimRes.json();
-        const addressData = nominatimData.address || {};
-
-        addressLine = [
-          addressData.house_number,
-          addressData.road || addressData.pedestrian || addressData.footway,
-          addressData.neighbourhood || addressData.suburb || addressData.quarter,
-        ]
-          .filter(Boolean)
-          .join(", ");
-
-        if (!addressLine && typeof nominatimData.display_name === "string") {
-          addressLine = nominatimData.display_name.split(",").slice(0, 3).join(", ").trim();
-        }
-
-        cityValue =
-          addressData.city ||
-          addressData.town ||
-          addressData.village ||
-          addressData.municipality ||
-          "";
-        stateValue = addressData.state || addressData.state_district || "";
-        pinValue = addressData.postcode || "";
-        landmarkValue =
-          addressData.neighbourhood ||
-          addressData.suburb ||
-          addressData.quarter ||
-          addressData.landmark ||
-          "";
+      if (!geocodeRes.ok) {
+        throw new Error(geoData.error || "Unable to fetch current location");
       }
 
-      if (!addressLine || !cityValue || !stateValue) {
-        const geocodeRes = await fetch(
-          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
-        );
-
-        if (!geocodeRes.ok) {
-          throw new Error("Failed to detect address from your location");
-        }
-
-        const geoData = await geocodeRes.json();
-        addressLine =
-          addressLine ||
-          [
-            geoData.locality,
-            geoData.localityInfo?.administrative?.[2]?.name,
-            geoData.principalSubdivision,
-          ]
-            .filter(Boolean)
-            .join(", ");
-        cityValue = cityValue || geoData.city || geoData.locality || "";
-        stateValue = stateValue || geoData.principalSubdivision || "";
-        pinValue = pinValue || geoData.postcode || "";
-      }
-
-      setAddress(addressLine || `Lat ${latitude.toFixed(5)}, Lng ${longitude.toFixed(5)}`);
-      setLandmark((current) => current || landmarkValue);
-      setCity(cityValue);
-      setState(stateValue);
-      setPincode(pinValue);
+      setAddress(geoData.addressLine || `Lat ${latitude.toFixed(5)}, Lng ${longitude.toFixed(5)}`);
+      setLandmark((current) => current || geoData.landmark || "");
+      setCity(geoData.city || "");
+      setState(geoData.state || "");
+      setPincode(geoData.pincode || "");
       setAddressSaved(false);
       setAddressOpen(true);
       toast.success("Location updated. Please review and click Update Address.");
@@ -427,16 +373,8 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
 
         localStorage.setItem("lastOrder", JSON.stringify(data.order));
         removePurchasedFromWishlist();
-
-        // Clear cart in background
-        setTimeout(() => {
-          fetch("/api/cart/sync", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ items: [] }),
-          }).catch(console.error);
-          localStorage.removeItem("cart-storage");
-        }, 500);
+        clearCart();
+        localStorage.removeItem("cart-storage");
 
         router.push(`/order-confirmation/${data.order.id}`);
         return;
@@ -471,15 +409,8 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
 
         localStorage.setItem("lastOrder", JSON.stringify(data.order));
         removePurchasedFromWishlist();
-
-        setTimeout(() => {
-          fetch("/api/cart/sync", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ items: [] }),
-          }).catch(console.error);
-          localStorage.removeItem("cart-storage");
-        }, 500);
+        clearCart();
+        localStorage.removeItem("cart-storage");
 
         router.push(`/order-confirmation/${data.order.id}`);
         return;
@@ -532,15 +463,8 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
 
               localStorage.setItem("lastOrder", JSON.stringify(data.order));
               removePurchasedFromWishlist();
-
-              setTimeout(() => {
-                fetch("/api/cart/sync", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ items: [] }),
-                }).catch(console.error);
-                localStorage.removeItem("cart-storage");
-              }, 500);
+              clearCart();
+              localStorage.removeItem("cart-storage");
 
               router.push(`/order-confirmation/${data.order.id}`);
             } catch (err: unknown) {
@@ -775,7 +699,7 @@ const CheckoutCart = ({ items, itemCount }: CheckoutCartProps) => {
                     <div className="space-y-2">
                       <Label className="text-[#020817] text-sm mb-1 block">Address Label</Label>
                       <div className="flex items-center gap-2">
-                        {(["HOME", "WORK", "OTHER"] as const).map((label) => (
+                        {(["HOME", "OFFICE", "OTHER"] as const).map((label) => (
                           <button
                             key={label}
                             type="button"

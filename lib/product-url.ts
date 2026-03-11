@@ -41,7 +41,6 @@ export function buildProductPathWithVariant(
   variant?: string | null
 ): string {
   const path = buildProductPath(input);
-  console.log("buildProductPathWithVariant", { input, variant, path });
   if (!variant) return path;
   return `${path}?variant=${encodeURIComponent(variant)}`;
 }

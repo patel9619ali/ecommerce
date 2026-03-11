@@ -27,6 +27,7 @@ type CartState = {
   addItem: (item: CartProduct, openCart?: boolean) => void;
   removeItem: (productId: string, variantKey: string) => void;
   updateQuantity: (productId: string, variantKey: string, qty: number) => void;
+  clearCart: () => void;
 
   loadFromDatabase: (userId: string) => Promise<void>;
   syncWithDatabase: () => void;
@@ -124,6 +125,17 @@ export const useCartStore = create<CartState>()(
           items: state.items.filter(
             (i) => !(i.productId === productId && i.variantKey === variantKey)
           ),
+        }));
+
+        get().syncWithDatabase();
+      },
+
+      clearCart: () => {
+        set((state) => ({
+          items: [],
+          isCartOpen: false,
+          hydrated: true,
+          userId: state.userId,
         }));
 
         get().syncWithDatabase();

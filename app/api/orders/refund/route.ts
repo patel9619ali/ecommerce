@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { razorpay } from "@/lib/razorpay";
 import { sendRefundRequestedEmailToSeller } from "@/lib/mail";
 import { isWithinReturnWindow } from "@/lib/order-policy";
+import { syncCmsStockDeltas } from "@/lib/stock";
 
 const REFUNDABLE_STATUS = "DELIVERED";
 
@@ -53,7 +54,13 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!isWithinReturnWindow(order.deliveredAt)) {
+    const fallbackDeliveredAt = order.status === "DELIVERED" ? order.createdAt : null;
+    const refundStockItems = await db.orderItem.findMany({
+      where: { orderId: order.id },
+      select: { productId: true, variantId: true, quantity: true },
+    });
+
+    if (!isWithinReturnWindow(order.deliveredAt, new Date(), fallbackDeliveredAt)) {
       return NextResponse.json(
         { error: "The 7-day return window for this order has expired" },
         { status: 400 }
@@ -97,6 +104,7 @@ export async function POST(req: Request) {
           },
         });
       });
+      await syncCmsStockDeltas(refundStockItems);
 
       const customer = await db.user.findUnique({
         where: { id: userId },
@@ -160,6 +168,7 @@ export async function POST(req: Request) {
           },
         });
       });
+      await syncCmsStockDeltas(refundStockItems);
 
       const customer = await db.user.findUnique({
         where: { id: userId },
@@ -230,6 +239,7 @@ export async function POST(req: Request) {
         refundProofImages: normalizedProofImages,
       },
     });
+    await syncCmsStockDeltas(refundStockItems);
 
     const customer = await db.user.findUnique({
       where: { id: userId },
