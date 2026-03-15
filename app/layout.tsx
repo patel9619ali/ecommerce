@@ -10,6 +10,14 @@ import LayoutClientWrapper from "@/components/LayoutClientWrapper";
 export const metadata: Metadata = {
   title: "BlendRas - Portable Juicer",
   description: "BlendRas",
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+    },
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
